@@ -1,0 +1,129 @@
+:root {
+	--fh-font:
+		"FH Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+		Helvetica, Arial, sans-serif;
+	--fh-mono:
+		ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+		monospace;
+	--fh-dur-instant: 80ms;
+	--fh-dur-fast: 120ms;
+	--fh-dur-base: 200ms;
+	--fh-dur-slow: 240ms;
+	--fh-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+	--fh-ease-quad: cubic-bezier(0.5, 1, 0.89, 1);
+	--fh-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root {
+	color-scheme: light;
+	--fh-fg: #1f2328;
+	--fh-fg-muted: #59636e;
+	--fh-fg-disabled: #818b98;
+	--fh-fg-on-emphasis: #ffffff;
+	--fh-bg: #ffffff;
+	--fh-bg-muted: #f6f8fa;
+	--fh-bg-header: #f6f8fa;
+	--fh-overlay-bg: #ffffff;
+	--fh-border: #d1d9e0;
+	--fh-border-muted: #d1d9e0b3;
+	--fh-accent: #0969da;
+	--fh-accent-emphasis: #0969da;
+	--fh-accent-muted: #ddf4ff;
+	--fh-accent-border: #54aeff66;
+	--fh-attention: #9a6700;
+	--fh-attention-emphasis: #9a6700;
+	--fh-danger: #d1242f;
+	--fh-danger-emphasis: #cf222e;
+	--fh-danger-muted: #ffebe9;
+	--fh-success: #1a7f37;
+	--fh-success-emphasis: #1a7f37;
+	--fh-neutral-muted: #818b981f;
+	--fh-control-bg: #f6f8fa;
+	--fh-control-hover: #eff2f5;
+	--fh-control-active: #e6eaef;
+	--fh-control-border: #d1d9e0;
+	--fh-control-disabled: #eff2f5;
+	--fh-transparent-hover: #818b981a;
+	--fh-transparent-active: #818b9826;
+	--fh-transparent-selected: #818b9826;
+	--fh-primary-bg: #1f883d;
+	--fh-primary-hover: #1c8139;
+	--fh-primary-border: #1f232826;
+	--fh-track-bg: #e6eaef;
+	--fh-track-hover: #dde3e9;
+	--fh-track-border: transparent;
+	--fh-knob-bg: #ffffff;
+	--fh-knob-border: #818b98;
+	--fh-checked: #0969da;
+	--fh-checked-hover: #0860ca;
+	--fh-check-border: #818b98;
+	--fh-input-bg: #ffffff;
+	--fh-tooltip-bg: #25292e;
+	--fh-tooltip-fg: #ffffff;
+	--fh-focus: #0969da;
+	--fh-logo-ink: #1f2328;
+	--fh-logo-band: #0969da;
+	--fh-shadow-resting-small: 0 1px 1px 0 #1f23280f, 0 1px 3px 0 #1f23280f;
+	--fh-shadow-floating-small:
+		0 0 0 1px #d1d9e080, 0 6px 12px -3px #25292e0a, 0 6px 18px 0 #25292e1f;
+	--fh-shadow-button: 0 1px 0 0 #1f23280a;
+	--fh-shadow-inset: inset 0 1px 0 0 #d1d9e033;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		color-scheme: dark;
+		--fh-fg: #f0f6fc;
+		--fh-fg-muted: #9198a1;
+		--fh-fg-disabled: #656c76;
+		--fh-fg-on-emphasis: #ffffff;
+		--fh-bg: #0d1117;
+		--fh-bg-muted: #151b23;
+		--fh-bg-header: #010409;
+		--fh-overlay-bg: #151b23;
+		--fh-border: #3d444d;
+		--fh-border-muted: #3d444db3;
+		--fh-accent: #4493f8;
+		--fh-accent-emphasis: #1f6feb;
+		--fh-accent-muted: #388bfd1a;
+		--fh-accent-border: #388bfd66;
+		--fh-attention: #d29922;
+		--fh-attention-emphasis: #9e6a03;
+		--fh-danger: #f85149;
+		--fh-danger-emphasis: #da3633;
+		--fh-danger-muted: #f851491a;
+		--fh-success: #3fb950;
+		--fh-success-emphasis: #238636;
+		--fh-neutral-muted: #656c7633;
+		--fh-control-bg: #212830;
+		--fh-control-hover: #262c36;
+		--fh-control-active: #2a313c;
+		--fh-control-border: #3d444d;
+		--fh-control-disabled: #212830;
+		--fh-transparent-hover: #656c7633;
+		--fh-transparent-active: #656c7640;
+		--fh-transparent-selected: #656c7626;
+		--fh-primary-bg: #238636;
+		--fh-primary-hover: #29903b;
+		--fh-primary-border: #ffffff1a;
+		--fh-track-bg: #262c36;
+		--fh-track-hover: #2a313c;
+		--fh-track-border: #3d444d;
+		--fh-knob-bg: #0d1117;
+		--fh-knob-border: #656c76;
+		--fh-checked: #1f6feb;
+		--fh-checked-hover: #2a7aef;
+		--fh-check-border: #6e7681;
+		--fh-input-bg: #0d1117;
+		--fh-tooltip-bg: #3d444d;
+		--fh-tooltip-fg: #ffffff;
+		--fh-focus: #1f6feb;
+		--fh-logo-ink: #f0f6fc;
+		--fh-logo-band: #4493f8;
+		--fh-shadow-resting-small: 0 1px 1px 0 #01040999, 0 1px 3px 0 #01040999;
+		--fh-shadow-floating-small:
+			0 0 0 1px #3d444d, 0 6px 12px -3px #01040966, 0 6px 18px 0 #01040966;
+		--fh-shadow-button: 0 0 0 0 #0000;
+		--fh-shadow-inset: 0 0 0 0 #0000;
+	}
+}

@@ -1,0 +1,32 @@
+.fh-ctl,
+.fh-flash,
+.fh-blankslate,
+.fh-tree-empty,
+.fh-file-label,
+.fh-tree-hint {
+	font-size: 14px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	font-variation-settings: "wdth" 100;
+	letter-spacing: normal;
+	text-transform: none;
+}
+
+.fh-ctl *,
+.fh-flash *,
+.fh-blankslate *,
+.fh-tree-empty *,
+.fh-ctl *::before,
+.fh-flash *::before,
+.fh-blankslate *::before,
+.fh-tree-empty *::before,
+.fh-ctl *::after,
+.fh-flash *::after,
+.fh-blankslate *::after,
+.fh-tree-empty *::after {
+	box-sizing: border-box;
+}
+
+.fh-hidden {
+	display: none !important;
+}

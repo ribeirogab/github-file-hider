@@ -1,0 +1,470 @@
+.fh-ctl {
+	display: inline-flex;
+	align-items: center;
+	margin-left: 4px;
+	font-family: var(--fh-font);
+}
+
+button.fh-ctl-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 28px;
+	padding: 0 8px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--fh-fg-muted);
+	font: 500 12px / 20px var(--fh-font);
+	white-space: nowrap;
+	cursor: pointer;
+	transition:
+		background-color var(--fh-dur-fast) var(--fh-ease-out),
+		color var(--fh-dur-fast) var(--fh-ease-out);
+}
+
+button.fh-ctl-btn[hidden] {
+	display: none;
+}
+
+button.fh-ctl-btn:hover,
+button.fh-ctl-btn.is-hover {
+	background: var(--fh-transparent-hover);
+	color: var(--fh-fg);
+}
+
+button.fh-ctl-btn:active {
+	background: var(--fh-transparent-active);
+}
+
+button.fh-ctl-btn:focus {
+	outline: none;
+}
+
+button.fh-ctl-btn:focus-visible,
+button.fh-ctl-btn.is-focus {
+	outline: 2px solid var(--fh-focus);
+	outline-offset: -2px;
+}
+
+button.fh-ctl-btn[aria-expanded="true"] {
+	background: var(--fh-transparent-selected);
+	color: var(--fh-fg);
+}
+
+.fh-ctl-btn .fh-icon {
+	color: var(--fh-fg-muted);
+}
+
+.fh-ctl[data-split] .fh-ctl-main {
+	border-radius: 6px 0 0 6px;
+}
+
+.fh-ctl[data-split] .fh-ctl-menu {
+	border-radius: 0 6px 6px 0;
+	padding: 0 6px;
+}
+
+.fh-ctl-sep {
+	width: 1px;
+	height: 16px;
+	background: var(--fh-border);
+	flex: none;
+}
+
+.fh-ctl-sep[hidden] {
+	display: none;
+}
+
+.fh-ctl-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.fh-ctl-status .fh-label {
+	margin-left: 2px;
+}
+
+.fh-ctl[data-view="filtering"] .fh-ctl-menu {
+	color: var(--fh-fg);
+}
+
+.fh-ctl[data-view="filtering"] .fh-ctl-icon {
+	color: var(--fh-accent);
+}
+
+.fh-ctl[data-view="filtering"] .fh-ctl-status {
+	animation: fh-pop var(--fh-dur-base) var(--fh-ease-out);
+}
+
+.fh-ctl-caret {
+	margin: 0 -2px 0 -2px;
+}
+
+@keyframes fh-pop {
+	from {
+		opacity: 0.4;
+		transform: scale(0.96);
+	}
+}
+
+.fh-overlay {
+	position: fixed;
+	z-index: 100;
+	box-sizing: border-box;
+	width: 320px;
+	max-width: calc(100vw - 16px);
+	overflow: auto;
+	overscroll-behavior: contain;
+	padding-bottom: 8px;
+	border-radius: 12px;
+	background: var(--fh-overlay-bg);
+	color: var(--fh-fg);
+	box-shadow: var(--fh-shadow-floating-small);
+	font: 400 14px / 20px var(--fh-font);
+	text-align: left;
+	outline: none;
+	-webkit-font-smoothing: antialiased;
+	animation: fh-overlay-in var(--fh-dur-base) var(--fh-ease-out);
+}
+
+.fh-overlay *,
+.fh-overlay *::before,
+.fh-overlay *::after {
+	box-sizing: border-box;
+}
+
+.fh-overlay.is-static {
+	position: relative;
+	z-index: auto;
+	animation: none;
+	max-width: 100%;
+}
+
+@keyframes fh-overlay-in {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+}
+
+.fh-ov-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+}
+
+.fh-ov-title {
+	flex: 1;
+	min-width: 0;
+	font-weight: 600;
+}
+
+.fh-al-divider {
+	display: block;
+	height: 1px;
+	margin: 8px 0;
+	border: 0;
+	background: var(--fh-border-muted);
+}
+
+.fh-ov-header + .fh-al-divider {
+	margin-top: 0;
+}
+
+.fh-al-heading {
+	margin: 0;
+	padding: 6px 16px;
+	font-size: 12px;
+	line-height: 20px;
+	font-weight: 600;
+	color: var(--fh-fg-muted);
+}
+
+.fh-al-heading-note {
+	float: right;
+	font-weight: 400;
+}
+
+.fh-nav-note + .fh-nav-note {
+	margin-top: 8px;
+}
+
+.fh-al-item {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	min-height: 32px;
+	margin: 0 8px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	color: var(--fh-fg);
+	cursor: pointer;
+	user-select: none;
+	transition: background-color var(--fh-dur-fast) var(--fh-ease-out);
+}
+
+.fh-al-item:hover,
+.fh-al-item.is-hover {
+	background: var(--fh-transparent-hover);
+}
+
+.fh-al-item:active {
+	background: var(--fh-transparent-active);
+}
+
+.fh-al-item:focus {
+	outline: none;
+}
+
+.fh-al-item:focus-visible,
+.fh-al-item.is-focus {
+	outline: 2px solid var(--fh-focus);
+	outline-offset: -2px;
+	background: var(--fh-transparent-hover);
+}
+
+.fh-al-lead {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 16px;
+	height: 20px;
+	color: var(--fh-fg-muted);
+}
+
+.fh-al-content {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+}
+
+.fh-al-label {
+	display: block;
+}
+
+.fh-al-desc {
+	display: block;
+	overflow: hidden;
+	font-size: 12px;
+	line-height: 16px;
+	color: var(--fh-fg-muted);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.fh-al-desc code {
+	font: 11px / 16px var(--fh-mono);
+}
+
+.fh-al-trail {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex: none;
+	min-height: 20px;
+	color: var(--fh-fg-muted);
+	font-size: 12px;
+	line-height: 20px;
+}
+
+.fh-al-trail.is-switch {
+	align-self: center;
+}
+
+.fh-al-count.is-live {
+	color: var(--fh-fg);
+	font-weight: 500;
+}
+
+.fh-ov-empty {
+	display: flex;
+	gap: 12px;
+	margin: 0 8px;
+	padding: 8px;
+	border-radius: 6px;
+}
+
+.fh-ov-empty-visual {
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: var(--fh-accent-muted);
+	color: var(--fh-accent);
+}
+
+.fh-ov-empty strong {
+	display: block;
+	font-weight: 600;
+}
+
+.fh-ov-empty p {
+	margin: 2px 0 0;
+	font-size: 12px;
+	line-height: 18px;
+	color: var(--fh-fg-muted);
+}
+
+.fh-check {
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 16px;
+	height: 16px;
+	border: 1px solid var(--fh-check-border);
+	border-radius: 3px;
+	background: var(--fh-bg);
+	transition:
+		background-color var(--fh-dur-instant) var(--fh-ease-quad),
+		border-color var(--fh-dur-instant) var(--fh-ease-quad);
+}
+
+.fh-check .fh-icon {
+	width: 12px;
+	height: 12px;
+	color: var(--fh-fg-on-emphasis);
+	stroke-width: 2;
+	opacity: 0;
+	transform: scale(0.6);
+	transition:
+		opacity var(--fh-dur-instant) var(--fh-ease-quad),
+		transform var(--fh-dur-fast) var(--fh-ease-out);
+}
+
+[aria-checked="true"] > .fh-al-lead .fh-check {
+	background: var(--fh-checked);
+	border-color: var(--fh-checked);
+}
+
+[aria-checked="true"] > .fh-al-lead .fh-check .fh-icon {
+	opacity: 1;
+	transform: none;
+}
+
+.fh-flash {
+	position: relative;
+	display: grid;
+	grid-template-columns: 16px minmax(0, 1fr) auto;
+	column-gap: 12px;
+	align-items: start;
+	margin-bottom: -8px;
+	padding: 12px 12px 12px 16px;
+	border: 1px solid var(--fh-accent-border);
+	border-radius: 6px;
+	background: var(--fh-accent-muted);
+	color: var(--fh-fg);
+	font: 400 14px / 20px var(--fh-font);
+	scroll-margin-top: calc(var(--fh-sticky-offset) + 16px);
+	animation: fh-flash-in var(--fh-dur-slow) var(--fh-ease-out);
+}
+
+.fh-flash-icon {
+	display: flex;
+	align-items: center;
+	height: 20px;
+	color: var(--fh-accent);
+}
+
+.fh-flash-text {
+	min-width: 0;
+}
+
+.fh-flash-text p {
+	margin: 0;
+}
+
+.fh-flash-detail {
+	margin-top: 2px !important;
+	font-size: 12px;
+	line-height: 18px;
+	color: var(--fh-fg-muted);
+}
+
+.fh-flash-detail code,
+code.fh-code {
+	padding: 0.15em 0.4em;
+	border-radius: 6px;
+	background: var(--fh-neutral-muted);
+	font: 85% / 1 var(--fh-mono);
+	white-space: nowrap;
+}
+
+.fh-flash-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	align-self: center;
+}
+
+@keyframes fh-flash-in {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+}
+
+.fh-revealed {
+	border-color: var(--fh-accent-emphasis) !important;
+	border-radius: 6px;
+	box-shadow: 0 0 0 3px var(--fh-accent-muted);
+}
+
+.fh-target-line,
+.fh-target-line > * {
+	box-shadow: inset 0 0 0 9999px #d4a72c33;
+}
+
+.fh-file-label {
+	margin-right: 4px;
+	cursor: default;
+}
+
+.fh-tree-hint {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: 16px;
+	height: 16px;
+	color: var(--fh-fg-muted);
+}
+
+.fh-tree-hint[data-kind="revealed"] {
+	color: var(--fh-accent);
+}
+
+[data-fh-state="diff-hidden"] > div,
+[data-fh-state="diff-hidden"] > div a {
+	color: var(--fh-fg-muted) !important;
+}
+
+[data-fh-state="diff-hidden"] > div svg:not(.fh-icon) {
+	opacity: 0.6;
+}
+
+.fh-tree-empty {
+	display: flex;
+	gap: 8px;
+	padding: 12px;
+	border: 1px dashed var(--fh-border);
+	border-radius: 6px;
+	color: var(--fh-fg-muted);
+	font: 400 12px / 18px var(--fh-font);
+}
+
+.fh-tree-empty .fh-icon {
+	margin-top: 1px;
+}
+
+.fh-tree-empty strong {
+	display: block;
+	color: var(--fh-fg);
+	font-weight: 600;
+}

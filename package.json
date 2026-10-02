@@ -12,11 +12,26 @@
 	"scripts": {
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
-		"fixtures:sanitize": "node scripts/sanitize-fixture.mjs"
+		"fixtures:sanitize": "node scripts/sanitize-fixture.mjs",
+		"build": "node scripts/build.mjs",
+		"build:test": "FH_VERSION_NAME=2026.10.02.1 node scripts/build.mjs",
+		"typecheck": "tsc --noEmit",
+		"test:unit": "vitest run",
+		"test:e2e": "pnpm build:test && playwright test --project e2e",
+		"test:visual": "pnpm build:test && playwright test --project visual",
+		"visual:baseline": "playwright test --project baseline",
+		"test": "pnpm test:unit && pnpm build:test && playwright test --project e2e --project visual",
+		"icons": "node scripts/icons.mjs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.15",
+		"@playwright/test": "^1.63.0",
 		"@types/chrome": "^0.3.4",
-		"typescript": "^7.0.2"
+		"@types/node": "^26.6.3",
+		"@types/pngjs": "^6.0.5",
+		"esbuild": "^0.28.2",
+		"pngjs": "^7.0.0",
+		"typescript": "^7.0.2",
+		"vitest": "^5.0.3"
 	}
 }

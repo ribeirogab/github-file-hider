@@ -1,0 +1,291 @@
+:root {
+	--fh-font:
+		"FH Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+		Helvetica, Arial, sans-serif;
+	--fh-mono:
+		ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+		monospace;
+	--fh-dur-instant: 80ms;
+	--fh-dur-fast: 120ms;
+	--fh-dur-base: 200ms;
+	--fh-dur-slow: 240ms;
+	--fh-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+	--fh-ease-quad: cubic-bezier(0.5, 1, 0.89, 1);
+	--fh-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root {
+	--fh-sticky-offset: 64px;
+	--fh-fg: var(--fgColor-default, #1f2328);
+	--fh-fg-muted: var(--fgColor-muted, #59636e);
+	--fh-fg-disabled: var(--fgColor-disabled, #818b98);
+	--fh-fg-on-emphasis: var(--fgColor-onEmphasis, #ffffff);
+	--fh-bg: var(--bgColor-default, #ffffff);
+	--fh-bg-muted: var(--bgColor-muted, #f6f8fa);
+	--fh-bg-header: var(--bgColor-inset, #f6f8fa);
+	--fh-overlay-bg: var(--overlay-bgColor, #ffffff);
+	--fh-border: var(--borderColor-default, #d1d9e0);
+	--fh-border-muted: var(--borderColor-muted, #d1d9e0b3);
+	--fh-accent: var(--fgColor-accent, #0969da);
+	--fh-accent-emphasis: var(--bgColor-accent-emphasis, #0969da);
+	--fh-accent-muted: var(--bgColor-accent-muted, #ddf4ff);
+	--fh-accent-border: var(--borderColor-accent-muted, #54aeff66);
+	--fh-attention: var(--fgColor-attention, #9a6700);
+	--fh-attention-emphasis: var(--borderColor-attention-emphasis, #9a6700);
+	--fh-danger: var(--fgColor-danger, #d1242f);
+	--fh-danger-emphasis: var(--borderColor-danger-emphasis, #cf222e);
+	--fh-danger-muted: var(--bgColor-danger-muted, #ffebe9);
+	--fh-success: var(--fgColor-success, #1a7f37);
+	--fh-success-emphasis: var(--borderColor-success-emphasis, #1a7f37);
+	--fh-neutral-muted: var(--bgColor-neutral-muted, #818b981f);
+	--fh-control-bg: var(--button-default-bgColor-rest, #f6f8fa);
+	--fh-control-hover: var(--button-default-bgColor-hover, #eff2f5);
+	--fh-control-active: var(--button-default-bgColor-active, #e6eaef);
+	--fh-control-border: var(--button-default-borderColor-rest, #d1d9e0);
+	--fh-control-disabled: var(--control-bgColor-disabled, #eff2f5);
+	--fh-transparent-hover: var(--control-transparent-bgColor-hover, #818b981a);
+	--fh-transparent-active: var(--control-transparent-bgColor-active, #818b9826);
+	--fh-transparent-selected: var(
+		--control-transparent-bgColor-selected,
+		#818b9826
+	);
+	--fh-primary-bg: var(--button-primary-bgColor-rest, #1f883d);
+	--fh-primary-hover: var(--button-primary-bgColor-hover, #1c8139);
+	--fh-primary-border: var(--button-primary-borderColor-rest, #1f232826);
+	--fh-track-bg: var(--controlTrack-bgColor-rest, #e6eaef);
+	--fh-track-hover: var(--controlTrack-bgColor-hover, #dde3e9);
+	--fh-track-border: var(--controlTrack-borderColor-rest, transparent);
+	--fh-knob-bg: var(--controlKnob-bgColor-rest, #ffffff);
+	--fh-knob-border: var(--controlKnob-borderColor-rest, #818b98);
+	--fh-checked: var(--control-checked-bgColor-rest, #0969da);
+	--fh-checked-hover: var(--control-checked-bgColor-hover, #0860ca);
+	--fh-check-border: var(--control-borderColor-emphasis, #818b98);
+	--fh-input-bg: var(--bgColor-default, #ffffff);
+	--fh-tooltip-bg: var(--tooltip-bgColor, #25292e);
+	--fh-tooltip-fg: var(--tooltip-fgColor, #ffffff);
+	--fh-focus: var(--focus-outlineColor, #0969da);
+	--fh-logo-ink: var(--fgColor-default, #1f2328);
+	--fh-logo-band: var(--fgColor-accent, #0969da);
+	--fh-shadow-resting-small: var(
+		--shadow-resting-small,
+		0 1px 1px 0 #1f23280f,
+		0 1px 3px 0 #1f23280f
+	);
+	--fh-shadow-floating-small: var(
+		--shadow-floating-small,
+		0 0 0 1px #d1d9e080,
+		0 6px 12px -3px #25292e0a,
+		0 6px 18px 0 #25292e1f
+	);
+	--fh-shadow-button: var(--button-default-shadow-resting, 0 1px 0 0 #1f23280a);
+	--fh-shadow-inset: var(--shadow-inset, inset 0 1px 0 0 #d1d9e033);
+}
+
+html[data-color-mode="dark"][data-dark-theme^="dark"],
+html[data-color-mode="light"][data-light-theme^="dark"] {
+	--fh-fg: var(--fgColor-default, #f0f6fc);
+	--fh-fg-muted: var(--fgColor-muted, #9198a1);
+	--fh-fg-disabled: var(--fgColor-disabled, #656c76);
+	--fh-fg-on-emphasis: var(--fgColor-onEmphasis, #ffffff);
+	--fh-bg: var(--bgColor-default, #0d1117);
+	--fh-bg-muted: var(--bgColor-muted, #151b23);
+	--fh-bg-header: var(--bgColor-inset, #010409);
+	--fh-overlay-bg: var(--overlay-bgColor, #151b23);
+	--fh-border: var(--borderColor-default, #3d444d);
+	--fh-border-muted: var(--borderColor-muted, #3d444db3);
+	--fh-accent: var(--fgColor-accent, #4493f8);
+	--fh-accent-emphasis: var(--bgColor-accent-emphasis, #1f6feb);
+	--fh-accent-muted: var(--bgColor-accent-muted, #388bfd1a);
+	--fh-accent-border: var(--borderColor-accent-muted, #388bfd66);
+	--fh-attention: var(--fgColor-attention, #d29922);
+	--fh-attention-emphasis: var(--borderColor-attention-emphasis, #9e6a03);
+	--fh-danger: var(--fgColor-danger, #f85149);
+	--fh-danger-emphasis: var(--borderColor-danger-emphasis, #da3633);
+	--fh-danger-muted: var(--bgColor-danger-muted, #f851491a);
+	--fh-success: var(--fgColor-success, #3fb950);
+	--fh-success-emphasis: var(--borderColor-success-emphasis, #238636);
+	--fh-neutral-muted: var(--bgColor-neutral-muted, #656c7633);
+	--fh-control-bg: var(--button-default-bgColor-rest, #212830);
+	--fh-control-hover: var(--button-default-bgColor-hover, #262c36);
+	--fh-control-active: var(--button-default-bgColor-active, #2a313c);
+	--fh-control-border: var(--button-default-borderColor-rest, #3d444d);
+	--fh-control-disabled: var(--control-bgColor-disabled, #212830);
+	--fh-transparent-hover: var(--control-transparent-bgColor-hover, #656c7633);
+	--fh-transparent-active: var(--control-transparent-bgColor-active, #656c7640);
+	--fh-transparent-selected: var(
+		--control-transparent-bgColor-selected,
+		#656c7626
+	);
+	--fh-primary-bg: var(--button-primary-bgColor-rest, #238636);
+	--fh-primary-hover: var(--button-primary-bgColor-hover, #29903b);
+	--fh-primary-border: var(--button-primary-borderColor-rest, #ffffff1a);
+	--fh-track-bg: var(--controlTrack-bgColor-rest, #262c36);
+	--fh-track-hover: var(--controlTrack-bgColor-hover, #2a313c);
+	--fh-track-border: var(--controlTrack-borderColor-rest, #3d444d);
+	--fh-knob-bg: var(--controlKnob-bgColor-rest, #0d1117);
+	--fh-knob-border: var(--controlKnob-borderColor-rest, #656c76);
+	--fh-checked: var(--control-checked-bgColor-rest, #1f6feb);
+	--fh-checked-hover: var(--control-checked-bgColor-hover, #2a7aef);
+	--fh-check-border: var(--control-borderColor-emphasis, #6e7681);
+	--fh-input-bg: var(--bgColor-default, #0d1117);
+	--fh-tooltip-bg: var(--tooltip-bgColor, #3d444d);
+	--fh-tooltip-fg: var(--tooltip-fgColor, #ffffff);
+	--fh-focus: var(--focus-outlineColor, #1f6feb);
+	--fh-logo-ink: var(--fgColor-default, #f0f6fc);
+	--fh-logo-band: var(--fgColor-accent, #4493f8);
+	--fh-shadow-resting-small: var(
+		--shadow-resting-small,
+		0 1px 1px 0 #01040999,
+		0 1px 3px 0 #01040999
+	);
+	--fh-shadow-floating-small: var(
+		--shadow-floating-small,
+		0 0 0 1px #3d444d,
+		0 6px 12px -3px #01040966,
+		0 6px 18px 0 #01040966
+	);
+	--fh-shadow-button: var(--button-default-shadow-resting, 0 0 0 0 #0000);
+	--fh-shadow-inset: var(--shadow-inset, 0 0 0 0 #0000);
+}
+
+@media (prefers-color-scheme: dark) {
+	html[data-color-mode="auto"][data-dark-theme^="dark"] {
+		--fh-fg: var(--fgColor-default, #f0f6fc);
+		--fh-fg-muted: var(--fgColor-muted, #9198a1);
+		--fh-fg-disabled: var(--fgColor-disabled, #656c76);
+		--fh-fg-on-emphasis: var(--fgColor-onEmphasis, #ffffff);
+		--fh-bg: var(--bgColor-default, #0d1117);
+		--fh-bg-muted: var(--bgColor-muted, #151b23);
+		--fh-bg-header: var(--bgColor-inset, #010409);
+		--fh-overlay-bg: var(--overlay-bgColor, #151b23);
+		--fh-border: var(--borderColor-default, #3d444d);
+		--fh-border-muted: var(--borderColor-muted, #3d444db3);
+		--fh-accent: var(--fgColor-accent, #4493f8);
+		--fh-accent-emphasis: var(--bgColor-accent-emphasis, #1f6feb);
+		--fh-accent-muted: var(--bgColor-accent-muted, #388bfd1a);
+		--fh-accent-border: var(--borderColor-accent-muted, #388bfd66);
+		--fh-attention: var(--fgColor-attention, #d29922);
+		--fh-attention-emphasis: var(--borderColor-attention-emphasis, #9e6a03);
+		--fh-danger: var(--fgColor-danger, #f85149);
+		--fh-danger-emphasis: var(--borderColor-danger-emphasis, #da3633);
+		--fh-danger-muted: var(--bgColor-danger-muted, #f851491a);
+		--fh-success: var(--fgColor-success, #3fb950);
+		--fh-success-emphasis: var(--borderColor-success-emphasis, #238636);
+		--fh-neutral-muted: var(--bgColor-neutral-muted, #656c7633);
+		--fh-control-bg: var(--button-default-bgColor-rest, #212830);
+		--fh-control-hover: var(--button-default-bgColor-hover, #262c36);
+		--fh-control-active: var(--button-default-bgColor-active, #2a313c);
+		--fh-control-border: var(--button-default-borderColor-rest, #3d444d);
+		--fh-control-disabled: var(--control-bgColor-disabled, #212830);
+		--fh-transparent-hover: var(--control-transparent-bgColor-hover, #656c7633);
+		--fh-transparent-active: var(
+			--control-transparent-bgColor-active,
+			#656c7640
+		);
+		--fh-transparent-selected: var(
+			--control-transparent-bgColor-selected,
+			#656c7626
+		);
+		--fh-primary-bg: var(--button-primary-bgColor-rest, #238636);
+		--fh-primary-hover: var(--button-primary-bgColor-hover, #29903b);
+		--fh-primary-border: var(--button-primary-borderColor-rest, #ffffff1a);
+		--fh-track-bg: var(--controlTrack-bgColor-rest, #262c36);
+		--fh-track-hover: var(--controlTrack-bgColor-hover, #2a313c);
+		--fh-track-border: var(--controlTrack-borderColor-rest, #3d444d);
+		--fh-knob-bg: var(--controlKnob-bgColor-rest, #0d1117);
+		--fh-knob-border: var(--controlKnob-borderColor-rest, #656c76);
+		--fh-checked: var(--control-checked-bgColor-rest, #1f6feb);
+		--fh-checked-hover: var(--control-checked-bgColor-hover, #2a7aef);
+		--fh-check-border: var(--control-borderColor-emphasis, #6e7681);
+		--fh-input-bg: var(--bgColor-default, #0d1117);
+		--fh-tooltip-bg: var(--tooltip-bgColor, #3d444d);
+		--fh-tooltip-fg: var(--tooltip-fgColor, #ffffff);
+		--fh-focus: var(--focus-outlineColor, #1f6feb);
+		--fh-logo-ink: var(--fgColor-default, #f0f6fc);
+		--fh-logo-band: var(--fgColor-accent, #4493f8);
+		--fh-shadow-resting-small: var(
+			--shadow-resting-small,
+			0 1px 1px 0 #01040999,
+			0 1px 3px 0 #01040999
+		);
+		--fh-shadow-floating-small: var(
+			--shadow-floating-small,
+			0 0 0 1px #3d444d,
+			0 6px 12px -3px #01040966,
+			0 6px 18px 0 #01040966
+		);
+		--fh-shadow-button: var(--button-default-shadow-resting, 0 0 0 0 #0000);
+		--fh-shadow-inset: var(--shadow-inset, 0 0 0 0 #0000);
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	html[data-color-mode="auto"][data-light-theme^="dark"] {
+		--fh-fg: var(--fgColor-default, #f0f6fc);
+		--fh-fg-muted: var(--fgColor-muted, #9198a1);
+		--fh-fg-disabled: var(--fgColor-disabled, #656c76);
+		--fh-fg-on-emphasis: var(--fgColor-onEmphasis, #ffffff);
+		--fh-bg: var(--bgColor-default, #0d1117);
+		--fh-bg-muted: var(--bgColor-muted, #151b23);
+		--fh-bg-header: var(--bgColor-inset, #010409);
+		--fh-overlay-bg: var(--overlay-bgColor, #151b23);
+		--fh-border: var(--borderColor-default, #3d444d);
+		--fh-border-muted: var(--borderColor-muted, #3d444db3);
+		--fh-accent: var(--fgColor-accent, #4493f8);
+		--fh-accent-emphasis: var(--bgColor-accent-emphasis, #1f6feb);
+		--fh-accent-muted: var(--bgColor-accent-muted, #388bfd1a);
+		--fh-accent-border: var(--borderColor-accent-muted, #388bfd66);
+		--fh-attention: var(--fgColor-attention, #d29922);
+		--fh-attention-emphasis: var(--borderColor-attention-emphasis, #9e6a03);
+		--fh-danger: var(--fgColor-danger, #f85149);
+		--fh-danger-emphasis: var(--borderColor-danger-emphasis, #da3633);
+		--fh-danger-muted: var(--bgColor-danger-muted, #f851491a);
+		--fh-success: var(--fgColor-success, #3fb950);
+		--fh-success-emphasis: var(--borderColor-success-emphasis, #238636);
+		--fh-neutral-muted: var(--bgColor-neutral-muted, #656c7633);
+		--fh-control-bg: var(--button-default-bgColor-rest, #212830);
+		--fh-control-hover: var(--button-default-bgColor-hover, #262c36);
+		--fh-control-active: var(--button-default-bgColor-active, #2a313c);
+		--fh-control-border: var(--button-default-borderColor-rest, #3d444d);
+		--fh-control-disabled: var(--control-bgColor-disabled, #212830);
+		--fh-transparent-hover: var(--control-transparent-bgColor-hover, #656c7633);
+		--fh-transparent-active: var(
+			--control-transparent-bgColor-active,
+			#656c7640
+		);
+		--fh-transparent-selected: var(
+			--control-transparent-bgColor-selected,
+			#656c7626
+		);
+		--fh-primary-bg: var(--button-primary-bgColor-rest, #238636);
+		--fh-primary-hover: var(--button-primary-bgColor-hover, #29903b);
+		--fh-primary-border: var(--button-primary-borderColor-rest, #ffffff1a);
+		--fh-track-bg: var(--controlTrack-bgColor-rest, #262c36);
+		--fh-track-hover: var(--controlTrack-bgColor-hover, #2a313c);
+		--fh-track-border: var(--controlTrack-borderColor-rest, #3d444d);
+		--fh-knob-bg: var(--controlKnob-bgColor-rest, #0d1117);
+		--fh-knob-border: var(--controlKnob-borderColor-rest, #656c76);
+		--fh-checked: var(--control-checked-bgColor-rest, #1f6feb);
+		--fh-checked-hover: var(--control-checked-bgColor-hover, #2a7aef);
+		--fh-check-border: var(--control-borderColor-emphasis, #6e7681);
+		--fh-input-bg: var(--bgColor-default, #0d1117);
+		--fh-tooltip-bg: var(--tooltip-bgColor, #3d444d);
+		--fh-tooltip-fg: var(--tooltip-fgColor, #ffffff);
+		--fh-focus: var(--focus-outlineColor, #1f6feb);
+		--fh-logo-ink: var(--fgColor-default, #f0f6fc);
+		--fh-logo-band: var(--fgColor-accent, #4493f8);
+		--fh-shadow-resting-small: var(
+			--shadow-resting-small,
+			0 1px 1px 0 #01040999,
+			0 1px 3px 0 #01040999
+		);
+		--fh-shadow-floating-small: var(
+			--shadow-floating-small,
+			0 0 0 1px #3d444d,
+			0 6px 12px -3px #01040966,
+			0 6px 18px 0 #01040966
+		);
+		--fh-shadow-button: var(--button-default-shadow-resting, 0 0 0 0 #0000);
+		--fh-shadow-inset: var(--shadow-inset, 0 0 0 0 #0000);
+	}
+}
