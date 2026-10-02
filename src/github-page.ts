@@ -73,3 +73,7 @@ export function placeEmptyStates(diff: HTMLElement, tree: HTMLElement) {
 	if (treeRoot && tree.previousElementSibling !== treeRoot)
 		treeRoot.after(tree);
 }
+export function placeFileLabel(path: string, label: HTMLElement) {
+	const header = diffBlock(path)?.querySelector("[data-diff-header-wrapper]");
+	if (header && label.parentElement !== header) header.append(label);
+}

@@ -7,6 +7,7 @@ import {
 	applyVisibility,
 	listedPaths,
 	placeEmptyStates,
+	placeFileLabel,
 	restoreVisibility,
 	toolbarAnchor,
 } from "./github-page";
@@ -25,6 +26,7 @@ let session: Session | null = null;
 let ui: PageUI | null = null;
 let queued = false;
 let signature = "";
+let lastUrl = location.href;
 async function action(action: string) {
 	const current = session;
 	if (!current) return;
@@ -58,6 +60,7 @@ async function action(action: string) {
 	});
 }
 function refresh() {
+	lastUrl = location.href;
 	const key = pullRequestKey(new URL(location.href));
 	if (!key) {
 		ui?.destroy();
@@ -86,6 +89,7 @@ function refresh() {
 	const model = filteringModel(settings, session, paths);
 	applyVisibility(model.files, settings.treeFiltering);
 	placeEmptyStates(ui.emptyDiff, ui.emptyTree);
+	for (const [path, label] of ui.fileLabels(model)) placeFileLabel(path, label);
 	const nextSignature = JSON.stringify([
 		settings,
 		paths,
@@ -117,7 +121,6 @@ const observer = new MutationObserver((records) => {
 observer.observe(document.documentElement, { childList: true, subtree: true });
 window.addEventListener("popstate", queueRefresh);
 window.addEventListener("hashchange", queueRefresh);
-let lastUrl = location.href;
 setInterval(() => {
 	if (lastUrl !== location.href) {
 		lastUrl = location.href;

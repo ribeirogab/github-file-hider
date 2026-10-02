@@ -212,3 +212,22 @@ input[aria-invalid="true"] {
 .box-heading button {
 	margin-left: auto;
 }
+details {
+	border: 1px solid var(--borderColor-default);
+	border-radius: 6px;
+	padding: 12px 16px;
+}
+summary {
+	cursor: pointer;
+	color: var(--fgColor-accent);
+}
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+th,
+td {
+	text-align: left;
+	border-bottom: 1px solid var(--borderColor-default);
+	padding: 8px;
+}

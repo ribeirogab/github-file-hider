@@ -10,8 +10,9 @@ import { button, element } from "./ui";
 
 const root = document.getElementById("settings");
 let settings = firstInstallSettings();
-let editing: { id: PresetId; index: number; draft: string } | null = null;
-const drafts = new Map<PresetId, string>();
+type ListId = PresetId | "custom" | "always";
+let editing: { id: ListId; index: number; draft: string } | null = null;
+const drafts = new Map<ListId, string>();
 const errors = new Map<string, string>();
 const focusNodes = new Map<string, HTMLElement>();
 function focusKey<T extends HTMLElement>(node: T, key: string): T {
@@ -34,7 +35,38 @@ async function save(change: (settings: Settings) => void, message = "Saved") {
 function storeRules(settings: Settings, id: PresetId, rules: string[]) {
 	settings.presets[id].rules = rules;
 }
-function ruleForm(id: PresetId, index?: number) {
+function listRules(settings: Settings, id: ListId): string[] {
+	return id === "custom"
+		? settings.customRules.map((r) => r.pattern)
+		: id === "always"
+			? settings.alwaysShow.map((r) => r.pattern)
+			: presetRules(settings, id);
+}
+function writeRule(
+	settings: Settings,
+	id: ListId,
+	pattern: string,
+	index?: number,
+) {
+	if (id === "custom" || id === "always") {
+		const list = id === "custom" ? settings.customRules : settings.alwaysShow;
+		const existing = index === undefined ? undefined : list[index];
+		if (existing) existing.pattern = pattern;
+		else if (id === "custom")
+			settings.customRules.push({
+				id: crypto.randomUUID(),
+				pattern,
+				enabled: true,
+			});
+		else settings.alwaysShow.push({ id: crypto.randomUUID(), pattern });
+	} else {
+		const rules = [...presetRules(settings, id)];
+		if (index === undefined) rules.push(pattern);
+		else rules[index] = pattern;
+		storeRules(settings, id, rules);
+	}
+}
+function ruleForm(id: ListId, index?: number) {
 	const form = element("form");
 	const key = index === undefined ? `add:${id}` : `edit:${id}:${index}`;
 	const input = focusKey(element("input"), key);
@@ -42,10 +74,17 @@ function ruleForm(id: PresetId, index?: number) {
 	input.setAttribute(
 		"aria-label",
 		index === undefined
-			? `Add ${presets.find((p) => p.id === id)?.name} rule`
+			? `Add ${presets.find((p) => p.id === id)?.name ?? (id === "custom" ? "custom" : "Always show")} rule`
 			: "Pattern",
 	);
-	input.placeholder = id === "tests" ? "**/*.integration.ts" : "**/bun.lockb";
+	input.placeholder =
+		id === "tests"
+			? "**/*.integration.ts"
+			: id === "lockfiles"
+				? "**/bun.lockb"
+				: id === "custom"
+					? "docs/** or **/generated/**"
+					: "src/payments/**";
 	input.value =
 		index === undefined ? (drafts.get(id) ?? "") : (editing?.draft ?? "");
 	input.oninput = () => {
@@ -75,7 +114,7 @@ function ruleForm(id: PresetId, index?: number) {
 	}
 	form.onsubmit = async (e) => {
 		e.preventDefault();
-		const existing = presetRules(settings, id).filter((_, i) => i !== index);
+		const existing = listRules(settings, id).filter((_, i) => i !== index);
 		const errorMessage = validatePattern(input.value, existing);
 		if (errorMessage) {
 			errors.set(key, errorMessage);
@@ -88,10 +127,7 @@ function ruleForm(id: PresetId, index?: number) {
 		else editing = null;
 		await save(
 			(settings) => {
-				const rules = [...presetRules(settings, id)];
-				if (index === undefined) rules.push(pattern);
-				else rules[index] = pattern;
-				storeRules(settings, id, rules);
+				writeRule(settings, id, pattern, index);
 			},
 			index === undefined ? "Rule added." : "Rule saved.",
 		);
@@ -148,7 +184,7 @@ function presetSection(id: PresetId) {
 						storeRules(
 							settings,
 							id,
-							presetRules(settings, id).filter((_, i) => i !== index),
+							listRules(settings, id).filter((_, i) => i !== index),
 						),
 					"Rule removed.",
 				);
@@ -171,6 +207,101 @@ function presetSection(id: PresetId) {
 	restore.disabled = !settings.presets[id].rules;
 	section.append(restore);
 	return section;
+}
+function syntaxHelp() {
+	const help = element("details");
+	help.append(element("summary", "Pattern syntax"));
+	help.append(
+		element(
+			"p",
+			"Every pattern starts at the repository root. Matching is case-sensitive. Spaces are allowed. * and ? stay inside one path segment. **/ matches zero or more folders. No brace expansion, negation, or character classes.",
+		),
+	);
+	const table = element("table");
+	const heading = element("tr");
+	heading.append(element("th", "Pattern"), element("th", "Matches"));
+	table.append(heading);
+	for (const [pattern, example] of [
+		["*.lock", "yarn.lock at the root"],
+		["**/yarn.lock", "yarn.lock and apps/web/yarn.lock"],
+		["docs/", "The same as docs/**"],
+		["docs/**", "Everything inside the root docs folder"],
+		["src/?.ts", "src/a.ts"],
+		["**/generated/**", "Files inside generated folders"],
+	]) {
+		const row = element("tr");
+		row.append(element("td", pattern), element("td", example));
+		table.append(row);
+	}
+	help.append(table);
+	return help;
+}
+function ruleList(id: "custom" | "always") {
+	const node = element("div", "", "box");
+	node.setAttribute("role", "region");
+	node.setAttribute(
+		"aria-label",
+		id === "custom" ? "Hide rules" : "Always show rules",
+	);
+	const list = id === "custom" ? settings.customRules : settings.alwaysShow;
+	if (!list.length)
+		node.append(
+			element(
+				"h3",
+				id === "custom" ? "No custom rules yet" : "No Always show rules",
+			),
+			element(
+				"p",
+				id === "custom"
+					? "Add a pattern such as docs/** or **/generated/** to hide files that presets don't cover."
+					: "Add a path to keep one file visible while similar files are hidden, for example src/payments/checkout.spec.ts.",
+			),
+		);
+	list.forEach((rule, index) => {
+		const row = element("div", "", "rule-row");
+		if (editing?.id === id && editing.index === index)
+			row.append(ruleForm(id, index));
+		else {
+			row.append(element("code", rule.pattern));
+			if (id === "custom") {
+				const enabled = settings.customRules[index]?.enabled ?? false;
+				const toggle = focusKey(
+					button(enabled ? "On" : "Off", () => {
+						void save((settings) => {
+							const rule = settings.customRules[index];
+							if (rule) rule.enabled = !rule.enabled;
+						});
+					}),
+					`toggle:${id}:${index}`,
+				);
+				toggle.setAttribute("aria-pressed", String(enabled));
+				toggle.setAttribute(
+					"aria-label",
+					`Turn rule on or off ${rule.pattern}`,
+				);
+				row.append(toggle);
+			}
+			const edit = focusKey(
+				button("Edit rule", () => {
+					editing = { id, index, draft: rule.pattern };
+					render(`edit:${id}:${index}`);
+				}),
+				`row-edit:${id}:${index}`,
+			);
+			edit.setAttribute("aria-label", `Edit rule ${rule.pattern}`);
+			const remove = button("Remove rule", () => {
+				void save((settings) => {
+					if (id === "custom") settings.customRules.splice(index, 1);
+					else settings.alwaysShow.splice(index, 1);
+				}, "Rule removed.");
+			});
+			remove.setAttribute("aria-label", `Remove rule ${rule.pattern}`);
+			row.append(edit, remove);
+		}
+		node.append(row);
+	});
+	node.append(ruleForm(id));
+	return node;
 }
 function section(id: string, title: string, description: string) {
 	const node = element("section");
@@ -212,8 +343,25 @@ function render(preferredFocus?: string) {
 		"Ready-made rule sets. A preset hides its files only while filtering is on in a pull request.",
 	);
 	for (const p of presets) preset.append(presetSection(p.id));
-	const custom = section("custom-rules", "Custom rules", "No custom rules yet");
-	const always = section("always-show", "Always show", "No Always show rules");
+	const custom = section(
+		"custom-rules",
+		"Custom rules",
+		"Hide files that presets don't cover. Rules match file paths relative to the repository root, not file contents.",
+	);
+	custom.append(ruleList("custom"), syntaxHelp());
+	const always = section(
+		"always-show",
+		"Always show",
+		"Files that match these rules stay visible, even when a preset or a custom rule would hide them.",
+	);
+	always.append(
+		ruleList("always"),
+		element(
+			"p",
+			"Hide: **/*.spec.*. Always show: src/payments/checkout.spec.ts. Other .spec.ts files are hidden. src/payments/checkout.spec.ts stays visible.",
+		),
+		syntaxHelp(),
+	);
 	root.replaceChildren(general, preset, custom, always);
 	if (previousFocus) focusNodes.get(previousFocus)?.focus();
 }

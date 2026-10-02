@@ -19,6 +19,7 @@ export function button(text: string, action: () => void): HTMLButtonElement {
 	return node;
 }
 export class PageUI {
+	readonly labels = new Map<string, HTMLElement>();
 	readonly control = element("div");
 	readonly main = button("Hide files", () => this.action("activate"));
 	readonly menuButton = button("▾", () => this.toggle());
@@ -253,7 +254,7 @@ export class PageUI {
 		nodes.push(
 			heading,
 			group,
-			this.item("Custom rules · No custom rules yet", "custom"),
+			this.item(this.customSummary(settings, model), "custom"),
 			this.item("Hide in sidebar tree", "tree", settings.treeFiltering),
 			this.item("Settings", "settings"),
 		);
@@ -263,8 +264,41 @@ export class PageUI {
 				.find((item) => item.dataset.action === focused)
 				?.focus();
 	}
+	private customSummary(settings: Settings, model: Model) {
+		const enabled = settings.customRules.filter((r) => r.enabled);
+		if (!settings.customRules.length)
+			return "Custom rules · No custom rules yet";
+		if (!enabled.length)
+			return `Custom rules · ${settings.customRules.length} ${settings.customRules.length === 1 ? "rule" : "rules"}, all off`;
+		const count = model.files.filter(
+			(f) => !f.kept && enabled.some((r) => matches(r.pattern, f.path)),
+		).length;
+		return `Custom rules · ${enabled.length} on · ${count} files`;
+	}
+	fileLabels(model: Model) {
+		for (const file of model.files) {
+			let label = this.labels.get(file.path);
+			if (file.state !== "kept") {
+				label?.remove();
+				this.labels.delete(file.path);
+				continue;
+			}
+			if (file.state === "kept" && !label) {
+				label = element("span", "Always shown", "fh-file-label");
+				label.dataset.fhOwned = "";
+				this.labels.set(file.path, label);
+			}
+			if (label) {
+				label.hidden = file.state !== "kept";
+				label.title = `Kept visible by the Always show rule ${file.reason?.pattern}.`;
+			}
+		}
+		return this.labels;
+	}
+
 	destroy() {
 		this.control.remove();
+		for (const label of this.labels.values()) label.remove();
 		this.emptyDiff.remove();
 		this.emptyTree.remove();
 		this.menu.remove();
