@@ -23,6 +23,8 @@ export class PageUI {
 	readonly main = button("Hide files", () => this.action("activate"));
 	readonly menuButton = button("▾", () => this.toggle());
 	readonly menu = element("div", "", "fh-menu");
+	readonly emptyDiff = element("section", "", "fh-empty");
+	readonly emptyTree = element("div", "", "fh-tree-empty");
 	readonly status = element("div", "", "fh-sr");
 	private model: Model | null = null;
 	private settings: Settings | null = null;
@@ -32,6 +34,23 @@ export class PageUI {
 	private typeaheadTime = 0;
 	constructor(private action: (action: string) => void) {
 		this.control.id = "fh-control";
+		this.emptyDiff.dataset.fhOwned = "";
+		this.emptyTree.dataset.fhOwned = "";
+		this.emptyDiff.setAttribute("aria-label", "All files are hidden");
+		this.emptyDiff.append(
+			element("h3", "All files are hidden"),
+			element(
+				"p",
+				"Every file in this pull request matches your rules. Hidden files are still part of the pull request and may need review.",
+			),
+			button("Show all files", () => this.action("show-all")),
+			button("Edit rules", () => this.action("settings")),
+		);
+		this.emptyTree.append(
+			element("strong", "All files are hidden"),
+			element("p", "Your rules hide every file in this tree."),
+			button("Show all files", () => this.action("show-all")),
+		);
 		this.menu.id = "fh-menu";
 		this.menu.setAttribute("role", "menu");
 		this.menu.setAttribute("aria-label", "GitHub File Hider settings");
@@ -46,7 +65,7 @@ export class PageUI {
 		this.main.onclick = () => {
 			if (this.model?.view === "empty") this.toggle();
 			else {
-				this.action("activate");
+				this.action(this.model?.view === "showing" ? "hide-again" : "activate");
 				this.menuButton.focus();
 			}
 		};
@@ -140,7 +159,7 @@ export class PageUI {
 		this.main.hidden = model.view === "filtering";
 		this.main.textContent =
 			model.view === "showing"
-				? "Hide files again"
+				? `Hide files again · ${model.matchCount}`
 				: model.view === "empty"
 					? "Hide files"
 					: `Hide files · ${model.matchCount}`;
@@ -159,9 +178,15 @@ export class PageUI {
 				: "GitHub File Hider settings",
 		);
 		this.renderMenu();
+		const allHidden =
+			model.files.length > 0 && model.hiddenCount === model.files.length;
+		this.emptyDiff.hidden = !allHidden;
+		this.emptyTree.hidden = !allHidden || !settings.treeFiltering;
 		const announcement = model.filtering
 			? `${model.hiddenCount} ${model.hiddenCount === 1 ? "file" : "files"} hidden.`
-			: "All files are visible.";
+			: model.view === "showing"
+				? `Showing all files. ${model.matchCount} files match your rules.`
+				: "All files are visible.";
 		this.announce(announcement);
 	}
 	announce(message: string) {
@@ -189,6 +214,13 @@ export class PageUI {
 		nodes.push(
 			this.item("Hide files in this pull request", "activation", model.active),
 		);
+		if (model.active && model.view !== "empty")
+			nodes.push(
+				this.item(
+					model.view === "showing" ? "Hide files again" : "Show all files",
+					model.view === "showing" ? "hide-again" : "show-all",
+				),
+			);
 		const heading = element(
 			"div",
 			"Presets · All repositories",
@@ -233,6 +265,8 @@ export class PageUI {
 	}
 	destroy() {
 		this.control.remove();
+		this.emptyDiff.remove();
+		this.emptyTree.remove();
 		this.menu.remove();
 		this.status.remove();
 		clearTimeout(this.announceTimer);

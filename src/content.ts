@@ -6,6 +6,7 @@ import {
 import {
 	applyVisibility,
 	listedPaths,
+	placeEmptyStates,
 	restoreVisibility,
 	toolbarAnchor,
 } from "./github-page";
@@ -27,6 +28,13 @@ let signature = "";
 async function action(action: string) {
 	const current = session;
 	if (!current) return;
+	if (action === "show-all" || action === "hide-again") {
+		current.showingAll = action === "show-all";
+		if (current.showingAll) current.revealed.clear();
+		ui?.close();
+		queueRefresh();
+		return;
+	}
 	if (action === "settings" || action === "custom") {
 		await chrome.runtime.sendMessage({ type: "open-settings" });
 		return;
@@ -77,6 +85,7 @@ function refresh() {
 	const paths = listedPaths();
 	const model = filteringModel(settings, session, paths);
 	applyVisibility(model.files, settings.treeFiltering);
+	placeEmptyStates(ui.emptyDiff, ui.emptyTree);
 	const nextSignature = JSON.stringify([
 		settings,
 		paths,

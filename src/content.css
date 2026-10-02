@@ -99,3 +99,31 @@
 	clip-path: inset(50%);
 	white-space: nowrap;
 }
+.fh-empty,
+.fh-tree-empty {
+	padding: 32px;
+	text-align: center;
+	border: 1px solid var(--borderColor-default, #d1d9e0);
+	border-radius: 6px;
+	color: var(--fgColor-default, #1f2328);
+	background: var(--bgColor-default, #fff);
+	font:
+		14px / 1.5 -apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		sans-serif;
+}
+.fh-tree-empty {
+	padding: 16px;
+	font-size: 12px;
+}
+.fh-empty button,
+.fh-tree-empty button {
+	padding: 6px 12px;
+	margin: 4px;
+	border: 1px solid var(--button-default-borderColor-rest, #d1d9e0);
+	border-radius: 6px;
+	color: var(--fgColor-default, #1f2328);
+	background: var(--button-default-bgColor-rest, #f6f8fa);
+	cursor: pointer;
+}

@@ -66,3 +66,10 @@ export function restoreVisibility() {
 	for (const el of document.querySelectorAll(".fh-hidden"))
 		el.classList.remove("fh-hidden");
 }
+export function placeEmptyStates(diff: HTMLElement, tree: HTMLElement) {
+	const first = document.querySelector('[id^="diff-"][role="region"]');
+	if (first && diff.parentElement !== first.parentElement) first.before(diff);
+	const treeRoot = document.querySelector('[role="tree"]');
+	if (treeRoot && tree.previousElementSibling !== treeRoot)
+		treeRoot.after(tree);
+}
