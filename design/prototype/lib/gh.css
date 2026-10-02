@@ -1,0 +1,1017 @@
+@import url("https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap");
+
+:root,
+[data-gh-theme="light"] {
+	--gh-bg: #ffffff;
+	--gh-bg-subtle: #f6f8fa;
+	--gh-bg-inset: #f6f8fa;
+	--gh-bg-muted: #eff2f5;
+	--gh-header-bg: #f6f8fa;
+	--gh-border: #d1d9e0;
+	--gh-border-muted: #d1d9e0b3;
+	--gh-fg: #1f2328;
+	--gh-fg-muted: #59636e;
+	--gh-fg-subtle: #818b98;
+	--gh-accent: #0969da;
+	--gh-accent-subtle: #ddf4ff;
+	--gh-accent-emphasis: #0969da;
+	--gh-success: #1a7f37;
+	--gh-success-emphasis: #1f883d;
+	--gh-success-hover: #1c8139;
+	--gh-attention: #9a6700;
+	--gh-attention-subtle: #fff8c5;
+	--gh-danger: #d1242f;
+	--gh-done: #8250df;
+	--gh-btn-bg: #f6f8fa;
+	--gh-btn-hover: #eff2f5;
+	--gh-btn-border: #d1d9e0;
+	--gh-neutral-muted: #818b981f;
+	--gh-overlay-bg: #ffffff;
+	--gh-overlay-shadow: 0 0 0 1px #d1d9e080, 0 6px 12px -3px #25292e0a, 0 6px 18px 0 #25292e1f;
+	--gh-focus: #0969da;
+	--gh-add-line: #dafbe1;
+	--gh-add-num: #aceebb;
+	--gh-add-word: #aceebb;
+	--gh-del-line: #ffebe9;
+	--gh-del-num: #ffcecb;
+	--gh-hunk-line: #ddf4ff;
+	--gh-hunk-num: #b6e3ff;
+	--gh-underline-active: #fd8c73;
+	--gh-syn-keyword: #cf222e;
+	--gh-syn-string: #0a3069;
+	--gh-syn-entity: #8250df;
+	--gh-syn-constant: #0550ae;
+	--gh-syn-comment: #59636e;
+	--gh-syn-tag: #116329;
+	--gh-avatar-ring: #1f232826;
+	color-scheme: light;
+}
+
+[data-gh-theme="dark"] {
+	--gh-bg: #0d1117;
+	--gh-bg-subtle: #151b23;
+	--gh-bg-inset: #010409;
+	--gh-bg-muted: #212830;
+	--gh-header-bg: #010409;
+	--gh-border: #3d444d;
+	--gh-border-muted: #3d444db3;
+	--gh-fg: #f0f6fc;
+	--gh-fg-muted: #9198a1;
+	--gh-fg-subtle: #656c76;
+	--gh-accent: #4493f8;
+	--gh-accent-subtle: #388bfd1a;
+	--gh-accent-emphasis: #1f6feb;
+	--gh-success: #3fb950;
+	--gh-success-emphasis: #238636;
+	--gh-success-hover: #29903b;
+	--gh-attention: #d29922;
+	--gh-attention-subtle: #bb800926;
+	--gh-danger: #f85149;
+	--gh-done: #ab7df8;
+	--gh-btn-bg: #212830;
+	--gh-btn-hover: #262c36;
+	--gh-btn-border: #3d444d;
+	--gh-neutral-muted: #656c7633;
+	--gh-overlay-bg: #151b23;
+	--gh-overlay-shadow: 0 0 0 1px #3d444d, 0 6px 12px -3px #01040966, 0 6px 18px 0 #01040966;
+	--gh-focus: #1f6feb;
+	--gh-add-line: #2ea04326;
+	--gh-add-num: #3fb9504d;
+	--gh-add-word: #2ea04366;
+	--gh-del-line: #f851491a;
+	--gh-del-num: #f851494d;
+	--gh-hunk-line: #388bfd1a;
+	--gh-hunk-num: #388bfd40;
+	--gh-underline-active: #f78166;
+	--gh-syn-keyword: #ff7b72;
+	--gh-syn-string: #a5d6ff;
+	--gh-syn-entity: #d2a8ff;
+	--gh-syn-constant: #79c0ff;
+	--gh-syn-comment: #9198a1;
+	--gh-syn-tag: #7ee787;
+	--gh-avatar-ring: #f0f6fc26;
+	color-scheme: dark;
+}
+
+.gh-root {
+	--gh-font: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+	--gh-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+	--gh-toolbar-h: 52px;
+	--gh-top: var(--proto-h, 0px);
+	font-family: var(--gh-font);
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--gh-fg);
+	background: var(--gh-bg);
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
+	font-variation-settings: "wdth" 100;
+}
+
+.gh-root *,
+.gh-root *::before,
+.gh-root *::after {
+	box-sizing: border-box;
+}
+
+.gh-root button {
+	font: inherit;
+	color: inherit;
+}
+
+.gh-icon {
+	width: 16px;
+	height: 16px;
+	flex: none;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	vertical-align: text-bottom;
+}
+
+.gh-header {
+	background: var(--gh-header-bg);
+	border-bottom: 1px solid var(--gh-border);
+	padding: 16px 16px 0;
+}
+
+.gh-header-top {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	height: 32px;
+}
+
+.gh-icon-btn {
+	display: inline-grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 6px;
+	border: 1px solid var(--gh-btn-border);
+	background: transparent;
+	color: var(--gh-fg-muted);
+	cursor: pointer;
+}
+
+.gh-icon-btn:hover {
+	background: var(--gh-btn-hover);
+}
+
+.gh-mark {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: var(--gh-fg);
+	position: relative;
+	flex: none;
+}
+
+.gh-mark::after {
+	content: "";
+	position: absolute;
+	inset: 9px 9px 7px;
+	border-radius: 50% 50% 45% 45%;
+	background: var(--gh-header-bg);
+}
+
+.gh-crumbs {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.gh-crumbs span.sep {
+	color: var(--gh-fg-muted);
+	font-weight: 400;
+}
+
+.gh-crumbs .owner {
+	font-weight: 400;
+}
+
+.gh-search {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 272px;
+	height: 32px;
+	padding: 0 8px;
+	border: 1px solid var(--gh-btn-border);
+	border-radius: 6px;
+	color: var(--gh-fg-muted);
+	font-size: 14px;
+}
+
+.gh-search kbd {
+	margin-left: auto;
+	font: 11px var(--gh-mono);
+	border: 1px solid var(--gh-border);
+	border-radius: 4px;
+	padding: 0 4px;
+}
+
+.gh-avatar {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	display: inline-grid;
+	place-items: center;
+	font-size: 12px;
+	font-weight: 600;
+	color: #fff;
+	box-shadow: 0 0 0 1px var(--gh-avatar-ring);
+	flex: none;
+}
+
+.gh-avatar.sm {
+	width: 20px;
+	height: 20px;
+	font-size: 9px;
+}
+
+.gh-repo-nav {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+	overflow: hidden;
+}
+
+.gh-repo-nav a {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 8px;
+	height: 48px;
+	color: var(--gh-fg);
+	text-decoration: none;
+	position: relative;
+	white-space: nowrap;
+}
+
+.gh-repo-nav a .gh-icon {
+	color: var(--gh-fg-muted);
+}
+
+.gh-repo-nav a.selected {
+	font-weight: 600;
+}
+
+.gh-repo-nav a.selected::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 2px;
+	border-radius: 6px;
+	background: var(--gh-underline-active);
+}
+
+.gh-counter {
+	display: inline-block;
+	min-width: 20px;
+	padding: 0 6px;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 18px;
+	text-align: center;
+	border-radius: 2em;
+	background: var(--gh-neutral-muted);
+	color: var(--gh-fg);
+}
+
+.gh-pr-head {
+	padding: 24px 32px 0;
+}
+
+.gh-pr-title-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+}
+
+.gh-pr-title {
+	margin: 0;
+	font-size: 32px;
+	font-weight: 400;
+	line-height: 1.25;
+	letter-spacing: -0.01em;
+	flex: 1;
+}
+
+.gh-pr-title .num {
+	color: var(--gh-fg-muted);
+	font-weight: 300;
+}
+
+.gh-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 32px;
+	padding: 0 12px;
+	font-size: 14px;
+	font-weight: 500;
+	border-radius: 6px;
+	border: 1px solid var(--gh-btn-border);
+	background: var(--gh-btn-bg);
+	color: var(--gh-fg);
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background 80ms;
+}
+
+.gh-btn:hover {
+	background: var(--gh-btn-hover);
+}
+
+.gh-btn.sm {
+	height: 28px;
+	padding: 0 8px;
+	font-size: 12px;
+}
+
+.gh-btn.primary {
+	background: var(--gh-success-emphasis);
+	border-color: #1f232826;
+	color: #fff;
+}
+
+.gh-btn.primary:hover {
+	background: var(--gh-success-hover);
+}
+
+.gh-btn.invisible {
+	border-color: transparent;
+	background: transparent;
+	color: var(--gh-fg-muted);
+}
+
+.gh-btn.invisible:hover {
+	background: var(--gh-btn-hover);
+	color: var(--gh-fg);
+}
+
+.gh-btn.invisible b {
+	color: var(--gh-fg);
+	font-weight: 600;
+}
+
+.gh-pr-meta {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+	color: var(--gh-fg-muted);
+	flex-wrap: wrap;
+}
+
+.gh-pr-meta b {
+	color: var(--gh-fg);
+	font-weight: 600;
+}
+
+.gh-state {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 32px;
+	padding: 0 12px;
+	border-radius: 2em;
+	background: var(--gh-success-emphasis);
+	color: #fff;
+	font-weight: 500;
+}
+
+.gh-branch {
+	font: 12px var(--gh-mono);
+	padding: 2px 6px;
+	border-radius: 6px;
+	background: var(--gh-accent-subtle);
+	color: var(--gh-accent);
+}
+
+.gh-pr-tabs {
+	display: flex;
+	align-items: flex-end;
+	gap: 0;
+	margin-top: 24px;
+	border-bottom: 1px solid var(--gh-border);
+}
+
+.gh-pr-tabs a {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	color: var(--gh-fg-muted);
+	text-decoration: none;
+	border: 1px solid transparent;
+	border-bottom: 0;
+	border-radius: 6px 6px 0 0;
+	margin-bottom: -1px;
+	white-space: nowrap;
+}
+
+.gh-pr-tabs a.selected {
+	color: var(--gh-fg);
+	background: var(--gh-bg);
+	border-color: var(--gh-border);
+}
+
+.gh-pr-tabs a.selected .gh-icon {
+	color: var(--gh-fg);
+}
+
+.gh-diffstat {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding-bottom: 8px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.gh-diffstat .add {
+	color: var(--gh-success);
+}
+
+.gh-diffstat .del {
+	color: var(--gh-danger);
+}
+
+.gh-blocks {
+	display: inline-flex;
+	gap: 1px;
+}
+
+.gh-blocks i {
+	width: 8px;
+	height: 8px;
+	background: var(--gh-neutral-muted);
+	border-radius: 1px;
+}
+
+.gh-blocks i.a {
+	background: var(--gh-success-emphasis);
+}
+
+.gh-blocks i.d {
+	background: var(--gh-danger);
+}
+
+.gh-toolbar {
+	position: sticky;
+	top: var(--gh-top);
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	height: var(--gh-toolbar-h);
+	padding: 0 32px;
+	background: var(--gh-bg);
+	border-bottom: 1px solid var(--gh-border-muted);
+}
+
+.gh-toolbar-group {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.gh-toolbar-end {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.gh-viewed-progress {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+	color: var(--gh-fg-muted);
+}
+
+.gh-viewed-progress .bar {
+	width: 56px;
+	height: 8px;
+	border-radius: 4px;
+	background: var(--gh-neutral-muted);
+	overflow: hidden;
+}
+
+.gh-viewed-progress .bar i {
+	display: block;
+	height: 100%;
+	background: var(--gh-success-emphasis);
+	width: 0;
+	transition: width 200ms;
+}
+
+[data-gh-slot] {
+	display: contents;
+}
+
+.gh-layout {
+	display: grid;
+	grid-template-columns: 296px minmax(0, 1fr);
+	gap: 24px;
+	padding: 16px 32px 64px;
+	align-items: start;
+}
+
+.gh-layout.no-tree {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.gh-layout.no-tree .gh-sidebar {
+	display: none;
+}
+
+.gh-sidebar {
+	position: sticky;
+	top: calc(var(--gh-top) + var(--gh-toolbar-h) + 16px);
+	max-height: calc(100vh - var(--gh-top) - var(--gh-toolbar-h) - 32px);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+}
+
+.gh-tree-filter {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	height: 32px;
+	padding: 0 8px;
+	border: 1px solid var(--gh-btn-border);
+	border-radius: 6px;
+	background: var(--gh-bg);
+	color: var(--gh-fg-muted);
+}
+
+.gh-tree-filter input {
+	border: 0;
+	outline: 0;
+	background: transparent;
+	font: inherit;
+	color: var(--gh-fg);
+	width: 100%;
+}
+
+.gh-tree-filter:focus-within {
+	border-color: var(--gh-focus);
+	box-shadow: inset 0 0 0 1px var(--gh-focus);
+}
+
+.gh-tree {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overflow: auto;
+	min-height: 0;
+	flex: 1;
+}
+
+.gh-tree ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.gh-tree-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	height: 32px;
+	padding-right: 8px;
+	border-radius: 6px;
+	cursor: pointer;
+	color: var(--gh-fg);
+	white-space: nowrap;
+	user-select: none;
+}
+
+.gh-tree-row:hover {
+	background: var(--gh-btn-hover);
+}
+
+.gh-tree-row.active {
+	background: var(--gh-neutral-muted);
+}
+
+.gh-tree-row .name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	flex: 1;
+	min-width: 0;
+}
+
+.gh-tree-row .gh-icon {
+	color: var(--gh-fg-muted);
+}
+
+.gh-tree-row .folder {
+	color: #54aeff;
+	fill: currentColor;
+	stroke: none;
+}
+
+.gh-tree-dir.collapsed > ul {
+	display: none;
+}
+
+.gh-tree-dir.collapsed > .gh-tree-row .chev {
+	transform: rotate(-90deg);
+}
+
+.gh-tree-row .chev {
+	transition: transform 120ms;
+}
+
+.gh-status {
+	width: 16px;
+	height: 16px;
+	flex: none;
+	border-radius: 3px;
+	border: 1.5px solid currentColor;
+	display: grid;
+	place-items: center;
+	font: 700 10px/1 var(--gh-mono);
+}
+
+.gh-status.added {
+	color: var(--gh-success);
+}
+
+.gh-status.modified {
+	color: var(--gh-attention);
+}
+
+.gh-status.modified::before {
+	content: "";
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+.gh-status.added::before {
+	content: "+";
+}
+
+.gh-files {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	min-width: 0;
+}
+
+.gh-file {
+	border: 1px solid var(--gh-border);
+	border-radius: 6px;
+	background: var(--gh-bg);
+	scroll-margin-top: calc(var(--gh-top) + var(--gh-toolbar-h) + 16px);
+	min-width: 0;
+}
+
+.gh-file-header {
+	position: sticky;
+	top: calc(var(--gh-top) + var(--gh-toolbar-h));
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 6px 8px 6px 8px;
+	background: var(--gh-bg-subtle);
+	border-bottom: 1px solid var(--gh-border);
+	border-radius: 6px 6px 0 0;
+}
+
+.gh-file.collapsed .gh-file-header {
+	border-bottom: 0;
+	border-radius: 6px;
+}
+
+.gh-file.collapsed .gh-file-body {
+	display: none;
+}
+
+.gh-file.collapsed .gh-file-collapse .gh-icon {
+	transform: rotate(-90deg);
+}
+
+.gh-file-collapse {
+	width: 28px;
+	height: 28px;
+	display: grid;
+	place-items: center;
+	border: 0;
+	background: transparent;
+	color: var(--gh-fg-muted);
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.gh-file-collapse:hover {
+	background: var(--gh-btn-hover);
+}
+
+.gh-file-stat {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font: 600 12px var(--gh-mono);
+	color: var(--gh-fg-muted);
+}
+
+.gh-file-path {
+	font: 600 12px/20px var(--gh-mono);
+	color: var(--gh-fg);
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-decoration: none;
+}
+
+.gh-file-path:hover {
+	color: var(--gh-accent);
+	text-decoration: underline;
+}
+
+.gh-file-actions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.gh-viewed {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 28px;
+	padding: 0 8px;
+	font-size: 12px;
+	border: 1px solid var(--gh-btn-border);
+	border-radius: 6px;
+	background: var(--gh-btn-bg);
+	cursor: pointer;
+	color: var(--gh-fg);
+}
+
+.gh-viewed .box {
+	width: 14px;
+	height: 14px;
+	border-radius: 3px;
+	border: 1px solid var(--gh-fg-subtle);
+	display: grid;
+	place-items: center;
+	background: var(--gh-bg);
+}
+
+.gh-file.viewed .gh-viewed {
+	background: var(--gh-accent-subtle);
+	border-color: transparent;
+	color: var(--gh-accent);
+}
+
+.gh-file.viewed .gh-viewed .box {
+	background: var(--gh-accent-emphasis);
+	border-color: var(--gh-accent-emphasis);
+}
+
+.gh-file.viewed .gh-viewed .box::after {
+	content: "";
+	width: 7px;
+	height: 4px;
+	border: 1.5px solid #fff;
+	border-top: 0;
+	border-right: 0;
+	transform: translateY(-1px) rotate(-45deg);
+}
+
+.gh-file-body {
+	overflow-x: auto;
+	border-radius: 0 0 6px 6px;
+}
+
+.gh-diff {
+	width: 100%;
+	border-collapse: collapse;
+	font: 12px/20px var(--gh-mono);
+	tab-size: 4;
+}
+
+.gh-diff td {
+	padding: 0;
+	vertical-align: top;
+}
+
+.gh-diff .ln {
+	width: 1%;
+	min-width: 50px;
+	padding: 0 10px;
+	text-align: right;
+	color: var(--gh-fg-subtle);
+	user-select: none;
+	cursor: pointer;
+}
+
+.gh-diff .ln:hover {
+	color: var(--gh-fg);
+}
+
+.gh-diff .code {
+	padding: 0 10px 0 22px;
+	position: relative;
+	white-space: pre;
+}
+
+.gh-diff .code::before {
+	position: absolute;
+	left: 8px;
+	content: " ";
+}
+
+.gh-diff tr.add .code {
+	background: var(--gh-add-line);
+}
+
+.gh-diff tr.add .ln {
+	background: var(--gh-add-num);
+	color: var(--gh-fg);
+}
+
+.gh-diff tr.add .code::before {
+	content: "+";
+}
+
+.gh-diff tr.del .code {
+	background: var(--gh-del-line);
+}
+
+.gh-diff tr.del .ln {
+	background: var(--gh-del-num);
+	color: var(--gh-fg);
+}
+
+.gh-diff tr.del .code::before {
+	content: "-";
+}
+
+.gh-diff tr.hunk td {
+	background: var(--gh-hunk-line);
+	color: var(--gh-fg-muted);
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+.gh-diff tr.hunk .ln {
+	background: var(--gh-hunk-num);
+	text-align: center;
+	color: var(--gh-fg-muted);
+}
+
+.gh-diff tr.target .ln,
+.gh-diff tr.target .code {
+	box-shadow: inset 0 0 0 9999px #d4a72c33;
+}
+
+.syn-k {
+	color: var(--gh-syn-keyword);
+}
+
+.syn-s {
+	color: var(--gh-syn-string);
+}
+
+.syn-e {
+	color: var(--gh-syn-entity);
+}
+
+.syn-c {
+	color: var(--gh-syn-constant);
+}
+
+.syn-m {
+	color: var(--gh-syn-comment);
+}
+
+.syn-t {
+	color: var(--gh-syn-tag);
+}
+
+.gh-comment-cell {
+	padding: 8px !important;
+	background: var(--gh-bg-subtle);
+	border-top: 1px solid var(--gh-border);
+	border-bottom: 1px solid var(--gh-border);
+	font-family: var(--gh-font);
+	white-space: normal;
+}
+
+.gh-comment {
+	max-width: 760px;
+	border: 1px solid var(--gh-border);
+	border-radius: 6px;
+	background: var(--gh-bg);
+	scroll-margin-top: calc(var(--gh-top) + var(--gh-toolbar-h) + 64px);
+}
+
+.gh-comment.target {
+	border-color: var(--gh-accent);
+	box-shadow: 0 0 0 2px var(--gh-accent-subtle);
+}
+
+.gh-comment-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	font-size: 14px;
+}
+
+.gh-comment-head .age {
+	color: var(--gh-fg-muted);
+}
+
+.gh-comment-body {
+	padding: 0 12px 12px 40px;
+	font-size: 14px;
+}
+
+.gh-comment-reply {
+	border-top: 1px solid var(--gh-border);
+	padding: 8px 12px;
+}
+
+.gh-comment-reply span {
+	display: block;
+	padding: 5px 12px;
+	border: 1px solid var(--gh-border);
+	border-radius: 6px;
+	color: var(--gh-fg-muted);
+	font-size: 14px;
+	background: var(--gh-bg);
+}
+
+.gh-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 24px;
+	border: 1px dashed var(--gh-border);
+	border-radius: 6px;
+	color: var(--gh-fg-muted);
+	font-size: 14px;
+}
+
+.gh-loading .spinner {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	border: 2px solid var(--gh-border);
+	border-top-color: var(--gh-fg-muted);
+	animation: gh-spin 700ms linear infinite;
+}
+
+@keyframes gh-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes gh-file-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+}
+
+.gh-file.just-loaded {
+	animation: gh-file-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.gh-file.fh-hidden,
+.gh-tree-file.fh-hidden,
+.gh-tree-dir.fh-hidden {
+	display: none !important;
+}
+
+.gh-tree-file.filtered-out,
+.gh-tree-dir.filtered-out {
+	display: none;
+}

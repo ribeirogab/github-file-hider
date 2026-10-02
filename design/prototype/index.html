@@ -1,0 +1,4834 @@
+<!doctype html>
+<html lang="en" data-gh-theme="light">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>GitHub File Hider — Prototype</title>
+		<link
+			rel="icon"
+			href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cmask id='a'%3E%3Crect width='24' height='10' fill='%23fff'/%3E%3C/mask%3E%3Cmask id='b'%3E%3Crect y='15.5' width='24' height='8.5' fill='%23fff'/%3E%3C/mask%3E%3Cg fill='none' stroke='%231f2328' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg mask='url(%23a)'%3E%3Cpath d='M13.75 2.75H6.5A1.75 1.75 0 0 0 4.75 4.5v15a1.75 1.75 0 0 0 1.75 1.75h11a1.75 1.75 0 0 0 1.75-1.75V8.25Z'/%3E%3Cpath d='M13.75 2.75v5.5h5.5'/%3E%3C/g%3E%3Cpath mask='url(%23b)' stroke-dasharray='2 2.25' d='M13.75 2.75H6.5A1.75 1.75 0 0 0 4.75 4.5v15a1.75 1.75 0 0 0 1.75 1.75h11a1.75 1.75 0 0 0 1.75-1.75V8.25Z'/%3E%3C/g%3E%3Crect x='3' y='11' width='18' height='3.5' rx='1.25' fill='%230969da'/%3E%3C/svg%3E
+		/>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wdth,wght@0,75..125,200..900;1,75..125,200..900&display=swap"
+		/>
+		<link rel="stylesheet" href="./lib/gh.css" />
+		<link rel="stylesheet" href="./lib/proto.css" />
+		<style>
+			:root,
+			[data-gh-theme="light"] {
+				--fh-fg: #1f2328;
+				--fh-fg-muted: #59636e;
+				--fh-fg-disabled: #818b98;
+				--fh-fg-on-emphasis: #ffffff;
+				--fh-bg: #ffffff;
+				--fh-bg-muted: #f6f8fa;
+				--fh-bg-header: #f6f8fa;
+				--fh-overlay-bg: #ffffff;
+				--fh-border: #d1d9e0;
+				--fh-border-muted: #d1d9e0b3;
+				--fh-accent: #0969da;
+				--fh-accent-emphasis: #0969da;
+				--fh-accent-muted: #ddf4ff;
+				--fh-accent-border: #54aeff66;
+				--fh-attention: #9a6700;
+				--fh-attention-emphasis: #9a6700;
+				--fh-danger: #d1242f;
+				--fh-danger-emphasis: #cf222e;
+				--fh-danger-muted: #ffebe9;
+				--fh-success: #1a7f37;
+				--fh-success-emphasis: #1a7f37;
+				--fh-neutral-muted: #818b981f;
+				--fh-control-bg: #f6f8fa;
+				--fh-control-hover: #eff2f5;
+				--fh-control-active: #e6eaef;
+				--fh-control-border: #d1d9e0;
+				--fh-control-disabled: #eff2f5;
+				--fh-transparent-hover: #818b981a;
+				--fh-transparent-active: #818b9826;
+				--fh-transparent-selected: #818b9826;
+				--fh-primary-bg: #1f883d;
+				--fh-primary-hover: #1c8139;
+				--fh-primary-border: #1f232826;
+				--fh-track-bg: #e6eaef;
+				--fh-track-hover: #dde3e9;
+				--fh-track-border: transparent;
+				--fh-knob-bg: #ffffff;
+				--fh-knob-border: #818b98;
+				--fh-checked: #0969da;
+				--fh-checked-hover: #0860ca;
+				--fh-check-border: #818b98;
+				--fh-input-bg: #ffffff;
+				--fh-tooltip-bg: #25292e;
+				--fh-tooltip-fg: #ffffff;
+				--fh-focus: #0969da;
+				--fh-logo-ink: #1f2328;
+				--fh-logo-band: #0969da;
+				--fh-chrome-bg: #e9edf1;
+				--fh-chrome-omni: #ffffff;
+				--fh-canvas-dot: #d1d9e0;
+				--fh-shadow-resting-small: 0 1px 1px 0 #1f23280f, 0 1px 3px 0 #1f23280f;
+				--fh-shadow-floating-small: 0 0 0 1px #d1d9e080, 0 6px 12px -3px #25292e0a, 0 6px 18px 0 #25292e1f;
+				--fh-shadow-button: 0 1px 0 0 #1f23280a;
+				--fh-shadow-inset: inset 0 1px 0 0 #d1d9e033;
+			}
+
+			[data-gh-theme="dark"] {
+				--fh-fg: #f0f6fc;
+				--fh-fg-muted: #9198a1;
+				--fh-fg-disabled: #656c76;
+				--fh-fg-on-emphasis: #ffffff;
+				--fh-bg: #0d1117;
+				--fh-bg-muted: #151b23;
+				--fh-bg-header: #010409;
+				--fh-overlay-bg: #151b23;
+				--fh-border: #3d444d;
+				--fh-border-muted: #3d444db3;
+				--fh-accent: #4493f8;
+				--fh-accent-emphasis: #1f6feb;
+				--fh-accent-muted: #388bfd1a;
+				--fh-accent-border: #388bfd66;
+				--fh-attention: #d29922;
+				--fh-attention-emphasis: #9e6a03;
+				--fh-danger: #f85149;
+				--fh-danger-emphasis: #da3633;
+				--fh-danger-muted: #f851491a;
+				--fh-success: #3fb950;
+				--fh-success-emphasis: #238636;
+				--fh-neutral-muted: #656c7633;
+				--fh-control-bg: #212830;
+				--fh-control-hover: #262c36;
+				--fh-control-active: #2a313c;
+				--fh-control-border: #3d444d;
+				--fh-control-disabled: #212830;
+				--fh-transparent-hover: #656c7633;
+				--fh-transparent-active: #656c7640;
+				--fh-transparent-selected: #656c7626;
+				--fh-primary-bg: #238636;
+				--fh-primary-hover: #29903b;
+				--fh-primary-border: #ffffff1a;
+				--fh-track-bg: #262c36;
+				--fh-track-hover: #2a313c;
+				--fh-track-border: #3d444d;
+				--fh-knob-bg: #0d1117;
+				--fh-knob-border: #656c76;
+				--fh-checked: #1f6feb;
+				--fh-checked-hover: #2a7aef;
+				--fh-check-border: #6e7681;
+				--fh-input-bg: #0d1117;
+				--fh-tooltip-bg: #3d444d;
+				--fh-tooltip-fg: #ffffff;
+				--fh-focus: #1f6feb;
+				--fh-logo-ink: #f0f6fc;
+				--fh-logo-band: #4493f8;
+				--fh-chrome-bg: #1c2128;
+				--fh-chrome-omni: #2d333b;
+				--fh-canvas-dot: #3d444d;
+				--fh-shadow-resting-small: 0 1px 1px 0 #01040999, 0 1px 3px 0 #01040999;
+				--fh-shadow-floating-small: 0 0 0 1px #3d444d, 0 6px 12px -3px #01040966, 0 6px 18px 0 #01040966;
+				--fh-shadow-button: 0 0 0 0 #0000;
+				--fh-shadow-inset: 0 0 0 0 #0000;
+			}
+
+			:root {
+				--fh-font: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+				--fh-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+				--fh-dur-instant: 80ms;
+				--fh-dur-fast: 120ms;
+				--fh-dur-base: 200ms;
+				--fh-dur-slow: 240ms;
+				--fh-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+				--fh-ease-quad: cubic-bezier(0.5, 1, 0.89, 1);
+				--fh-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+				--fh-sticky-offset: calc(var(--proto-h, 0px) + 52px);
+			}
+
+			html {
+				background: var(--fh-bg);
+			}
+
+			.fh-sr {
+				position: absolute !important;
+				width: 1px;
+				height: 1px;
+				margin: -1px;
+				padding: 0;
+				overflow: hidden;
+				clip-path: inset(50%);
+				white-space: nowrap;
+				border: 0;
+			}
+
+			.fh-logo {
+				display: block;
+				flex: none;
+				color: var(--fh-logo-ink);
+			}
+
+			.fh-logo-band {
+				fill: var(--fh-logo-band);
+			}
+
+			.fh-logo-tile {
+				display: inline-grid;
+				place-items: center;
+				flex: none;
+				width: var(--tile, 48px);
+				height: var(--tile, 48px);
+				border-radius: calc(var(--tile, 48px) * 0.22);
+				background: var(--fh-bg);
+				box-shadow:
+					0 0 0 1px var(--fh-border),
+					var(--fh-shadow-resting-small);
+			}
+
+			.fh-ctl {
+				display: inline-flex;
+				align-items: center;
+				margin-left: 4px;
+				font-family: var(--fh-font);
+			}
+
+			button.fh-ctl-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				height: 28px;
+				padding: 0 8px;
+				border: 0;
+				border-radius: 6px;
+				background: transparent;
+				color: var(--fh-fg-muted);
+				font: 500 12px/20px var(--fh-font);
+				white-space: nowrap;
+				cursor: pointer;
+				transition:
+					background-color var(--fh-dur-fast) var(--fh-ease-out),
+					color var(--fh-dur-fast) var(--fh-ease-out);
+			}
+
+			button.fh-ctl-btn[hidden] {
+				display: none;
+			}
+
+			button.fh-ctl-btn:hover,
+			button.fh-ctl-btn.is-hover {
+				background: var(--fh-transparent-hover);
+				color: var(--fh-fg);
+			}
+
+			button.fh-ctl-btn:active {
+				background: var(--fh-transparent-active);
+			}
+
+			button.fh-ctl-btn:focus {
+				outline: none;
+			}
+
+			button.fh-ctl-btn:focus-visible,
+			button.fh-ctl-btn.is-focus {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: -2px;
+			}
+
+			button.fh-ctl-btn[aria-expanded="true"] {
+				background: var(--fh-transparent-selected);
+				color: var(--fh-fg);
+			}
+
+			.fh-ctl-btn .gh-icon {
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-ctl[data-split] .fh-ctl-main {
+				border-radius: 6px 0 0 6px;
+			}
+
+			.fh-ctl[data-split] .fh-ctl-menu {
+				border-radius: 0 6px 6px 0;
+				padding: 0 6px;
+			}
+
+			.fh-ctl-sep {
+				width: 1px;
+				height: 16px;
+				background: var(--fh-border);
+				flex: none;
+			}
+
+			.fh-ctl-sep[hidden] {
+				display: none;
+			}
+
+			.fh-ctl-status {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+
+			.fh-ctl-status .fh-label {
+				margin-left: 2px;
+			}
+
+			.fh-ctl[data-view="filtering"] .fh-ctl-menu {
+				color: var(--fh-fg);
+			}
+
+			.fh-ctl[data-view="filtering"] .fh-ctl-icon {
+				color: var(--fh-accent);
+			}
+
+			.fh-ctl[data-view="filtering"] .fh-ctl-status {
+				animation: fh-pop var(--fh-dur-base) var(--fh-ease-out);
+			}
+
+			.fh-ctl-caret {
+				margin: 0 -2px 0 -2px;
+			}
+
+			@keyframes fh-pop {
+				from {
+					opacity: 0.4;
+					transform: scale(0.96);
+				}
+			}
+
+			.fh-counter {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				box-sizing: border-box;
+				min-width: 20px;
+				height: 20px;
+				padding: 0 6px;
+				border: 1px solid transparent;
+				border-radius: 2em;
+				background: var(--fh-neutral-muted);
+				color: var(--fh-fg);
+				font: 500 12px/18px var(--fh-font);
+				vertical-align: middle;
+			}
+
+			.fh-counter.is-accent {
+				background: var(--fh-accent-muted);
+				color: var(--fh-accent);
+			}
+
+			.fh-roll {
+				display: inline-grid;
+				overflow: hidden;
+				height: 18px;
+			}
+
+			.fh-roll > span {
+				grid-area: 1 / 1;
+				display: block;
+				text-align: center;
+			}
+
+			.fh-roll-out {
+				animation: fh-roll-out var(--fh-dur-base) var(--fh-ease-out) both;
+			}
+
+			.fh-roll-in {
+				animation: fh-roll-in var(--fh-dur-base) var(--fh-ease-out) both;
+			}
+
+			@keyframes fh-roll-out {
+				to {
+					transform: translateY(calc(-100% * var(--dir, 1)));
+					opacity: 0;
+				}
+			}
+
+			@keyframes fh-roll-in {
+				from {
+					transform: translateY(calc(100% * var(--dir, 1)));
+					opacity: 0;
+				}
+			}
+
+			.fh-label {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				box-sizing: border-box;
+				height: 20px;
+				padding: 0 7px;
+				border: 1px solid var(--fh-border);
+				border-radius: 2em;
+				background: transparent;
+				color: var(--fh-fg-muted);
+				font: 500 12px/1 var(--fh-font);
+				white-space: nowrap;
+				vertical-align: middle;
+			}
+
+			.fh-label.is-accent {
+				color: var(--fh-accent);
+				border-color: var(--fh-accent-emphasis);
+			}
+
+			.fh-label.is-attention {
+				color: var(--fh-attention);
+				border-color: var(--fh-attention-emphasis);
+			}
+
+			.fh-label.is-success {
+				color: var(--fh-success);
+				border-color: var(--fh-success-emphasis);
+			}
+
+			.fh-label[tabindex]:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: 2px;
+			}
+
+			.fh-label .gh-icon {
+				width: 12px;
+				height: 12px;
+			}
+
+			.fh-overlay {
+				position: fixed;
+				z-index: 100;
+				box-sizing: border-box;
+				width: 320px;
+				max-width: calc(100vw - 16px);
+				overflow: auto;
+				overscroll-behavior: contain;
+				padding-bottom: 8px;
+				border-radius: 12px;
+				background: var(--fh-overlay-bg);
+				color: var(--fh-fg);
+				box-shadow: var(--fh-shadow-floating-small);
+				font: 400 14px/20px var(--fh-font);
+				text-align: left;
+				outline: none;
+				-webkit-font-smoothing: antialiased;
+				animation: fh-overlay-in var(--fh-dur-base) var(--fh-ease-out);
+			}
+
+			.fh-overlay *,
+			.fh-overlay *::before,
+			.fh-overlay *::after {
+				box-sizing: border-box;
+			}
+
+			.fh-overlay.is-static {
+				position: relative;
+				z-index: auto;
+				animation: none;
+				max-width: 100%;
+			}
+
+			@keyframes fh-overlay-in {
+				from {
+					opacity: 0;
+					transform: translateY(-4px);
+				}
+			}
+
+			.fh-ov-header {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 12px 16px;
+			}
+
+			.fh-ov-title {
+				flex: 1;
+				min-width: 0;
+				font-weight: 600;
+			}
+
+			.fh-al-divider {
+				display: block;
+				height: 1px;
+				margin: 8px 0;
+				border: 0;
+				background: var(--fh-border-muted);
+			}
+
+			.fh-ov-header + .fh-al-divider {
+				margin-top: 0;
+			}
+
+			.fh-al-heading {
+				margin: 0;
+				padding: 6px 16px;
+				font-size: 12px;
+				line-height: 20px;
+				font-weight: 600;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-al-item {
+				position: relative;
+				display: flex;
+				align-items: flex-start;
+				gap: 8px;
+				min-height: 32px;
+				margin: 0 8px;
+				padding: 6px 8px;
+				border-radius: 6px;
+				color: var(--fh-fg);
+				cursor: pointer;
+				user-select: none;
+				transition: background-color var(--fh-dur-fast) var(--fh-ease-out);
+			}
+
+			.fh-al-item:hover,
+			.fh-al-item.is-hover {
+				background: var(--fh-transparent-hover);
+			}
+
+			.fh-al-item:active {
+				background: var(--fh-transparent-active);
+			}
+
+			.fh-al-item:focus {
+				outline: none;
+			}
+
+			.fh-al-item:focus-visible,
+			.fh-al-item.is-focus {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: -2px;
+				background: var(--fh-transparent-hover);
+			}
+
+			.fh-al-lead {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex: none;
+				width: 16px;
+				height: 20px;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-al-content {
+				display: flex;
+				flex-direction: column;
+				flex: 1;
+				min-width: 0;
+			}
+
+			.fh-al-label {
+				display: block;
+			}
+
+			.fh-al-desc {
+				display: block;
+				overflow: hidden;
+				font-size: 12px;
+				line-height: 16px;
+				color: var(--fh-fg-muted);
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.fh-al-desc code {
+				font: 11px/16px var(--fh-mono);
+			}
+
+			.fh-al-trail {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				flex: none;
+				min-height: 20px;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+				line-height: 20px;
+			}
+
+			.fh-al-trail.is-switch {
+				align-self: center;
+			}
+
+			.fh-al-count.is-live {
+				color: var(--fh-fg);
+				font-weight: 500;
+			}
+
+			.fh-ov-empty {
+				display: flex;
+				gap: 12px;
+				margin: 0 8px;
+				padding: 8px;
+				border-radius: 6px;
+			}
+
+			.fh-ov-empty-visual {
+				display: grid;
+				place-items: center;
+				flex: none;
+				width: 32px;
+				height: 32px;
+				border-radius: 8px;
+				background: var(--fh-accent-muted);
+				color: var(--fh-accent);
+			}
+
+			.fh-ov-empty strong {
+				display: block;
+				font-weight: 600;
+			}
+
+			.fh-ov-empty p {
+				margin: 2px 0 0;
+				font-size: 12px;
+				line-height: 18px;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-check {
+				display: grid;
+				place-items: center;
+				box-sizing: border-box;
+				width: 16px;
+				height: 16px;
+				border: 1px solid var(--fh-check-border);
+				border-radius: 3px;
+				background: var(--fh-bg);
+				transition:
+					background-color var(--fh-dur-instant) var(--fh-ease-quad),
+					border-color var(--fh-dur-instant) var(--fh-ease-quad);
+			}
+
+			.fh-check .gh-icon {
+				width: 12px;
+				height: 12px;
+				color: var(--fh-fg-on-emphasis);
+				stroke-width: 2;
+				opacity: 0;
+				transform: scale(0.6);
+				transition:
+					opacity var(--fh-dur-instant) var(--fh-ease-quad),
+					transform var(--fh-dur-fast) var(--fh-ease-out);
+			}
+
+			[aria-checked="true"] > .fh-al-lead .fh-check {
+				background: var(--fh-checked);
+				border-color: var(--fh-checked);
+			}
+
+			[aria-checked="true"] > .fh-al-lead .fh-check .gh-icon {
+				opacity: 1;
+				transform: none;
+			}
+
+			.fh-switch {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				flex: none;
+			}
+
+			.fh-switch-status {
+				min-width: 22px;
+				font-size: 14px;
+				line-height: 20px;
+				color: var(--fh-fg);
+				text-align: right;
+			}
+
+			.fh-switch-status.is-disabled {
+				color: var(--fh-fg-disabled);
+			}
+
+			.fh-switch-track {
+				position: relative;
+				display: block;
+				flex: none;
+				box-sizing: border-box;
+				width: 48px;
+				height: 24px;
+				margin: 0;
+				padding: 0;
+				border: 1px solid var(--fh-track-border);
+				border-radius: 6px;
+				background: var(--fh-track-bg);
+				overflow: hidden;
+				cursor: pointer;
+				appearance: none;
+				transition:
+					background-color var(--fh-dur-instant) var(--fh-ease-quad),
+					border-color var(--fh-dur-instant) var(--fh-ease-quad);
+			}
+
+			.fh-switch-track::before {
+				content: "";
+				position: absolute;
+				top: 50%;
+				left: 25%;
+				width: 2px;
+				height: 10px;
+				margin: -5px 0 0 -1px;
+				border-radius: 1px;
+				background: var(--fh-fg-on-emphasis);
+				opacity: 0;
+				transition: opacity var(--fh-dur-instant) var(--fh-ease-quad);
+			}
+
+			.fh-switch-track::after {
+				content: "";
+				position: absolute;
+				top: 50%;
+				left: 75%;
+				box-sizing: border-box;
+				width: 10px;
+				height: 10px;
+				margin: -5px 0 0 -5px;
+				border: 1.5px solid var(--fh-fg-muted);
+				border-radius: 50%;
+				transition: opacity var(--fh-dur-instant) var(--fh-ease-quad);
+			}
+
+			.fh-switch-knob {
+				position: absolute;
+				top: -1px;
+				bottom: -1px;
+				left: -1px;
+				z-index: 1;
+				box-sizing: border-box;
+				width: calc(50% + 1px);
+				border: 1px solid var(--fh-knob-border);
+				border-radius: 6px;
+				background: var(--fh-knob-bg);
+				box-shadow: var(--fh-shadow-resting-small);
+				transition:
+					transform var(--fh-dur-instant) var(--fh-ease-quad),
+					border-color var(--fh-dur-instant) var(--fh-ease-quad);
+			}
+
+			.fh-switch-track:hover {
+				background: var(--fh-track-hover);
+			}
+
+			.fh-switch-track:is([aria-pressed="true"], [data-on="true"]) {
+				background: var(--fh-checked);
+				border-color: var(--fh-checked);
+			}
+
+			.fh-switch-track:is([aria-pressed="true"], [data-on="true"]):hover {
+				background: var(--fh-checked-hover);
+			}
+
+			.fh-switch-track:is([aria-pressed="true"], [data-on="true"])::before {
+				opacity: 1;
+			}
+
+			.fh-switch-track:is([aria-pressed="true"], [data-on="true"])::after {
+				opacity: 0;
+			}
+
+			.fh-switch-track:is([aria-pressed="true"], [data-on="true"]) .fh-switch-knob {
+				transform: translateX(100%);
+				border-color: var(--fh-checked);
+			}
+
+			.fh-switch-track:focus {
+				outline: none;
+			}
+
+			.fh-switch-track:focus-visible,
+			.fh-switch-track.is-focus {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: 2px;
+			}
+
+			.fh-switch-track:is(:disabled, [data-disabled="true"]) {
+				cursor: not-allowed;
+				background: var(--fh-control-disabled);
+				border-color: var(--fh-border-muted);
+			}
+
+			.fh-switch-track:is(:disabled, [data-disabled="true"])::before {
+				background: var(--fh-fg-disabled);
+			}
+
+			.fh-switch-track:is(:disabled, [data-disabled="true"])::after {
+				border-color: var(--fh-fg-disabled);
+			}
+
+			.fh-switch-track:is(:disabled, [data-disabled="true"]) .fh-switch-knob {
+				border-color: var(--fh-border);
+				box-shadow: none;
+			}
+
+			.fh-flash {
+				position: relative;
+				display: grid;
+				grid-template-columns: 16px minmax(0, 1fr) auto;
+				column-gap: 12px;
+				align-items: start;
+				margin-bottom: -8px;
+				padding: 12px 12px 12px 16px;
+				border: 1px solid var(--fh-accent-border);
+				border-radius: 6px;
+				background: var(--fh-accent-muted);
+				color: var(--fh-fg);
+				font: 400 14px/20px var(--fh-font);
+				scroll-margin-top: calc(var(--fh-sticky-offset) + 16px);
+				animation: fh-flash-in var(--fh-dur-slow) var(--fh-ease-out);
+			}
+
+			.fh-flash-icon {
+				display: flex;
+				align-items: center;
+				height: 20px;
+				color: var(--fh-accent);
+			}
+
+			.fh-flash-text {
+				min-width: 0;
+			}
+
+			.fh-flash-text p {
+				margin: 0;
+			}
+
+			.fh-flash-detail {
+				margin-top: 2px !important;
+				font-size: 12px;
+				line-height: 18px;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-flash-detail code,
+			code.fh-code {
+				padding: 0.15em 0.4em;
+				border-radius: 6px;
+				background: var(--fh-neutral-muted);
+				font: 85%/1 var(--fh-mono);
+				white-space: nowrap;
+			}
+
+			.fh-flash-actions {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				align-self: center;
+			}
+
+			@keyframes fh-flash-in {
+				from {
+					opacity: 0;
+					transform: translateY(-6px);
+				}
+			}
+
+			.gh-file.fh-revealed {
+				border-color: var(--fh-accent-emphasis);
+				box-shadow: 0 0 0 3px var(--fh-accent-muted);
+			}
+
+			.gh-file.fh-revealed > .gh-file-header {
+				border-bottom-color: var(--fh-accent-border);
+			}
+
+			.fh-file-label {
+				margin-right: 4px;
+				cursor: default;
+			}
+
+			.fh-tree-hint {
+				display: inline-grid;
+				place-items: center;
+				flex: none;
+				width: 16px;
+				height: 16px;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-tree-hint[data-kind="revealed"] {
+				color: var(--fh-accent);
+			}
+
+			.gh-tree-file[data-fh-state="diff-hidden"] > .gh-tree-row {
+				color: var(--fh-fg-muted);
+			}
+
+			.gh-tree-file[data-fh-state="diff-hidden"] > .gh-tree-row > .gh-icon,
+			.gh-tree-file[data-fh-state="diff-hidden"] > .gh-tree-row > .gh-status {
+				opacity: 0.6;
+			}
+
+			.fh-tree-empty {
+				display: flex;
+				gap: 8px;
+				padding: 12px;
+				border: 1px dashed var(--fh-border);
+				border-radius: 6px;
+				color: var(--fh-fg-muted);
+				font: 400 12px/18px var(--fh-font);
+			}
+
+			.fh-tree-empty .gh-icon {
+				margin-top: 1px;
+			}
+
+			.fh-tree-empty strong {
+				display: block;
+				color: var(--fh-fg);
+				font-weight: 600;
+			}
+
+			.fh-blankslate {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				box-sizing: border-box;
+				margin-bottom: 16px;
+				padding: 48px 32px;
+				border: 1px solid var(--fh-border);
+				border-radius: 6px;
+				background: var(--fh-bg);
+				color: var(--fh-fg);
+				font-family: var(--fh-font);
+				text-align: center;
+				animation: fh-flash-in var(--fh-dur-slow) var(--fh-ease-out);
+			}
+
+			.fh-blankslate.is-compact {
+				margin: 0;
+				padding: 32px 24px;
+				border: 0;
+				border-radius: 0;
+				animation: none;
+			}
+
+			.fh-blankslate-visual {
+				margin-bottom: 8px;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-blankslate-visual .gh-icon {
+				width: 24px;
+				height: 24px;
+				stroke-width: 1.25;
+			}
+
+			.fh-blankslate-heading {
+				margin: 0 0 4px;
+				font-size: 20px;
+				line-height: 30px;
+				font-weight: 600;
+			}
+
+			.fh-blankslate.is-compact .fh-blankslate-heading {
+				font-size: 16px;
+				line-height: 24px;
+			}
+
+			.fh-blankslate-desc {
+				max-width: 480px;
+				margin: 0;
+				font-size: 16px;
+				line-height: 24px;
+				color: var(--fh-fg-muted);
+				text-wrap: pretty;
+			}
+
+			.fh-blankslate.is-compact .fh-blankslate-desc {
+				font-size: 14px;
+				line-height: 20px;
+			}
+
+			.fh-blankslate-actions {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 8px;
+				margin-top: 16px;
+			}
+
+			button.fh-link,
+			a.fh-link {
+				padding: 0;
+				border: 0;
+				background: none;
+				color: var(--fh-accent);
+				font: inherit;
+				text-decoration: none;
+				cursor: pointer;
+			}
+
+			.fh-link:hover {
+				text-decoration: underline;
+			}
+
+			.fh-link:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: 2px;
+				border-radius: 3px;
+			}
+
+			button.fh-btn,
+			a.fh-btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 8px;
+				box-sizing: border-box;
+				height: 32px;
+				padding: 0 12px;
+				border: 1px solid var(--fh-control-border);
+				border-radius: 6px;
+				background: var(--fh-control-bg);
+				color: var(--fh-fg);
+				font: 500 14px/20px var(--fh-font);
+				box-shadow: var(--fh-shadow-button);
+				text-decoration: none;
+				white-space: nowrap;
+				cursor: pointer;
+				transition:
+					background-color var(--fh-dur-instant) linear,
+					border-color var(--fh-dur-instant) linear;
+			}
+
+			.fh-btn .gh-icon {
+				color: var(--fh-fg-muted);
+			}
+
+			button.fh-btn:hover {
+				background: var(--fh-control-hover);
+			}
+
+			button.fh-btn:active {
+				background: var(--fh-control-active);
+			}
+
+			.fh-btn:focus {
+				outline: none;
+			}
+
+			.fh-btn:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: -2px;
+			}
+
+			.fh-btn.is-small {
+				height: 28px;
+				padding: 0 8px;
+				gap: 4px;
+				font-size: 12px;
+			}
+
+			.fh-btn.is-primary {
+				background: var(--fh-primary-bg);
+				border-color: var(--fh-primary-border);
+				color: #ffffff;
+				box-shadow: 0 1px 0 0 #1f23281a;
+			}
+
+			.fh-btn.is-primary .gh-icon {
+				color: #ffffff;
+			}
+
+			.fh-btn.is-primary:hover {
+				background: var(--fh-primary-hover);
+			}
+
+			.fh-btn.is-primary:focus-visible {
+				outline-offset: 2px;
+			}
+
+			.fh-btn.is-invisible {
+				background: transparent;
+				border-color: transparent;
+				box-shadow: none;
+			}
+
+			.fh-btn.is-invisible:hover {
+				background: var(--fh-transparent-hover);
+			}
+
+			button.fh-btn:is(:disabled, [aria-disabled="true"]) {
+				background: var(--fh-control-disabled);
+				border-color: var(--fh-border-muted);
+				color: var(--fh-fg-disabled);
+				box-shadow: none;
+				cursor: not-allowed;
+			}
+
+			button.fh-btn.is-invisible:is(:disabled, [aria-disabled="true"]) {
+				background: transparent;
+				border-color: transparent;
+			}
+
+			button.fh-btn:is(:disabled, [aria-disabled="true"]) .gh-icon {
+				color: var(--fh-fg-disabled);
+			}
+
+			button.fh-iconbtn {
+				display: inline-grid;
+				place-items: center;
+				box-sizing: border-box;
+				width: 28px;
+				height: 28px;
+				padding: 0;
+				border: 1px solid transparent;
+				border-radius: 6px;
+				background: transparent;
+				color: var(--fh-fg-muted);
+				cursor: pointer;
+				transition:
+					background-color var(--fh-dur-instant) linear,
+					color var(--fh-dur-instant) linear;
+			}
+
+			button.fh-iconbtn:hover {
+				background: var(--fh-transparent-hover);
+				color: var(--fh-fg);
+			}
+
+			button.fh-iconbtn.is-danger:hover {
+				background: var(--fh-danger-muted);
+				color: var(--fh-danger);
+			}
+
+			.fh-iconbtn:focus {
+				outline: none;
+			}
+
+			.fh-iconbtn:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: -2px;
+			}
+
+			.fh-input {
+				display: block;
+				box-sizing: border-box;
+				width: 100%;
+				height: 32px;
+				margin: 0;
+				padding: 5px 12px;
+				border: 1px solid var(--fh-control-border);
+				border-radius: 6px;
+				background: var(--fh-input-bg);
+				color: var(--fh-fg);
+				font: 400 14px/20px var(--fh-font);
+				box-shadow: var(--fh-shadow-inset);
+				transition:
+					border-color var(--fh-dur-instant) linear,
+					outline-color var(--fh-dur-instant) linear;
+			}
+
+			.fh-input.is-mono {
+				font-family: var(--fh-mono);
+				font-size: 13px;
+			}
+
+			.fh-input::placeholder {
+				color: var(--fh-fg-muted);
+				opacity: 1;
+			}
+
+			.fh-input:focus,
+			.fh-input.is-focus {
+				border-color: var(--fh-focus);
+				outline: 2px solid var(--fh-focus);
+				outline-offset: -1px;
+			}
+
+			.fh-input[aria-invalid="true"] {
+				border-color: var(--fh-danger-emphasis);
+			}
+
+			.fh-input[aria-invalid="true"]:focus {
+				outline-color: var(--fh-danger-emphasis);
+			}
+
+			.fh-validation {
+				display: flex;
+				align-items: flex-start;
+				gap: 4px;
+				margin-top: 6px;
+				color: var(--fh-danger);
+				font-size: 12px;
+				line-height: 16px;
+				font-weight: 600;
+			}
+
+			.fh-validation:empty {
+				display: none;
+			}
+
+			.fh-validation .gh-icon {
+				width: 12px;
+				height: 12px;
+				margin-top: 2px;
+				stroke-width: 1.75;
+			}
+
+			input.fh-checkbox {
+				display: inline-grid;
+				place-content: center;
+				flex: none;
+				box-sizing: border-box;
+				width: 16px;
+				height: 16px;
+				margin: 0;
+				border: 1px solid var(--fh-check-border);
+				border-radius: 3px;
+				background: var(--fh-bg);
+				cursor: pointer;
+				appearance: none;
+				transition:
+					background-color var(--fh-dur-instant) var(--fh-ease-quad),
+					border-color var(--fh-dur-instant) var(--fh-ease-quad);
+			}
+
+			input.fh-checkbox::before {
+				content: "";
+				width: 12px;
+				height: 12px;
+				background: var(--fh-fg-on-emphasis);
+				-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E")
+					center / contain no-repeat;
+				mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E")
+					center / contain no-repeat;
+				transform: scale(0);
+				transition: transform var(--fh-dur-fast) var(--fh-ease-out);
+			}
+
+			input.fh-checkbox:checked {
+				background: var(--fh-checked);
+				border-color: var(--fh-checked);
+			}
+
+			input.fh-checkbox:checked::before {
+				transform: scale(1);
+			}
+
+			input.fh-checkbox:focus {
+				outline: none;
+			}
+
+			input.fh-checkbox:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: 2px;
+			}
+
+			input.fh-radio {
+				flex: none;
+				box-sizing: border-box;
+				width: 16px;
+				height: 16px;
+				margin: 2px 0 0;
+				border: 1px solid var(--fh-check-border);
+				border-radius: 50%;
+				background: var(--fh-bg);
+				cursor: pointer;
+				appearance: none;
+				transition:
+					border-width var(--fh-dur-instant) var(--fh-ease-quad),
+					border-color var(--fh-dur-instant) var(--fh-ease-quad);
+			}
+
+			input.fh-radio:checked {
+				border: 4px solid var(--fh-checked);
+				background: var(--fh-fg-on-emphasis);
+			}
+
+			input.fh-radio:focus {
+				outline: none;
+			}
+
+			input.fh-radio:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: 2px;
+			}
+
+			.fh-tooltip {
+				position: fixed;
+				left: 0;
+				top: 0;
+				z-index: 110;
+				box-sizing: border-box;
+				max-width: 280px;
+				padding: 6px 8px;
+				border-radius: 6px;
+				background: var(--fh-tooltip-bg);
+				color: var(--fh-tooltip-fg);
+				font: 400 12px/16px var(--fh-font);
+				text-wrap: pretty;
+				pointer-events: none;
+				opacity: 0;
+				visibility: hidden;
+				transform: translateY(2px);
+				transition:
+					opacity var(--fh-dur-fast) var(--fh-ease-out),
+					transform var(--fh-dur-fast) var(--fh-ease-out),
+					visibility 0s linear var(--fh-dur-fast);
+				-webkit-font-smoothing: antialiased;
+			}
+
+			.fh-tooltip.is-open {
+				opacity: 1;
+				visibility: visible;
+				transform: none;
+				transition:
+					opacity var(--fh-dur-fast) var(--fh-ease-out),
+					transform var(--fh-dur-fast) var(--fh-ease-out);
+			}
+
+			.fh-tooltip.is-static {
+				position: relative;
+				display: inline-block;
+				opacity: 1;
+				visibility: visible;
+				transform: none;
+				z-index: auto;
+			}
+
+			.fh-app,
+			.ho {
+				min-height: calc(100vh - var(--proto-h));
+				background: var(--fh-bg);
+				color: var(--fh-fg);
+				font: 400 14px/1.5 var(--fh-font);
+				-webkit-font-smoothing: antialiased;
+			}
+
+			.fh-app *,
+			.fh-app *::before,
+			.fh-app *::after,
+			.ho *,
+			.ho *::before,
+			.ho *::after {
+				box-sizing: border-box;
+			}
+
+			.fh-chrome {
+				display: flex;
+				align-items: center;
+				gap: 2px;
+				height: 44px;
+				padding: 0 10px;
+				background: var(--fh-chrome-bg);
+				border-bottom: 1px solid var(--fh-border);
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-chrome-btn {
+				display: grid;
+				place-items: center;
+				flex: none;
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+			}
+
+			.fh-chrome-btn.is-off {
+				opacity: 0.45;
+			}
+
+			.fh-omnibox {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				flex: 1;
+				min-width: 0;
+				height: 32px;
+				margin: 0 8px;
+				padding: 0 6px;
+				border-radius: 16px;
+				background: var(--fh-chrome-omni);
+				font-size: 13px;
+			}
+
+			.fh-omnibox-chip {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				flex: none;
+				height: 24px;
+				padding: 0 10px 0 8px;
+				border-radius: 12px;
+				background: var(--fh-bg-muted);
+				color: var(--fh-fg);
+				font-weight: 500;
+			}
+
+			.fh-omnibox-url {
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.fh-omnibox-url b {
+				color: var(--fh-fg);
+				font-weight: 400;
+			}
+
+			.fh-chrome-ext {
+				display: grid;
+				place-items: center;
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				background: var(--fh-transparent-hover);
+			}
+
+			.fh-appheader {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				height: 64px;
+				padding: 0 24px;
+				background: var(--fh-bg-header);
+				border-bottom: 1px solid var(--fh-border);
+			}
+
+			.fh-crumbs {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 14px;
+			}
+
+			.fh-crumbs b {
+				font-weight: 600;
+			}
+
+			.fh-crumbs .sep {
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-appheader-end {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin-left: auto;
+			}
+
+			.fh-saved {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				color: var(--fh-success);
+				font-size: 12px;
+				font-weight: 500;
+				opacity: 0;
+				transform: translateY(3px);
+				transition:
+					opacity var(--fh-dur-base) var(--fh-ease-out),
+					transform var(--fh-dur-base) var(--fh-ease-out);
+			}
+
+			.fh-saved.is-on {
+				opacity: 1;
+				transform: none;
+			}
+
+			.fh-page {
+				max-width: 1012px;
+				margin: 0 auto;
+				padding: 32px 24px 96px;
+			}
+
+			.fh-context {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				margin-bottom: 32px;
+			}
+
+			.fh-context h1 {
+				margin: 0;
+				font-size: 20px;
+				line-height: 28px;
+				font-weight: 600;
+			}
+
+			.fh-context p {
+				margin: 0;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-context-end {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-left: auto;
+			}
+
+			.fh-grid {
+				display: grid;
+				grid-template-columns: 240px minmax(0, 1fr);
+				gap: 32px;
+				align-items: start;
+			}
+
+			.fh-nav {
+				position: sticky;
+				top: calc(var(--proto-h) + 16px);
+			}
+
+			.fh-navlist {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+			}
+
+			button.fh-navlist-item {
+				position: relative;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				width: calc(100% - 8px);
+				min-height: 32px;
+				margin: 0 0 1px 8px;
+				padding: 6px 8px;
+				border: 0;
+				border-radius: 6px;
+				background: transparent;
+				color: var(--fh-fg);
+				font: 400 14px/20px var(--fh-font);
+				text-align: left;
+				cursor: pointer;
+				transition: background-color var(--fh-dur-fast) var(--fh-ease-out);
+			}
+
+			button.fh-navlist-item:hover {
+				background: var(--fh-transparent-hover);
+			}
+
+			button.fh-navlist-item[aria-current="page"] {
+				background: var(--fh-transparent-selected);
+				font-weight: 600;
+			}
+
+			button.fh-navlist-item[aria-current="page"]::after {
+				content: "";
+				position: absolute;
+				top: calc(50% - 12px);
+				left: -8px;
+				width: 4px;
+				height: 24px;
+				border-radius: 6px;
+				background: var(--fh-accent-emphasis);
+			}
+
+			.fh-navlist-item:focus {
+				outline: none;
+			}
+
+			.fh-navlist-item:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: -2px;
+			}
+
+			.fh-navlist-item .gh-icon {
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-navlist-item .fh-counter {
+				margin-left: auto;
+				font-weight: 500;
+			}
+
+			.fh-navlist-heading {
+				margin: 0;
+				padding: 6px 16px;
+				font-size: 12px;
+				line-height: 20px;
+				font-weight: 600;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-navlist-divider {
+				height: 1px;
+				margin: 8px 0 8px 8px;
+				background: var(--fh-border-muted);
+			}
+
+			.fh-nav-note {
+				display: flex;
+				gap: 8px;
+				margin: 16px 0 0 8px;
+				padding: 12px;
+				border: 1px solid var(--fh-border-muted);
+				border-radius: 6px;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+				line-height: 18px;
+			}
+
+			.fh-nav-note .gh-icon {
+				margin-top: 1px;
+			}
+
+			.fh-main {
+				min-width: 0;
+			}
+
+			.fh-subhead {
+				display: flex;
+				align-items: flex-end;
+				gap: 16px;
+				margin-bottom: 16px;
+				padding-bottom: 8px;
+				border-bottom: 1px solid var(--fh-border-muted);
+			}
+
+			.fh-subhead.is-spacious {
+				margin-top: 40px;
+			}
+
+			.fh-subhead h2 {
+				flex: 1;
+				margin: 0;
+				font-size: 24px;
+				line-height: 36px;
+				font-weight: 400;
+			}
+
+			.fh-subhead h2:focus {
+				outline: none;
+			}
+
+			.fh-lede {
+				margin: -4px 0 24px;
+				color: var(--fh-fg-muted);
+				text-wrap: pretty;
+			}
+
+			.fh-fieldset {
+				min-width: 0;
+				margin: 0;
+				padding: 0;
+				border: 0;
+			}
+
+			.fh-legend {
+				padding: 0;
+				font-size: 16px;
+				line-height: 24px;
+				font-weight: 600;
+			}
+
+			.fh-caption {
+				margin: 0;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+				line-height: 18px;
+				text-wrap: pretty;
+			}
+
+			.fh-caption b {
+				color: var(--fh-fg);
+				font-weight: 600;
+			}
+
+			.fh-choices {
+				display: grid;
+				gap: 4px;
+				margin-top: 12px;
+			}
+
+			.fh-choice {
+				display: flex;
+				gap: 8px;
+				padding: 6px 0;
+				cursor: pointer;
+			}
+
+			.fh-choice-text {
+				display: grid;
+				gap: 2px;
+			}
+
+			.fh-choice-label {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-weight: 600;
+				line-height: 20px;
+			}
+
+			.fh-rule-divider {
+				height: 1px;
+				margin: 24px 0;
+				background: var(--fh-border-muted);
+			}
+
+			.fh-setting {
+				display: flex;
+				align-items: flex-start;
+				gap: 24px;
+			}
+
+			.fh-setting-text {
+				flex: 1;
+				min-width: 0;
+			}
+
+			.fh-setting-title {
+				margin: 0 0 2px;
+				font-size: 16px;
+				line-height: 24px;
+				font-weight: 600;
+			}
+
+			.fh-box {
+				border: 1px solid var(--fh-border);
+				border-radius: 6px;
+				background: var(--fh-bg);
+			}
+
+			.fh-box + .fh-box {
+				margin-top: 24px;
+			}
+
+			.fh-box-header {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin: -1px -1px 0;
+				padding: 16px;
+				border: 1px solid var(--fh-border);
+				border-radius: 6px 6px 0 0;
+				background: var(--fh-bg-muted);
+			}
+
+			.fh-box-title {
+				margin: 0;
+				font-size: 14px;
+				line-height: 20px;
+				font-weight: 600;
+			}
+
+			.fh-box-row {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 16px;
+				border-top: 1px solid var(--fh-border-muted);
+			}
+
+			.fh-box-row:first-child {
+				border-top: 0;
+			}
+
+			.fh-box-footer {
+				padding: 16px;
+				border-top: 1px solid var(--fh-border);
+			}
+
+			.fh-fact {
+				align-items: flex-start;
+			}
+
+			.fh-fact > .gh-icon {
+				margin-top: 2px;
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-fact b {
+				display: block;
+				font-weight: 600;
+			}
+
+			.fh-preset-icon {
+				display: grid;
+				place-items: center;
+				flex: none;
+				width: 32px;
+				height: 32px;
+				border: 1px solid var(--fh-border);
+				border-radius: 6px;
+				background: var(--fh-bg);
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-preset-text {
+				flex: 1;
+				min-width: 0;
+			}
+
+			.fh-preset-title {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.fh-preset-title h3 {
+				margin: 0;
+				font-size: 14px;
+				line-height: 20px;
+				font-weight: 600;
+			}
+
+			.fh-rules {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+			}
+
+			.fh-rule {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				min-height: 45px;
+				padding: 8px 8px 8px 16px;
+				border-top: 1px solid var(--fh-border-muted);
+				transition: background-color var(--fh-dur-fast) var(--fh-ease-out);
+			}
+
+			.fh-rule:first-child {
+				border-top: 0;
+			}
+
+			.fh-rule:hover {
+				background: var(--fh-bg-muted);
+			}
+
+			.fh-rule.is-editing {
+				display: block;
+				padding: 12px 16px;
+				background: var(--fh-bg-muted);
+			}
+
+			.fh-rule-pattern {
+				flex: 1;
+				min-width: 0;
+				overflow: hidden;
+				font: 12px/20px var(--fh-mono);
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.fh-rule.is-off .fh-rule-pattern {
+				color: var(--fh-fg-muted);
+			}
+
+			.fh-rule-actions {
+				display: flex;
+				align-items: center;
+				gap: 2px;
+				margin-left: auto;
+			}
+
+			.fh-rule-form,
+			.fh-add {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.fh-rule-form .fh-input,
+			.fh-add .fh-input {
+				flex: 1;
+			}
+
+			.fh-rules-empty {
+				padding: 16px;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+			}
+
+			.fh-preset-foot {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				margin-top: 12px;
+			}
+
+			.fh-preset-foot .fh-caption {
+				flex: 1;
+			}
+
+			.fh-preset-foot code {
+				font: 11px/1 var(--fh-mono);
+				padding: 2px 4px;
+				border-radius: 4px;
+				background: var(--fh-neutral-muted);
+				color: var(--fh-fg);
+			}
+
+			.fh-box-header .fh-counter {
+				margin-left: -4px;
+			}
+
+			.fh-box-header .fh-caption {
+				margin-left: auto;
+			}
+
+			.fh-example {
+				display: grid;
+				grid-template-columns: auto 1fr;
+				gap: 6px 16px;
+				align-items: center;
+				margin-bottom: 24px;
+				padding: 16px;
+				border-radius: 6px;
+				background: var(--fh-bg-muted);
+				border: 1px solid var(--fh-border-muted);
+			}
+
+			.fh-example-k {
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+				font-weight: 600;
+			}
+
+			.fh-example code {
+				justify-self: start;
+				font: 12px/20px var(--fh-mono);
+			}
+
+			.fh-example p {
+				grid-column: 1 / -1;
+				margin: 6px 0 0;
+				padding-top: 10px;
+				border-top: 1px solid var(--fh-border-muted);
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+			}
+
+			.fh-details {
+				margin-top: 24px;
+				border: 1px solid var(--fh-border);
+				border-radius: 6px;
+			}
+
+			.fh-details > summary {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 12px 16px;
+				font-weight: 600;
+				list-style: none;
+				cursor: pointer;
+				border-radius: 6px;
+			}
+
+			.fh-details > summary::-webkit-details-marker {
+				display: none;
+			}
+
+			.fh-details > summary:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: -2px;
+			}
+
+			.fh-details > summary .chev {
+				color: var(--fh-fg-muted);
+				transition: transform var(--fh-dur-fast) var(--fh-ease-out);
+			}
+
+			.fh-details[open] > summary {
+				border-bottom: 1px solid var(--fh-border-muted);
+				border-radius: 6px 6px 0 0;
+			}
+
+			.fh-details[open] > summary .chev {
+				transform: rotate(90deg);
+			}
+
+			.fh-details-body {
+				padding: 0 0 12px;
+			}
+
+			.fh-details-body > p {
+				margin: 12px 16px 0;
+			}
+
+			.fh-table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 14px;
+			}
+
+			.fh-table th {
+				padding: 8px 16px;
+				border-bottom: 1px solid var(--fh-border-muted);
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+				font-weight: 600;
+				text-align: left;
+			}
+
+			.fh-table td {
+				padding: 8px 16px;
+				border-top: 1px solid var(--fh-border-muted);
+				vertical-align: top;
+			}
+
+			.fh-table tr:first-child td {
+				border-top: 0;
+			}
+
+			.fh-table td code {
+				font: 12px/20px var(--fh-mono);
+			}
+
+			.ho-wrap {
+				display: grid;
+				grid-template-columns: 200px minmax(0, 1fr);
+				gap: 56px;
+				max-width: 1320px;
+				margin: 0 auto;
+				padding: 0 40px 160px;
+			}
+
+			.ho-toc {
+				position: sticky;
+				top: calc(var(--proto-h) + 40px);
+				align-self: start;
+				padding-top: 72px;
+			}
+
+			.ho-toc-title {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-bottom: 20px;
+				font-weight: 600;
+			}
+
+			.ho-toc ol {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+				border-left: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-toc a {
+				position: relative;
+				display: flex;
+				gap: 10px;
+				padding: 5px 0 5px 14px;
+				color: var(--fh-fg-muted);
+				text-decoration: none;
+				font-size: 13px;
+			}
+
+			.ho-toc a span {
+				font: 500 11px/20px var(--fh-mono);
+				color: var(--fh-fg-muted);
+			}
+
+			.ho-toc a:hover {
+				color: var(--fh-fg);
+			}
+
+			.ho-toc a.is-current {
+				color: var(--fh-fg);
+				font-weight: 600;
+			}
+
+			.ho-toc a.is-current::before {
+				content: "";
+				position: absolute;
+				left: -1px;
+				top: 6px;
+				bottom: 6px;
+				width: 2px;
+				border-radius: 2px;
+				background: var(--fh-accent);
+			}
+
+			.ho-toc a:focus-visible {
+				outline: 2px solid var(--fh-focus);
+				outline-offset: 2px;
+				border-radius: 4px;
+			}
+
+			.ho-main {
+				min-width: 0;
+			}
+
+			.ho-hero {
+				position: relative;
+				padding: 72px 0 56px;
+				border-bottom: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-hero-top {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+			}
+
+			.ho-eyebrow {
+				margin: 0;
+				color: var(--fh-fg-muted);
+				font: 500 12px/16px var(--fh-mono);
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+			}
+
+			.ho-title {
+				margin: 28px 0 0;
+				font-size: 76px;
+				line-height: 1;
+				font-weight: 620;
+				font-stretch: 112%;
+				letter-spacing: -0.04em;
+			}
+
+			.ho-title em {
+				font-style: normal;
+				color: var(--fh-accent);
+			}
+
+			.ho-lede {
+				max-width: 720px;
+				margin: 24px 0 0;
+				color: var(--fh-fg-muted);
+				font-size: 20px;
+				line-height: 1.5;
+				text-wrap: pretty;
+			}
+
+			.ho-lede b {
+				color: var(--fh-fg);
+				font-weight: 600;
+			}
+
+			.ho-meta {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 24px;
+				margin: 48px 0 0;
+				padding-top: 24px;
+				border-top: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-meta dt {
+				color: var(--fh-fg-muted);
+				font: 500 11px/16px var(--fh-mono);
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+			}
+
+			.ho-meta dd {
+				margin: 6px 0 0;
+				font-size: 14px;
+				line-height: 20px;
+			}
+
+			.ho-section {
+				padding: 72px 0;
+				border-bottom: 1px solid var(--fh-border-muted);
+				scroll-margin-top: var(--proto-h);
+			}
+
+			.ho-section:last-child {
+				padding-bottom: 0;
+				border-bottom: 0;
+			}
+
+			.ho-section-head {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr);
+				gap: 8px;
+				margin-bottom: 40px;
+			}
+
+			.ho-num {
+				color: var(--fh-accent);
+				font: 500 12px/16px var(--fh-mono);
+				letter-spacing: 0.06em;
+			}
+
+			.ho-h2 {
+				margin: 0;
+				font-size: 36px;
+				line-height: 1.15;
+				font-weight: 600;
+				font-stretch: 108%;
+				letter-spacing: -0.025em;
+			}
+
+			.ho-intro {
+				max-width: 720px;
+				margin: 4px 0 0;
+				color: var(--fh-fg-muted);
+				font-size: 16px;
+				line-height: 1.6;
+				text-wrap: pretty;
+			}
+
+			.ho-h3 {
+				margin: 0;
+				font-size: 18px;
+				line-height: 28px;
+				font-weight: 600;
+				letter-spacing: -0.005em;
+			}
+
+			.ho-sub {
+				margin: 48px 0 16px;
+			}
+
+			.ho-sub:first-child {
+				margin-top: 0;
+			}
+
+			.ho-p {
+				margin: 4px 0 0;
+				color: var(--fh-fg-muted);
+				max-width: 720px;
+				text-wrap: pretty;
+			}
+
+			.ho-principles {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 16px;
+			}
+
+			.ho-principle {
+				padding: 24px;
+				border: 1px solid var(--fh-border);
+				border-radius: 12px;
+				background: var(--fh-bg);
+			}
+
+			.ho-principle-n {
+				display: grid;
+				place-items: center;
+				width: 28px;
+				height: 28px;
+				margin-bottom: 16px;
+				border-radius: 8px;
+				background: var(--fh-accent-muted);
+				color: var(--fh-accent);
+				font: 600 12px/1 var(--fh-mono);
+			}
+
+			.ho-principle h3 {
+				margin: 0 0 6px;
+				font-size: 16px;
+				line-height: 24px;
+				font-weight: 600;
+			}
+
+			.ho-principle p {
+				margin: 0;
+				color: var(--fh-fg-muted);
+				text-wrap: pretty;
+			}
+
+			.ho-states {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 0;
+				border: 1px solid var(--fh-border);
+				border-radius: 12px;
+				overflow: hidden;
+			}
+
+			.ho-state {
+				display: flex;
+				flex-direction: column;
+				border-left: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-state:first-child {
+				border-left: 0;
+			}
+
+			.ho-state-stage {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				min-height: 96px;
+				padding: 20px 12px;
+				background-color: var(--fh-bg-muted);
+				background-image: radial-gradient(var(--fh-canvas-dot) 1px, transparent 1px);
+				background-size: 14px 14px;
+				border-bottom: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-state-stage .fh-ctl {
+				margin: 0;
+				padding: 4px;
+				border-radius: 8px;
+				background: var(--fh-bg);
+				box-shadow: 0 0 0 1px var(--fh-border-muted);
+			}
+
+			.ho-state-body {
+				padding: 16px;
+			}
+
+			.ho-state-body h4 {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin: 0;
+				font-size: 14px;
+				font-weight: 600;
+			}
+
+			.ho-state-body p {
+				margin: 4px 0 0;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+				line-height: 18px;
+			}
+
+			.ho-state-body code,
+			.ho-code {
+				font: 11px/1.5 var(--fh-mono);
+				padding: 1px 5px;
+				border-radius: 4px;
+				background: var(--fh-neutral-muted);
+				color: var(--fh-fg);
+				white-space: nowrap;
+			}
+
+			.ho-flow {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 8px;
+				margin-top: 16px;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+			}
+
+			.ho-flow .gh-icon {
+				width: 14px;
+				height: 14px;
+			}
+
+			.ho-tokens {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 13px;
+			}
+
+			.ho-tokens th {
+				padding: 0 12px 10px 0;
+				border-bottom: 1px solid var(--fh-border);
+				color: var(--fh-fg-muted);
+				font: 500 11px/16px var(--fh-mono);
+				letter-spacing: 0.06em;
+				text-align: left;
+				text-transform: uppercase;
+			}
+
+			.ho-tokens td {
+				padding: 10px 12px 10px 0;
+				border-bottom: 1px solid var(--fh-border-muted);
+				vertical-align: middle;
+			}
+
+			.ho-tokens td:first-child {
+				font: 12px/1.4 var(--fh-mono);
+				color: var(--fh-fg);
+			}
+
+			.ho-tokens .muted {
+				color: var(--fh-fg-muted);
+			}
+
+			.ho-swatch {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				font: 12px/1 var(--fh-mono);
+				color: var(--fh-fg-muted);
+			}
+
+			.ho-swatch i {
+				display: block;
+				width: 28px;
+				height: 28px;
+				border-radius: 6px;
+				box-shadow: inset 0 0 0 1px #8c959f40;
+				background-image: linear-gradient(45deg, #8c959f26 25%, transparent 25%, transparent 75%, #8c959f26 75%), linear-gradient(45deg, #8c959f26 25%, transparent 25%, transparent 75%, #8c959f26 75%);
+				background-size: 8px 8px;
+				background-position: 0 0, 4px 4px;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.ho-swatch i::after {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background: var(--c);
+				border-radius: inherit;
+				box-shadow: inset 0 0 0 1px #8c959f40;
+			}
+
+			.ho-type {
+				display: grid;
+				border-top: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-type-row {
+				display: grid;
+				grid-template-columns: 200px minmax(0, 1fr) 220px;
+				gap: 24px;
+				align-items: baseline;
+				padding: 18px 0;
+				border-bottom: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-type-name {
+				font-size: 13px;
+				font-weight: 600;
+			}
+
+			.ho-type-name small {
+				display: block;
+				color: var(--fh-fg-muted);
+				font-weight: 400;
+				font-size: 12px;
+			}
+
+			.ho-type-spec {
+				color: var(--fh-fg-muted);
+				font: 12px/1.5 var(--fh-mono);
+				text-align: right;
+			}
+
+			.ho-grid-2 {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 16px;
+			}
+
+			.ho-grid-3 {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 16px;
+			}
+
+			.ho-tile {
+				padding: 20px;
+				border: 1px solid var(--fh-border);
+				border-radius: 12px;
+			}
+
+			.ho-tile.is-muted {
+				background: var(--fh-bg-muted);
+			}
+
+			.ho-tile h4 {
+				margin: 0 0 16px;
+				font-size: 14px;
+				font-weight: 600;
+			}
+
+			.ho-id {
+				display: flex;
+				flex-direction: column;
+				background: var(--fh-bg);
+				color: var(--fh-fg);
+			}
+
+			.ho-id-marks {
+				display: flex;
+				align-items: flex-end;
+				gap: 20px;
+			}
+
+			.ho-id-sample {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-top: auto;
+				padding: 12px 16px;
+				border-radius: 12px;
+				background: var(--fh-overlay-bg);
+				box-shadow: var(--fh-shadow-floating-small);
+				font-size: 14px;
+			}
+
+			.ho-id-marks + .ho-id-sample {
+				margin-top: 28px;
+			}
+
+			.ho-id-sample b {
+				flex: 1;
+				font-weight: 600;
+			}
+
+			.ho-space {
+				display: grid;
+				gap: 10px;
+			}
+
+			.ho-space-row {
+				display: grid;
+				grid-template-columns: 48px 1fr;
+				align-items: center;
+				gap: 12px;
+				font: 12px var(--fh-mono);
+				color: var(--fh-fg-muted);
+			}
+
+			.ho-space-row i {
+				display: block;
+				height: 12px;
+				border-radius: 3px;
+				background: var(--fh-accent-muted);
+				box-shadow: inset 0 0 0 1px var(--fh-accent-border);
+			}
+
+			.ho-radii {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 20px 16px;
+			}
+
+			.ho-radius {
+				display: grid;
+				grid-template-columns: auto minmax(0, 1fr);
+				gap: 2px 12px;
+				align-items: center;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+				line-height: 16px;
+			}
+
+			.ho-radius i {
+				grid-row: span 2;
+			}
+
+			.ho-radius b {
+				color: var(--fh-fg);
+				font: 600 12px/16px var(--fh-mono);
+			}
+
+			.ho-radius i {
+				display: block;
+				width: 48px;
+				height: 40px;
+				border: 1px solid var(--fh-border);
+				background: var(--fh-bg-muted);
+			}
+
+			.ho-shadows {
+				display: grid;
+				gap: 16px;
+			}
+
+			.ho-shadow {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				font-size: 12px;
+				color: var(--fh-fg-muted);
+			}
+
+			.ho-shadow i {
+				display: block;
+				flex: none;
+				width: 64px;
+				height: 40px;
+				border-radius: 8px;
+				background: var(--fh-bg);
+			}
+
+			.ho-shadow b {
+				display: block;
+				color: var(--fh-fg);
+				font-weight: 600;
+				font-size: 13px;
+			}
+
+			.ho-motion {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 16px;
+			}
+
+			.ho-curve {
+				padding: 16px;
+				border: 1px solid var(--fh-border);
+				border-radius: 12px;
+			}
+
+			.ho-curve svg {
+				display: block;
+				width: 100%;
+				height: auto;
+				margin-bottom: 12px;
+				overflow: visible;
+			}
+
+			.ho-curve b {
+				display: block;
+				font-size: 13px;
+			}
+
+			.ho-curve span {
+				display: block;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+				line-height: 18px;
+			}
+
+			.ho-curve code {
+				font: 11px var(--fh-mono);
+				color: var(--fh-fg);
+			}
+
+			.ho-track {
+				position: relative;
+				height: 6px;
+				margin: 4px 0 14px;
+				border-radius: 3px;
+				background: var(--fh-neutral-muted);
+			}
+
+			.ho-track i {
+				position: absolute;
+				top: -3px;
+				left: 0;
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				background: var(--fh-accent);
+			}
+
+			.ho-curve:hover .ho-track i,
+			.ho-curve:focus-within .ho-track i {
+				animation: ho-slide var(--d) var(--e) infinite alternate;
+			}
+
+			@keyframes ho-slide {
+				to {
+					left: calc(100% - 12px);
+				}
+			}
+
+			.ho-card {
+				border: 1px solid var(--fh-border);
+				border-radius: 12px;
+				overflow: hidden;
+				background: var(--fh-bg);
+			}
+
+			.ho-card + .ho-card {
+				margin-top: 24px;
+			}
+
+			.ho-card-head {
+				display: flex;
+				align-items: baseline;
+				gap: 12px;
+				padding: 20px 24px;
+				border-bottom: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-card-head h3 {
+				margin: 0;
+				font-size: 16px;
+				line-height: 24px;
+				font-weight: 600;
+			}
+
+			.ho-card-head .ho-primer {
+				color: var(--fh-fg-muted);
+				font: 12px var(--fh-mono);
+			}
+
+			.ho-card-head p {
+				flex-basis: 100%;
+				margin: 0;
+			}
+
+			.ho-card-head {
+				flex-wrap: wrap;
+			}
+
+			.ho-card-head .ho-classes {
+				margin-left: auto;
+				color: var(--fh-fg-muted);
+				font: 11px var(--fh-mono);
+			}
+
+			.ho-pair {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+			}
+
+			.ho-stage {
+				--gh-font: var(--fh-font);
+				--gh-mono: var(--fh-mono);
+				--gh-top: 0px;
+				--gh-toolbar-h: 0px;
+				position: relative;
+				min-width: 0;
+				padding: 32px 24px 24px;
+				background: var(--fh-bg);
+				color: var(--fh-fg);
+				font-family: var(--fh-font);
+			}
+
+			.ho-stage + .ho-stage {
+				border-left: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-stage-tag {
+				position: absolute;
+				top: 10px;
+				left: 12px;
+				color: var(--fh-fg-muted);
+				font: 500 10px/1 var(--fh-mono);
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+
+			.ho-stage * {
+				box-sizing: border-box;
+			}
+
+			.ho-variants {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 16px 24px;
+				align-items: flex-start;
+			}
+
+			.ho-variant {
+				display: grid;
+				gap: 8px;
+				justify-items: start;
+				min-width: 0;
+			}
+
+			.ho-variant > small {
+				color: var(--fh-fg-muted);
+				font: 500 11px/1.4 var(--fh-mono);
+			}
+
+			.ho-variant.is-wide {
+				width: 100%;
+			}
+
+			.ho-mini-toolbar {
+				display: flex;
+				align-items: center;
+				gap: 2px;
+				padding: 4px 8px;
+				border: 1px solid var(--fh-border-muted);
+				border-radius: 8px;
+				background: var(--fh-bg);
+			}
+
+			.ho-mini-toolbar .gh-btn {
+				color: var(--fh-fg-muted);
+			}
+
+			.ho-mini-toolbar .fh-ctl {
+				margin-left: 0;
+			}
+
+			.ho-stage .gh-tree {
+				width: 280px;
+				flex: none;
+			}
+
+			.ho-stage .gh-file {
+				width: 100%;
+			}
+
+			.ho-stage .gh-file-header {
+				position: relative;
+				top: auto;
+				border-radius: 6px;
+				border-bottom: 0;
+			}
+
+			.ho-stage .fh-flash {
+				margin-bottom: 0;
+				animation: none;
+			}
+
+			.ho-stage .fh-blankslate {
+				margin: 0;
+				animation: none;
+				padding: 32px 24px;
+				width: 100%;
+			}
+
+			.ho-stage .fh-box {
+				width: 100%;
+			}
+
+			.ho-map {
+				position: relative;
+				padding: 24px;
+				border: 1px solid var(--fh-border);
+				border-radius: 12px;
+				background-color: var(--fh-bg-muted);
+				background-image: radial-gradient(var(--fh-canvas-dot) 1px, transparent 1px);
+				background-size: 16px 16px;
+			}
+
+			.ho-map-page {
+				position: relative;
+				border: 1px solid var(--fh-border);
+				border-radius: 8px;
+				background: var(--fh-bg);
+				box-shadow: var(--fh-shadow-resting-small);
+				overflow: hidden;
+			}
+
+			.ho-map-bar {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				height: 44px;
+				padding: 0 14px;
+				border-bottom: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-map-pill {
+				height: 10px;
+				border-radius: 5px;
+				background: var(--fh-neutral-muted);
+			}
+
+			.ho-map-pill.is-ext {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				height: 26px;
+				padding: 0 10px;
+				border-radius: 6px;
+				background: var(--fh-accent-muted);
+				box-shadow: inset 0 0 0 1px var(--fh-accent-border);
+				color: var(--fh-accent);
+				font-size: 12px;
+				font-weight: 500;
+			}
+
+			.ho-map-pill.is-primary {
+				width: 80px;
+				height: 22px;
+				border-radius: 6px;
+				background: var(--fh-primary-bg);
+				opacity: 0.8;
+			}
+
+			.ho-map-body {
+				display: grid;
+				grid-template-columns: 200px minmax(0, 1fr);
+				gap: 18px;
+				padding: 16px 14px 20px;
+			}
+
+			.ho-map-tree {
+				display: grid;
+				gap: 8px;
+				align-content: start;
+			}
+
+			.ho-map-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				height: 22px;
+				padding: 0 6px;
+				border-radius: 4px;
+			}
+
+			.ho-map-row i {
+				flex: 1;
+				height: 8px;
+				border-radius: 4px;
+				background: var(--fh-neutral-muted);
+			}
+
+			.ho-map-row.is-ext {
+				background: var(--fh-accent-muted);
+				box-shadow: inset 0 0 0 1px var(--fh-accent-border);
+				color: var(--fh-accent);
+			}
+
+			.ho-map-row .gh-icon {
+				width: 12px;
+				height: 12px;
+			}
+
+			.ho-map-diff {
+				display: grid;
+				gap: 10px;
+				align-content: start;
+			}
+
+			.ho-map-zone {
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				padding: 0 12px;
+				gap: 8px;
+				height: 40px;
+				border: 1px dashed var(--fh-accent);
+				border-radius: 6px;
+				color: var(--fh-accent);
+				font-size: 12px;
+				font-weight: 500;
+			}
+
+			.ho-map-flash {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				height: 34px;
+				padding: 0 12px;
+				border: 1px solid var(--fh-accent-border);
+				border-radius: 6px;
+				background: var(--fh-accent-muted);
+				color: var(--fh-accent);
+				font-size: 12px;
+				font-weight: 500;
+			}
+
+			.ho-map-file {
+				border: 1px solid var(--fh-border);
+				border-radius: 6px;
+				overflow: hidden;
+			}
+
+			.ho-map-file-head {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				height: 32px;
+				padding: 0 10px;
+				background: var(--fh-bg-muted);
+				border-bottom: 1px solid var(--fh-border-muted);
+			}
+
+			.ho-map-file-head .fh-label {
+				height: 18px;
+				font-size: 11px;
+			}
+
+			.ho-map-file-body {
+				display: grid;
+				gap: 6px;
+				padding: 10px;
+			}
+
+			.ho-map-file-body i {
+				display: block;
+				height: 7px;
+				border-radius: 4px;
+				background: var(--fh-neutral-muted);
+			}
+
+			.ho-pin {
+				display: inline-grid;
+				place-items: center;
+				flex: none;
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: var(--fh-accent-emphasis);
+				color: #fff;
+				font: 600 11px/1 var(--fh-mono);
+				box-shadow: 0 0 0 3px var(--fh-bg);
+			}
+
+			.ho-map-anchor {
+				position: relative;
+				display: inline-flex;
+			}
+
+			.ho-map-overlay {
+				position: absolute;
+				top: calc(100% + 6px);
+				left: 0;
+				z-index: 2;
+				width: 190px;
+				padding: 10px;
+				border-radius: 10px;
+				background: var(--fh-overlay-bg);
+				box-shadow: var(--fh-shadow-floating-small);
+				display: grid;
+				gap: 7px;
+			}
+
+			.ho-map-overlay i {
+				display: block;
+				height: 7px;
+				border-radius: 4px;
+				background: var(--fh-neutral-muted);
+			}
+
+			.ho-map-overlay .ho-pin {
+				position: absolute;
+				top: -10px;
+				right: -10px;
+			}
+
+			.ho-table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 13px;
+			}
+
+			.ho-table th {
+				padding: 0 16px 10px 0;
+				border-bottom: 1px solid var(--fh-border);
+				color: var(--fh-fg-muted);
+				font: 500 11px/16px var(--fh-mono);
+				letter-spacing: 0.06em;
+				text-align: left;
+				text-transform: uppercase;
+				white-space: nowrap;
+			}
+
+			.ho-table td {
+				padding: 12px 16px 12px 0;
+				border-bottom: 1px solid var(--fh-border-muted);
+				vertical-align: top;
+				text-wrap: pretty;
+			}
+
+			.ho-table td:first-child {
+				white-space: nowrap;
+			}
+
+			.ho-table code {
+				font: 12px/1.5 var(--fh-mono);
+			}
+
+			.ho-table .muted {
+				color: var(--fh-fg-muted);
+			}
+
+			.ho-table .str {
+				color: var(--fh-fg);
+				font-weight: 500;
+			}
+
+			kbd.ho-kbd {
+				display: inline-block;
+				min-width: 22px;
+				padding: 1px 6px;
+				border: 1px solid var(--fh-border);
+				border-bottom-width: 2px;
+				border-radius: 6px;
+				background: var(--fh-bg-muted);
+				color: var(--fh-fg);
+				font: 500 11px/18px var(--fh-mono);
+				text-align: center;
+				white-space: nowrap;
+			}
+
+			.ho-notes {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 16px;
+				margin-top: 32px;
+			}
+
+			.ho-note {
+				padding: 20px;
+				border: 1px solid var(--fh-border);
+				border-radius: 12px;
+			}
+
+			.ho-note h4 {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin: 0 0 10px;
+				font-size: 14px;
+				font-weight: 600;
+			}
+
+			.ho-note h4 .gh-icon {
+				color: var(--fh-accent);
+			}
+
+			.ho-note ul,
+			.ho-note ol {
+				margin: 0;
+				padding-left: 18px;
+				color: var(--fh-fg-muted);
+			}
+
+			.ho-note li + li {
+				margin-top: 6px;
+			}
+
+			.ho-note li b {
+				color: var(--fh-fg);
+				font-weight: 600;
+			}
+
+			.ho-copy-group + .ho-copy-group {
+				margin-top: 40px;
+			}
+
+			.ho-copy-group h3 {
+				display: flex;
+				align-items: baseline;
+				gap: 10px;
+				margin: 0 0 12px;
+				font-size: 16px;
+				font-weight: 600;
+			}
+
+			.ho-copy-group h3 small {
+				color: var(--fh-fg-muted);
+				font: 400 12px var(--fh-mono);
+			}
+
+			.ho-table.is-copy td:first-child {
+				width: 230px;
+			}
+
+			.ho-table.is-copy td:nth-child(2) {
+				width: 46%;
+			}
+
+			.ho-footer {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding-top: 40px;
+				color: var(--fh-fg-muted);
+				font-size: 12px;
+			}
+
+			@media (max-width: 1100px) {
+				.ho-wrap {
+					grid-template-columns: minmax(0, 1fr);
+				}
+				.ho-toc {
+					display: none;
+				}
+				.ho-states,
+				.ho-motion {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+				.ho-pair {
+					grid-template-columns: minmax(0, 1fr);
+				}
+				.ho-stage + .ho-stage {
+					border-left: 0;
+					border-top: 1px solid var(--fh-border-muted);
+				}
+			}
+
+			@media (max-width: 860px) {
+				.fh-grid {
+					grid-template-columns: minmax(0, 1fr);
+				}
+				.fh-nav {
+					position: static;
+				}
+				.ho-principles,
+				.ho-grid-2,
+				.ho-grid-3,
+				.ho-meta {
+					grid-template-columns: minmax(0, 1fr);
+				}
+				.ho-title {
+					font-size: 52px;
+				}
+				.ho-type-row {
+					grid-template-columns: minmax(0, 1fr);
+				}
+				.ho-type-spec {
+					text-align: left;
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				[class*="fh-"],
+				[class*="fh-"]::before,
+				[class*="fh-"]::after,
+				[class*="ho-"],
+				[class*="ho-"]::before,
+				[class*="ho-"]::after {
+					animation-duration: 0.01ms !important;
+					animation-iteration-count: 1 !important;
+					transition-duration: 0.01ms !important;
+					transition-delay: 0s !important;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<section data-proto-screen="github"><div id="gh"></div></section>
+		<section data-proto-screen="settings"><div class="fh-app" id="fh-app"></div></section>
+		<section data-proto-screen="handoff"><div class="ho" id="ho"></div></section>
+		<script src="./lib/data.js"></script>
+		<script src="./lib/gh.js"></script>
+		<script src="./lib/engine.js"></script>
+		<script src="./lib/proto.js"></script>
+		<script>
+			(() => {
+				const $ = (sel, root = document) => root.querySelector(sel);
+				const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+				const esc = (value) => GH.esc(value);
+				const motionQuery = matchMedia("(prefers-reduced-motion: reduce)");
+				const reduced = () => motionQuery.matches;
+				const plural = (n, one, many) => (n === 1 ? one : many);
+				const PROTO_H = 40;
+				const TOOLBAR_H = 52;
+
+				const EXTRA_ICONS = {
+					linkExternal:
+						'<path d="M9.75 2.25h4v4M13.5 2.5 7.75 8.25M12 9.25v3.5a1 1 0 0 1-1 1H3.25a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3.5"/>',
+					beaker:
+						'<path d="M5.5 1.75h5M6.5 1.75v4.1L2.95 12.1a1.25 1.25 0 0 0 1.09 1.9h7.92a1.25 1.25 0 0 0 1.09-1.9L9.5 5.85v-4.1M4.4 9.5h7.2"/>',
+					stack: '<path d="M8 1.75 14.25 5 8 8.25 1.75 5z"/><path d="M1.75 8 8 11.25 14.25 8M1.75 11 8 14.25 14.25 11"/>',
+					repo: '<path d="M3 12.5V3a1.25 1.25 0 0 1 1.25-1.25h8.75v9.5H4.25A1.25 1.25 0 0 0 3 12.5a1.25 1.25 0 0 0 1.25 1.25H6"/><path d="M8 11.25v4l1.25-.9 1.25.9v-4"/>',
+					device: '<rect x="1.75" y="2.5" width="12.5" height="8.75" rx="1.25"/><path d="M5.5 13.75h5M8 11.25v2.5"/>',
+					arrowLeft: '<path d="M13 8H3M7 4 3 8l4 4"/>',
+					arrowRight: '<path d="M3 8h10M9 4l4 4-4 4"/>',
+					reload: '<path d="M13.25 8A5.25 5.25 0 1 1 11.7 4.29M13.25 2.5v2.75H10.5"/>',
+					puzzle:
+						'<path d="M6.25 2.75a1.5 1.5 0 0 1 3 0v.75h3.25v3.25h.75a1.5 1.5 0 0 1 0 3h-.75v3.5H9.25v-.75a1.5 1.5 0 0 0-3 0v.75H2.75V9.75h.75a1.5 1.5 0 0 0 0-3h-.75V3.5h3.5z"/>',
+					checkCircle: '<circle cx="8" cy="8" r="6.25"/><path d="m5.5 8.25 1.75 1.75 3.25-3.5"/>',
+				};
+
+				const icon = (name, cls = "") =>
+					EXTRA_ICONS[name]
+						? `<svg class="gh-icon ${cls}" viewBox="0 0 16 16" aria-hidden="true" focusable="false">${EXTRA_ICONS[name]}</svg>`
+						: GH.icon(name, cls);
+
+				let logoSeq = 0;
+				function logo(size = 20, cls = "") {
+					const id = `fh-logo-${++logoSeq}`;
+					const doc = "M13.75 2.75H6.5A1.75 1.75 0 0 0 4.75 4.5v15a1.75 1.75 0 0 0 1.75 1.75h11a1.75 1.75 0 0 0 1.75-1.75V8.25Z";
+					return `<svg class="fh-logo ${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><mask id="${id}-top" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="10" fill="#fff"/></mask><mask id="${id}-bottom" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect y="15.5" width="24" height="8.5" fill="#fff"/></mask><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g mask="url(#${id}-top)"><path d="${doc}"/><path d="M13.75 2.75v5.5h5.5"/></g><path mask="url(#${id}-bottom)" d="${doc}" stroke-dasharray="2 2.25"/></g><rect class="fh-logo-band" x="3" y="11" width="18" height="3.5" rx="1.25"/></svg>`;
+				}
+
+				const logoTile = (tile = 48, mark = 28) => `<span class="fh-logo-tile" style="--tile:${tile}px">${logo(mark)}</span>`;
+
+				const T = {
+					product: "GitHub File Hider",
+					slogan: "Hide files in GitHub's Changes tab.",
+					hideFiles: "Hide files",
+					filesHidden: (n) => plural(n, "file hidden", "files hidden"),
+					hideAgain: "Hide files again",
+					showAll: "Show all files",
+					settings: "Settings",
+					presets: "Presets",
+					customRules: "Custom rules",
+					alwaysShow: "Always show",
+					manual: "Manual",
+					automatic: "Automatic",
+					options: "GitHub File Hider options",
+					tipHide: (n) =>
+						n === 0
+							? "No files in this pull request match your rules"
+							: `Hide ${n} ${plural(n, "file", "files")} that ${plural(n, "matches", "match")} your rules`,
+					tipHideAgain: "All files are showing for now. Hide the matching files again.",
+					tipEmpty: "Choose which files to hide",
+					menuToggle: "Hide files in this pull request",
+					menuToggleDesc: (pr) => `Remembered for #${String(pr).split("#").pop()}`,
+					menuShowAllAutoDesc: "Temporarily. Automatic mode stays on.",
+					menuShowAllDesc: "Temporarily. Your rules stay on.",
+					menuHideAgainDesc: "Showing all files for now",
+					menuEmptyTitle: "Choose what to hide",
+					menuEmptyManual: "Turn on a preset or add custom rules. Nothing is hidden until you select Hide files.",
+					menuEmptyAuto: "Turn on a preset or add custom rules. Automatic mode hides matching files when Changes opens.",
+					menuCustomNone: "No custom rules yet",
+					menuCustomOff: (n) => `${n} ${plural(n, "rule", "rules")}, all off`,
+					menuTree: "Hide in sidebar tree",
+					menuTreeOn: "Matching files leave the tree",
+					menuTreeOff: "The tree stays complete",
+					notice: "This file is temporarily visible because you opened a direct link.",
+					noticeFile: (reason) => `It matches ${reason}. Other matching files stay hidden.`,
+					noticeComment: (reason) => `The linked comment is highlighted. It matches ${reason}. Other matching files stay hidden.`,
+					hideRevealed: "Hide again",
+					labelRevealed: "Temporarily visible",
+					labelKept: "Always shown",
+					tipRevealed: "Opened from a direct link. Your rules have not changed.",
+					tipKept: (always, reason) => `Kept visible by the Always show rule ${always}. Otherwise ${reason} would hide it.`,
+					tipTreeHidden: (reason) => `Hidden in the diff by ${reason}. Select to show it temporarily.`,
+					tipTreeRevealed: "Temporarily visible because you opened a direct link",
+					emptyAll: "All files are hidden",
+					emptyKept: "All other files are hidden",
+					emptyAllBody: (allLoaded) =>
+						allLoaded
+							? "Every file in this pull request matches your rules. Hidden files are still part of the pull request and may need review."
+							: "Every file loaded so far matches your rules. Hidden files are still part of the pull request and may need review.",
+					emptyKeptBody: (n) =>
+						`Only ${plural(n, "the file", "the files")} kept by an Always show rule ${plural(n, "is", "are")} visible. Hidden files are still part of the pull request and may need review.`,
+					editRules: "Edit rules",
+					treeEmptyTitle: "All files are hidden",
+					treeEmptyBody: "Your rules hide every file in this tree.",
+					live: {
+						hidden: (n) => `${n} ${plural(n, "file", "files")} hidden.`,
+						showing: (n) => `Showing all files. ${n} ${plural(n, "file matches", "files match")} your rules.`,
+						off: "All files are visible.",
+						hiddenAgain: (path) => `${path} is hidden again.`,
+						ruleAdded: "Rule added.",
+						ruleSaved: "Rule saved.",
+						ruleRemoved: "Rule removed.",
+						restored: (name) => `${name} preset restored to its default rules.`,
+					},
+					s: {
+						crumb: "Settings",
+						contextSub: "Extension settings · Version 2026.10.02.1",
+						viewSource: "View source",
+						saved: "Saved",
+						general: "General",
+						rulesGroup: "Rules",
+						navNote: "Settings apply to every repository and are stored only in this browser.",
+						generalLede: "These settings apply to every repository on github.com.",
+						modeLegend: "Activation mode",
+						modeCaption: "Choose when your rules hide files. Turning rules on and hiding files are separate steps.",
+						manualTitle: "Manual",
+						defaultLabel: "Default",
+						manualBody:
+							"Each pull request starts with all files visible. Select <b>Hide files</b> in a pull request to filter it. File Hider remembers that choice for that pull request only.",
+						autoTitle: "Automatic",
+						autoBody: "Your rules apply as soon as you open Changes in any pull request. <b>Show all files</b> stays one click away.",
+						treeTitle: "Hide matching files in the sidebar tree",
+						treeBody: "When off, the tree stays complete and matching files appear muted with an icon. The diff is filtered either way.",
+						scopeTitle: "Scope and storage",
+						factRepoTitle: "Every repository",
+						factRepoBody: "One configuration applies to pull requests in all repositories on github.com. There are no per-repository settings.",
+						factLocalTitle: "Only in this browser",
+						factLocalBody: "Settings are stored locally in this Chrome profile. They are not synced between devices, and no account or server is involved.",
+						factDisplayTitle: "Display only",
+						factDisplayBody: "File Hider changes only what you see. It never changes files, comments, reviews, or the files you marked as viewed.",
+						presetsLede: "Ready-made rule sets. A preset hides its files only while filtering is on in a pull request.",
+						modified: "Modified",
+						restore: "Restore defaults",
+						restoreDisabled: "Rules match the defaults",
+						presetEmpty: "This preset has no rules. Add one below or restore the defaults.",
+						matchesLike: "Matches files like",
+						customLede: "Hide files that presets don't cover. Rules match file paths relative to the repository root, not file contents.",
+						customBox: "Hide rules",
+						customEmptyTitle: "No custom rules yet",
+						customEmptyBody: "Add a pattern such as `docs/**` or `**/generated/**` to hide files that presets don't cover.",
+						alwaysLede: "Files that match these rules stay visible, even when a preset or a custom rule would hide them.",
+						alwaysBox: "Always show rules",
+						alwaysEmptyTitle: "No Always show rules",
+						alwaysEmptyBody: "Add a path to keep one file visible while similar files are hidden, for example `src/payments/checkout.spec.ts`.",
+						exampleHide: "Hide",
+						exampleAlways: "Always show",
+						exampleResult: "Other `.spec.ts` files are hidden. `src/payments/checkout.spec.ts` stays visible.",
+						addRule: "Add rule",
+						save: "Save",
+						cancel: "Cancel",
+						edit: "Edit rule",
+						remove: "Remove rule",
+						enable: "Turn rule on or off",
+						on: "On",
+						off: "Off",
+						rulesOn: (n, total) => `${n} of ${total} on`,
+						syntaxTitle: "Pattern syntax",
+						syntaxBody:
+							"<code class=\"fh-code\">*</code> matches characters inside one folder or file name. <code class=\"fh-code\">**/</code> matches zero or more folders, so <code class=\"fh-code\">**/yarn.lock</code> matches <code class=\"fh-code\">yarn.lock</code> at the root and in <code class=\"fh-code\">apps/web/</code>.",
+						duplicate: "This rule is already in the list.",
+						placeholderCustom: "docs/** or **/generated/**",
+						placeholderAlways: "src/payments/**",
+					},
+				};
+
+				const PRESET_META = {
+					tests: {
+						icon: "beaker",
+						placeholder: "**/*.integration.ts",
+						examples: ["button.spec.ts", "src/components/Button.spec.tsx", "src/utils/format.test.js", "src/__tests__/checkout.ts"],
+					},
+					lockfiles: {
+						icon: "lock",
+						placeholder: "**/bun.lockb",
+						examples: ["package-lock.json", "apps/web/yarn.lock", "packages/service/pnpm-lock.yaml"],
+					},
+				};
+
+				const SYNTAX_ROWS = [
+					["src/config.ts", "One exact file path", "src/config.ts"],
+					["**/*.test.*", "Test filenames at any directory level", "src/utils/format.test.js"],
+					["**/generated/**", "Files inside generated directories", "src/generated/client.ts"],
+					["docs/**", "Files inside the root docs directory", "docs/setup.md"],
+				];
+
+				const codeify = (text) => esc(text).replace(/`([^`]+)`/g, '<code class="fh-code">$1</code>');
+				const plainCopy = (text) => text.replace(/`/g, "");
+
+				const reasonPhrase = (label) => (label === "Custom rule" ? "a custom rule" : label ? `the ${label}` : "a rule");
+
+				const announcer = document.createElement("div");
+				announcer.className = "fh-sr";
+				announcer.setAttribute("role", "status");
+				announcer.setAttribute("aria-live", "polite");
+				document.body.append(announcer);
+				let announceTimer = 0;
+				function announce(message) {
+					clearTimeout(announceTimer);
+					announcer.textContent = "";
+					announceTimer = setTimeout(() => {
+						announcer.textContent = message;
+					}, 150);
+				}
+
+				const counterHtml = (n, accent = false, roll = false) =>
+					`<span class="fh-counter${accent ? " is-accent" : ""}"><span class="fh-roll"${roll ? " data-roll" : ""} data-value="${n}"><span>${n}</span></span></span>`;
+
+				const labelHtml = (text, variant = "") => `<span class="fh-label${variant ? ` is-${variant}` : ""}">${text}</span>`;
+
+				const checkHtml = () => `<span class="fh-check" aria-hidden="true">${icon("check")}</span>`;
+
+				function switchVisual(on, disabled = false) {
+					return `<span class="fh-switch-track" data-on="${on}"${disabled ? ' data-disabled="true"' : ""} aria-hidden="true"><span class="fh-switch-knob"></span></span>`;
+				}
+
+				function switchControl({ on, act, data = "", labelledby, describedby = "", disabled = false, focusKey = "" }) {
+					return `<span class="fh-switch"><span class="fh-switch-status${disabled ? " is-disabled" : ""}" aria-hidden="true">${on ? T.s.on : T.s.off}</span><button type="button" class="fh-switch-track" aria-pressed="${on}" aria-labelledby="${labelledby}"${describedby ? ` aria-describedby="${describedby}"` : ""} data-act="${act}" ${data}${disabled ? " disabled" : ""}${focusKey ? ` data-focus="${focusKey}"` : ""}><span class="fh-switch-knob"></span></button></span>`;
+				}
+
+				function controlView(d) {
+					const view = d.ruleCount === 0 ? "empty" : d.filtering ? "filtering" : d.active && d.showingAll ? "showing" : "inactive";
+					return { view, hidden: d.hiddenCount, match: d.matchCount, auto: d.mode === "automatic" };
+				}
+
+				const isSplit = (view) => view === "inactive" || view === "showing";
+
+				function mainInner(v) {
+					return `${icon("eyeOff")}<span>${v.view === "showing" ? T.hideAgain : T.hideFiles}</span>${counterHtml(v.match, false, true)}`;
+				}
+
+				function menuInner(v) {
+					if (v.view === "filtering")
+						return `<span class="fh-ctl-status">${icon("eyeOff", "fh-ctl-icon")}${counterHtml(v.hidden, true, true)}<span class="fh-ctl-noun">${T.filesHidden(v.hidden)}</span>${v.auto ? labelHtml(T.automatic, "accent") : ""}</span>${icon("caret", "fh-ctl-caret")}`;
+					if (v.view === "empty") return `<span class="fh-ctl-status">${icon("eyeOff")}<span>${T.hideFiles}</span></span>${icon("caret", "fh-ctl-caret")}`;
+					return icon("caret", "fh-ctl-caret");
+				}
+
+				function controlHtml(v, { expanded = false, state = "" } = {}) {
+					const split = isSplit(v.view);
+					const mainState = state === "hover-main" ? " is-hover" : state === "focus-main" ? " is-focus" : "";
+					const menuState = state === "hover-menu" ? " is-hover" : state === "focus-menu" ? " is-focus" : "";
+					return `<div class="fh-ctl" data-view="${v.view}"${split ? " data-split" : ""}>${split ? `<button type="button" class="fh-ctl-btn fh-ctl-main${mainState}" tabindex="-1">${mainInner(v)}</button><span class="fh-ctl-sep" aria-hidden="true"></span>` : ""}<button type="button" class="fh-ctl-btn fh-ctl-menu${menuState}" aria-expanded="${expanded}" tabindex="-1">${menuInner(v)}</button></div>`;
+				}
+
+				function setRoll(el, n) {
+					if (!el) return;
+					const prev = Number(el.dataset.value);
+					if (prev === n) return;
+					el.dataset.value = String(n);
+					clearTimeout(el._fhTimer);
+					if (reduced() || Number.isNaN(prev)) {
+						el.innerHTML = `<span>${n}</span>`;
+						return;
+					}
+					el.style.setProperty("--dir", n > prev ? "1" : "-1");
+					el.innerHTML = `<span class="fh-roll-out">${prev}</span><span class="fh-roll-in">${n}</span>`;
+					el._fhTimer = setTimeout(() => {
+						el.innerHTML = `<span>${n}</span>`;
+					}, 260);
+				}
+
+				function presetCount(preset, d, s) {
+					const st = s.presets[preset.id];
+					if (st.enabled) {
+						if (d.filtering) return d.byReason[`${preset.name} preset`] || 0;
+						return d.matchPaths.filter((p) => FH.evaluate(p).reason?.presetId === preset.id).length;
+					}
+					return GH.paths.filter(
+						(p) => st.rules.some((r) => FH.match(r, p)) && !s.alwaysShow.some((a) => a.enabled !== false && FH.match(a.pattern, p)),
+					).length;
+				}
+
+				function menuModel(d = FH.detail, s = FH.state) {
+					const v = controlView(d);
+					const enabledCustom = s.customRules.filter((r) => r.enabled);
+					const customCount = d.filtering
+						? d.byReason["Custom rule"] || 0
+						: d.matchPaths.filter((p) => FH.evaluate(p).reason?.kind === "custom").length;
+					return {
+						view: v.view,
+						auto: v.auto,
+						prKey: d.prKey,
+						active: d.active,
+						filtering: d.filtering,
+						hidden: d.hiddenCount,
+						match: d.matchCount,
+						tree: d.treeFiltering,
+						presets: FH.presets.map((p) => ({ id: p.id, name: p.name, enabled: s.presets[p.id].enabled, count: presetCount(p, d, s) })),
+						custom: { on: enabledCustom.length, total: s.customRules.length, preview: enabledCustom.map((r) => r.pattern), count: customCount },
+					};
+				}
+
+				function itemHtml({ key, role = "menuitem", checked = false, lead = "", label, desc = "", trail = "", trailCls = "", sr = "", state = "" }) {
+					const aria = role === "menuitemcheckbox" ? ` aria-checked="${checked}"` : "";
+					return `<div class="fh-al-item${state ? ` is-${state}` : ""}" role="${role}" tabindex="-1" data-key="${key}"${aria}><span class="fh-al-lead">${lead}</span><span class="fh-al-content"><span class="fh-al-label">${label}${sr ? `<span class="fh-sr">${sr}</span>` : ""}</span>${desc ? `<span class="fh-al-desc">${desc}</span>` : ""}</span>${trail ? `<span class="fh-al-trail${trailCls ? ` ${trailCls}` : ""}" aria-hidden="true">${trail}</span>` : ""}</div>`;
+				}
+
+				function menuHtml(m, { states = {}, uid = "live" } = {}) {
+					const head = `<div class="fh-ov-header">${logo(20)}<span class="fh-ov-title">${T.product}</span>${labelHtml(m.auto ? T.automatic : T.manual, m.auto ? "accent" : "")}</div><div class="fh-al-divider" role="separator"></div>`;
+					let top = "";
+					if (m.view === "empty") {
+						top = `<div class="fh-ov-empty"><span class="fh-ov-empty-visual">${icon("eyeOff")}</span><div><strong>${T.menuEmptyTitle}</strong><p>${m.auto ? T.menuEmptyAuto : T.menuEmptyManual}</p></div></div>`;
+					} else {
+						if (!m.auto)
+							top += itemHtml({
+								key: "pr-toggle",
+								role: "menuitemcheckbox",
+								checked: m.active,
+								lead: icon("eyeOff"),
+								label: T.menuToggle,
+								desc: T.menuToggleDesc(esc(m.prKey)),
+								trail: switchVisual(m.active),
+								trailCls: "is-switch",
+								state: states["pr-toggle"],
+							});
+						if (m.view === "filtering")
+							top += itemHtml({ key: "show-all", lead: icon("eye"), label: T.showAll, desc: m.auto ? T.menuShowAllAutoDesc : T.menuShowAllDesc, state: states["show-all"] });
+						if (m.view === "showing")
+							top += itemHtml({
+								key: "hide-again",
+								lead: icon("eyeOff"),
+								label: T.hideAgain,
+								desc: T.menuHideAgainDesc,
+								trail: counterHtml(m.match),
+								sr: `, ${m.match} ${plural(m.match, "file", "files")}`,
+								state: states["hide-again"],
+							});
+					}
+					const presetItems = m.presets
+						.map((p) =>
+							itemHtml({
+								key: `preset:${p.id}`,
+								role: "menuitemcheckbox",
+								checked: p.enabled,
+								lead: checkHtml(),
+								label: p.name,
+								trail: `<span class="fh-al-count${p.enabled && m.filtering ? " is-live" : ""}">${p.count}</span>`,
+								sr: `, ${p.count} ${plural(p.count, "file", "files")} ${p.enabled && m.filtering ? "hidden" : "match"}`,
+								state: states[`preset:${p.id}`],
+							}),
+						)
+						.join("");
+					const customDesc = m.custom.on
+						? m.custom.preview.map((p) => `<code>${esc(p)}</code>`).join(", ")
+						: m.custom.total
+							? T.menuCustomOff(m.custom.total)
+							: T.menuCustomNone;
+					const customItem = itemHtml({
+						key: "custom",
+						lead: icon("filter"),
+						label: T.customRules,
+						desc: customDesc,
+						trail: `${m.custom.on ? `<span class="fh-al-count${m.filtering ? " is-live" : ""}">${m.custom.count}</span>` : ""}${icon("chevronRight")}`,
+						state: states.custom,
+					});
+					const treeItem = itemHtml({
+						key: "tree",
+						role: "menuitemcheckbox",
+						checked: m.tree,
+						lead: icon("sidebar"),
+						label: T.menuTree,
+						desc: m.tree ? T.menuTreeOn : T.menuTreeOff,
+						trail: switchVisual(m.tree),
+						trailCls: "is-switch",
+						state: states.tree,
+					});
+					const settingsItem = itemHtml({
+						key: "settings",
+						lead: icon("gear"),
+						label: T.settings,
+						trail: icon("linkExternal"),
+						state: states.settings,
+					});
+					return `${head}${top}<div class="fh-al-divider" role="separator"></div><div role="group" aria-labelledby="fh-menu-presets-${uid}"><p class="fh-al-heading" id="fh-menu-presets-${uid}">${T.presets}</p>${presetItems}${customItem}</div><div class="fh-al-divider" role="separator"></div>${treeItem}<div class="fh-al-divider" role="separator"></div>${settingsItem}`;
+				}
+
+				function noticeHtml(path, meta, { live = true } = {}) {
+					const e = FH.evaluate(path);
+					const reason = e.reason ? `${reasonPhrase(FH.reasonLabel(e.reason))} <code>${esc(e.reason.pattern)}</code>` : "a rule";
+					const detail = meta.kind === "comment" ? T.noticeComment(reason) : T.noticeFile(reason);
+					return `<div class="fh-flash" role="region" aria-label="Temporarily visible file" data-fh-notice="${esc(path)}" data-kind="${meta.kind}"><span class="fh-flash-icon">${icon("info")}</span><div class="fh-flash-text"><p>${T.notice}</p><p class="fh-flash-detail">${detail}</p></div><div class="fh-flash-actions"><button type="button" class="fh-btn is-small" data-fh-act="hide-revealed" data-path="${esc(path)}"${live ? "" : ' tabindex="-1"'}>${icon("eyeOff")}${T.hideRevealed}</button></div></div>`;
+				}
+
+				function blankslateHtml({ kind, allLoaded, keptCount, live = true }) {
+					const tab = live ? "" : ' tabindex="-1"';
+					return `<div class="fh-blankslate" data-sig="${kind}|${allLoaded}|${keptCount}" role="region" aria-label="${kind === "kept" ? T.emptyKept : T.emptyAll}"><div class="fh-blankslate-visual">${icon("eyeOff")}</div><h2 class="fh-blankslate-heading">${kind === "kept" ? T.emptyKept : T.emptyAll}</h2><p class="fh-blankslate-desc">${kind === "kept" ? T.emptyKeptBody(keptCount) : T.emptyAllBody(allLoaded)}</p><div class="fh-blankslate-actions"><button type="button" class="fh-btn is-primary" data-fh-act="show-all"${tab}>${icon("eye")}${T.showAll}</button><button type="button" class="fh-link" data-fh-act="edit-rules"${tab}>${T.editRules}</button></div></div>`;
+				}
+
+				function fileLabelHtml(kind, tip) {
+					return `<span class="fh-label fh-file-label${kind === "revealed" ? " is-accent" : ""}" data-kind="${kind}" data-fh-tip="${esc(tip)}" tabindex="0">${kind === "revealed" ? T.labelRevealed : T.labelKept}</span>`;
+				}
+
+				function treeHintHtml(kind, tip) {
+					return `<span class="fh-tree-hint" data-kind="${kind}" role="img" aria-label="${esc(tip)}" data-fh-tip="${esc(tip)}">${icon(kind === "revealed" ? "eye" : "eyeOff")}</span>`;
+				}
+
+				const Tip = (() => {
+					const el = document.createElement("div");
+					el.className = "fh-tooltip";
+					el.id = "fh-tooltip";
+					el.setAttribute("role", "tooltip");
+					document.body.append(el);
+					let current = null;
+					let host = null;
+					let timer = 0;
+					let suppressed = null;
+
+					function place(target) {
+						const r = target.getBoundingClientRect();
+						const w = el.offsetWidth;
+						const h = el.offsetHeight;
+						let top = r.top - h - 6;
+						if (top < PROTO_H + 4) top = r.bottom + 6;
+						const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8));
+						el.style.transform = "";
+						el.style.left = `${Math.round(left)}px`;
+						el.style.top = `${Math.round(top)}px`;
+					}
+
+					function show(target) {
+						const text = target.dataset.fhTip;
+						if (!text || !target.isConnected) return;
+						current = target;
+						host = target.parentElement?.closest("[title]") || null;
+						if (host) {
+							host.dataset.fhTitle = host.getAttribute("title");
+							host.removeAttribute("title");
+						}
+						el.textContent = text;
+						place(target);
+						el.classList.add("is-open");
+						target.setAttribute("aria-describedby", "fh-tooltip");
+					}
+
+					function hide() {
+						clearTimeout(timer);
+						if (!current) return;
+						current.removeAttribute("aria-describedby");
+						if (host?.dataset.fhTitle !== undefined) {
+							host.setAttribute("title", host.dataset.fhTitle);
+							delete host.dataset.fhTitle;
+						}
+						host = null;
+						current = null;
+						el.classList.remove("is-open");
+					}
+
+					document.addEventListener("pointerover", (e) => {
+						const t = e.target.closest?.("[data-fh-tip]") || null;
+						if (t === current) return;
+						if (t && t === suppressed) return;
+						suppressed = null;
+						hide();
+						if (t) timer = setTimeout(() => show(t), 350);
+					});
+					document.addEventListener(
+						"pointerdown",
+						(e) => {
+							suppressed = e.target.closest?.("[data-fh-tip]") || null;
+							hide();
+						},
+						true,
+					);
+					document.addEventListener("focusin", (e) => {
+						const t = e.target.closest?.("[data-fh-tip]");
+						hide();
+						if (t && t.matches(":focus-visible")) show(t);
+					});
+					document.addEventListener("focusout", hide);
+					document.addEventListener("keydown", (e) => {
+						if (e.key === "Escape") hide();
+					});
+					addEventListener("scroll", hide, true);
+					return { hide };
+				})();
+
+				GH.mount(document.getElementById("gh"));
+				FH.init({ namespace: "prototype" });
+
+				const Control = (() => {
+					const el = document.createElement("div");
+					el.className = "fh-ctl";
+					el.innerHTML = `<button type="button" class="fh-ctl-btn fh-ctl-main"></button><span class="fh-ctl-sep" aria-hidden="true"></span><button type="button" class="fh-ctl-btn fh-ctl-menu" aria-haspopup="menu" aria-expanded="false" aria-controls="fh-menu"></button>`;
+					GH.slot("toolbar-start").append(el);
+					const main = $(".fh-ctl-main", el);
+					const sep = $(".fh-ctl-sep", el);
+					const menuBtn = $(".fh-ctl-menu", el);
+					let current = null;
+					let signature = "";
+					let announced = null;
+
+					main.addEventListener("click", () => {
+						if (current.view === "inactive") FH.activate();
+						else if (current.view === "showing") FH.restore();
+					});
+					menuBtn.addEventListener("click", () => Menu.toggle("first"));
+					menuBtn.addEventListener("keydown", (e) => {
+						if (e.key === "ArrowDown") {
+							e.preventDefault();
+							Menu.open("first");
+						}
+						if (e.key === "ArrowUp") {
+							e.preventDefault();
+							Menu.open("last");
+						}
+					});
+
+					function announceChange(v) {
+						const key = `${v.view}|${v.hidden}|${v.match}`;
+						if (announced === null) {
+							announced = key;
+							return;
+						}
+						if (key === announced) return;
+						const previousView = announced.split("|")[0];
+						announced = key;
+						if (v.view === "filtering") announce(T.live.hidden(v.hidden));
+						else if (v.view === "showing" && previousView !== "showing") announce(T.live.showing(v.match));
+						else if (v.view === "inactive" && previousView !== "inactive") announce(T.live.off);
+					}
+
+					function update(d) {
+						const v = controlView(d);
+						const split = isSplit(v.view);
+						const sig = `${v.view}|${v.auto}`;
+						const hadMainFocus = document.activeElement === main;
+						if (sig !== signature) {
+							main.innerHTML = mainInner(v);
+							menuBtn.innerHTML = menuInner(v);
+							el.dataset.view = v.view;
+							el.toggleAttribute("data-split", split);
+							main.hidden = !split;
+							sep.hidden = !split;
+							signature = sig;
+						} else {
+							setRoll($(".fh-roll", main), v.match);
+							setRoll($(".fh-roll", menuBtn), v.hidden);
+							const noun = $(".fh-ctl-noun", menuBtn);
+							if (noun) noun.textContent = T.filesHidden(v.hidden);
+						}
+						main.dataset.fhTip = v.view === "showing" ? T.tipHideAgain : T.tipHide(v.match);
+						if (split) {
+							menuBtn.setAttribute("aria-label", T.options);
+							menuBtn.dataset.fhTip = T.options;
+						} else {
+							menuBtn.removeAttribute("aria-label");
+							if (v.view === "empty") menuBtn.dataset.fhTip = T.tipEmpty;
+							else delete menuBtn.dataset.fhTip;
+						}
+						current = v;
+						if (hadMainFocus && !split) menuBtn.focus();
+						announceChange(v);
+					}
+
+					return { el, main, menuBtn, update, focus: () => menuBtn.focus() };
+				})();
+
+				const Menu = (() => {
+					let ov = null;
+					let typeahead = "";
+					let typeTimer = 0;
+
+					const items = () => $$('[role^="menuitem"]', ov);
+
+					function position() {
+						if (!ov) return;
+						const anchor = Control.el.getBoundingClientRect();
+						const w = ov.offsetWidth;
+						let left = anchor.left;
+						if (left + w > innerWidth - 8) left = Math.max(8, anchor.right - w);
+						const top = anchor.bottom + 4;
+						ov.style.left = `${Math.round(left)}px`;
+						ov.style.top = `${Math.round(top)}px`;
+						ov.style.maxHeight = `${Math.max(200, innerHeight - top - 12)}px`;
+					}
+
+					function render() {
+						if (!ov) return;
+						const focusedKey = ov.contains(document.activeElement) ? document.activeElement.dataset.key : null;
+						ov.innerHTML = menuHtml(menuModel());
+						if (focusedKey) {
+							const again = ov.querySelector(`[data-key="${CSS.escape(focusedKey)}"]`) || items()[0];
+							again?.focus({ preventScroll: true });
+						}
+						position();
+					}
+
+					function open(focus = "first") {
+						if (!ov) {
+							Tip.hide();
+							ov = document.createElement("div");
+							ov.className = "fh-overlay";
+							ov.id = "fh-menu";
+							ov.setAttribute("role", "menu");
+							ov.setAttribute("aria-label", T.product);
+							ov.tabIndex = -1;
+							document.body.append(ov);
+							ov.addEventListener("keydown", onKey);
+							ov.addEventListener("click", (e) => {
+								const item = e.target.closest('[role^="menuitem"]');
+								if (item) run(item);
+							});
+							Control.menuBtn.setAttribute("aria-expanded", "true");
+							render();
+						}
+						const list = items();
+						const target = focus === "last" ? list[list.length - 1] : list[0];
+						(target || ov).focus({ preventScroll: true });
+					}
+
+					function close({ restore = true } = {}) {
+						if (!ov) return;
+						ov.remove();
+						ov = null;
+						Control.menuBtn.setAttribute("aria-expanded", "false");
+						if (restore) Control.focus();
+					}
+
+					function toggle(focus) {
+						if (ov) close();
+						else open(focus);
+					}
+
+					function run(item) {
+						const key = item.dataset.key;
+						if (key === "pr-toggle") {
+							if (FH.detail.active) FH.deactivate();
+							else FH.activate();
+						} else if (key === "show-all") {
+							FH.showAll();
+							close();
+						} else if (key === "hide-again") {
+							FH.restore();
+							close();
+						} else if (key.startsWith("preset:")) {
+							const id = key.slice(7);
+							FH.setPresetEnabled(id, !FH.state.presets[id].enabled);
+						} else if (key === "tree") {
+							FH.setTreeFiltering(!FH.state.treeFiltering);
+						} else if (key === "custom") {
+							close({ restore: false });
+							Settings.open("custom");
+						} else if (key === "settings") {
+							close({ restore: false });
+							Settings.open("general");
+						}
+					}
+
+					function onKey(e) {
+						const list = items();
+						const i = list.indexOf(document.activeElement);
+						const move = (n) => list[(n + list.length) % list.length]?.focus();
+						if (e.key === "ArrowDown") {
+							e.preventDefault();
+							move(i + 1);
+						} else if (e.key === "ArrowUp") {
+							e.preventDefault();
+							move(i < 0 ? -1 : i - 1);
+						} else if (e.key === "Home" || e.key === "PageUp") {
+							e.preventDefault();
+							move(0);
+						} else if (e.key === "End" || e.key === "PageDown") {
+							e.preventDefault();
+							move(-1);
+						} else if (e.key === "Enter" || e.key === " ") {
+							e.preventDefault();
+							if (i >= 0) run(list[i]);
+						} else if (e.key === "Escape" || e.key === "Tab") {
+							e.preventDefault();
+							close();
+						} else if (e.key.length === 1 && /\S/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+							clearTimeout(typeTimer);
+							typeahead += e.key.toLowerCase();
+							typeTimer = setTimeout(() => (typeahead = ""), 600);
+							const order = [...list.slice(i + 1), ...list.slice(0, i + 1)];
+							const hit = order.find((it) => $(".fh-al-label", it).textContent.trim().toLowerCase().startsWith(typeahead));
+							hit?.focus();
+						}
+					}
+
+					document.addEventListener(
+						"pointerdown",
+						(e) => {
+							if (ov && !ov.contains(e.target) && !Control.el.contains(e.target)) close({ restore: false });
+						},
+						true,
+					);
+					addEventListener("resize", position);
+					addEventListener("scroll", () => requestAnimationFrame(position), true);
+
+					return { open, close, toggle, render, get isOpen() {
+						return !!ov;
+					} };
+				})();
+
+				const revealMeta = new Map();
+
+				function syncNotices(d) {
+					const want = new Set(d.filtering ? d.revealed : []);
+					for (const n of $$(".fh-flash[data-fh-notice]", GH.root)) {
+						const p = n.dataset.fhNotice;
+						if (!want.has(p) || n.nextElementSibling !== GH.fileEl(p)) n.remove();
+					}
+					for (const p of want) {
+						const file = GH.fileEl(p);
+						if (!file) continue;
+						const meta = revealMeta.get(p) || { kind: "file" };
+						const prev = file.previousElementSibling;
+						if (prev?.dataset?.fhNotice === p) {
+							if (prev.dataset.kind !== meta.kind) {
+								const fresh = document.createElement("div");
+								fresh.innerHTML = noticeHtml(p, meta);
+								prev.innerHTML = fresh.firstElementChild.innerHTML;
+								prev.dataset.kind = meta.kind;
+							}
+							continue;
+						}
+						file.insertAdjacentHTML("beforebegin", noticeHtml(p, meta));
+					}
+				}
+
+				function syncFileLabels() {
+					for (const f of $$(".gh-file", GH.root)) {
+						const slot = f.querySelector('[data-gh-slot="file-actions"]');
+						if (!slot) continue;
+						const state = f.dataset.fhState;
+						const want = state === "kept" ? "kept" : state === "revealed" ? "revealed" : "";
+						let lab = slot.querySelector(".fh-file-label");
+						if (!want) {
+							lab?.remove();
+							continue;
+						}
+						let tip = T.tipRevealed;
+						if (want === "kept") {
+							const e = FH.evaluate(f.dataset.path);
+							tip = T.tipKept(e.reason.pattern, `${reasonPhrase(FH.reasonLabel(e.overridden))} (${e.overridden?.pattern})`);
+						}
+						if (!lab || lab.dataset.kind !== want) {
+							lab?.remove();
+							slot.insertAdjacentHTML("afterbegin", fileLabelHtml(want, tip));
+						} else lab.dataset.fhTip = tip;
+					}
+				}
+
+				function syncTreeHints() {
+					for (const li of $$(".gh-tree-file", GH.root)) {
+						const row = $(".gh-tree-row", li);
+						const state = li.dataset.fhState;
+						const kind = state === "diff-hidden" ? "hidden" : state === "revealed" ? "revealed" : "";
+						let hint = $(".fh-tree-hint", row);
+						if (!kind) {
+							hint?.remove();
+							continue;
+						}
+						const tip = kind === "hidden" ? T.tipTreeHidden(`${reasonPhrase(li.dataset.fhReason)} (${li.dataset.fhPattern})`) : T.tipTreeRevealed;
+						if (!hint || hint.dataset.kind !== kind) {
+							hint?.remove();
+							$(".gh-status", row).insertAdjacentHTML("beforebegin", treeHintHtml(kind, tip));
+						} else {
+							hint.dataset.fhTip = tip;
+							hint.setAttribute("aria-label", tip);
+						}
+					}
+				}
+
+				function syncEmpty(d) {
+					const slot = GH.slot("diff-top");
+					const files = $$(".gh-file", GH.root);
+					const visible = files.filter((f) => !f.classList.contains("fh-hidden"));
+					const show = d.filtering && files.length > 0 && visible.every((f) => f.dataset.fhState === "kept");
+					const current = $(".fh-blankslate", GH.root);
+					if (!show) {
+						current?.remove();
+						return;
+					}
+					const kind = visible.length ? "kept" : "all";
+					const allLoaded = d.loadedCount === d.totalCount;
+					const sig = `${kind}|${allLoaded}|${visible.length}`;
+					if (current?.dataset.sig === sig) return;
+					current?.remove();
+					slot.insertAdjacentHTML("beforeend", blankslateHtml({ kind, allLoaded, keptCount: visible.length }));
+				}
+
+				function syncTreeNote(d) {
+					const slot = GH.slot("tree-bottom");
+					const files = $$(".gh-tree-file", GH.root);
+					const empty = d.filtering && d.treeFiltering && files.length > 0 && files.every((f) => f.classList.contains("fh-hidden"));
+					const current = $(".fh-tree-empty", GH.root);
+					if (!empty) {
+						current?.remove();
+						return;
+					}
+					if (current) return;
+					slot.insertAdjacentHTML(
+						"beforeend",
+						`<div class="fh-tree-empty">${icon("eyeOff")}<div><strong>${T.treeEmptyTitle}</strong>${T.treeEmptyBody} <button type="button" class="fh-link" data-fh-act="show-all">${T.showAll}</button></div></div>`,
+					);
+				}
+
+				function scrollToNotice(r) {
+					const n = GH.root.querySelector(`.fh-flash[data-fh-notice="${CSS.escape(r.path)}"]`);
+					if (!n) return;
+					if (r.kind === "comment") {
+						const target = document.getElementById(r.targetId);
+						const room = innerHeight - (PROTO_H + TOOLBAR_H + 40);
+						if (target && target.getBoundingClientRect().bottom - n.getBoundingClientRect().top > room) return;
+					}
+					n.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" });
+				}
+
+				function openDirectLink(path) {
+					const id = GH.idFor(path);
+					if (location.hash === `#${id}`) history.replaceState(null, "", location.pathname + location.search);
+					requestAnimationFrame(() => {
+						location.hash = id;
+					});
+				}
+
+				GH.root.addEventListener(
+					"click",
+					(e) => {
+						const row = e.target.closest(".gh-tree-row");
+						const li = row?.parentElement;
+						if (!li?.classList.contains("gh-tree-file") || li.dataset.fhState !== "diff-hidden") return;
+						e.preventDefault();
+						e.stopPropagation();
+						openDirectLink(li.dataset.path);
+					},
+					true,
+				);
+
+				function largestReasonPage() {
+					const d = FH.detail;
+					const custom = d.byReason["Custom rule"] || 0;
+					const presets = Object.entries(d.byReason)
+						.filter(([k]) => k !== "Custom rule")
+						.reduce((n, [, v]) => n + v, 0);
+					return custom > presets ? "custom" : "presets";
+				}
+
+				document.addEventListener("click", (e) => {
+					const act = e.target.closest("[data-fh-act]");
+					if (!act || act.closest(".ho")) return;
+					const kind = act.dataset.fhAct;
+					if (kind === "show-all") {
+						FH.showAll();
+						Control.focus();
+					} else if (kind === "edit-rules") {
+						Settings.open(largestReasonPage());
+					} else if (kind === "hide-revealed") {
+						const path = act.dataset.path;
+						Control.focus();
+						revealMeta.delete(path);
+						FH.hideRevealed(path);
+						announce(T.live.hiddenAgain(path));
+					}
+				});
+
+				FH.on("change", (d) => {
+					Control.update(d);
+					syncNotices(d);
+					syncFileLabels();
+					syncTreeHints();
+					syncEmpty(d);
+					syncTreeNote(d);
+					if (Menu.isOpen) Menu.render();
+				});
+
+				FH.on("reveal", (r) => {
+					revealMeta.set(r.path, r);
+					syncNotices(FH.detail);
+					announce(T.notice);
+					requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => scrollToNotice(r), 30)));
+				});
+
+				const Settings = (() => {
+					const root = $("#fh-app");
+					const ui = { page: "general", edit: null, drafts: {}, errors: {}, focus: null };
+					let savedTimer = 0;
+
+					const PAGES = [
+						{ id: "general", label: T.s.general, icon: "gear" },
+						{ id: "presets", label: T.presets, icon: "stack", group: true },
+						{ id: "custom", label: T.customRules, icon: "filter", group: true },
+						{ id: "always", label: T.alwaysShow, icon: "eye", group: true },
+					];
+
+					function listName(list) {
+						if (list.startsWith("p:")) return `${FH.presets.find((p) => p.id === list.slice(2)).name} preset`;
+						return list === "c" ? "custom rules" : "Always show rules";
+					}
+
+					function listRules(list, s = FH.state) {
+						if (list.startsWith("p:")) return s.presets[list.slice(2)].rules.map((pattern, i) => ({ key: String(i), pattern, enabled: true }));
+						if (list === "c") return s.customRules.map((r) => ({ key: r.id, pattern: r.pattern, enabled: r.enabled }));
+						return s.alwaysShow.map((r) => ({ key: r.id, pattern: r.pattern, enabled: r.enabled !== false }));
+					}
+
+					function validate(list, value, exceptKey = null) {
+						const result = FH.validatePattern(value);
+						if (!result.ok) return result.error;
+						const v = value.trim();
+						if (listRules(list).some((r) => r.key !== exceptKey && r.pattern === v)) return T.s.duplicate;
+						return null;
+					}
+
+					const errorHtml = (msg) => (msg ? `${icon("alert")}<span>${esc(msg)}</span>` : "");
+
+					function ruleRowHtml({ list, rule, toggle, editing, draft = "", error = null, live = true }) {
+						const tab = live ? "" : ' tabindex="-1"';
+						const fk = `${list}:${rule.key}`;
+						if (editing) {
+							const id = `fh-edit-${fk.replace(/[^\w-]/g, "_")}`;
+							return `<li class="fh-rule is-editing" data-list="${list}" data-key="${esc(rule.key)}"><form class="fh-rule-form" data-form="edit" data-list="${list}" data-key="${esc(rule.key)}"><label class="fh-sr" for="${id}">Edit rule ${esc(rule.pattern)}</label><input id="${id}" class="fh-input is-mono" data-input="edit" data-focus="input:edit" value="${esc(draft)}" aria-invalid="${!!error}" aria-describedby="${id}-err" spellcheck="false" autocomplete="off"${tab}><button type="submit" class="fh-btn is-primary"${tab}>${T.s.save}</button><button type="button" class="fh-btn" data-act="cancel"${tab}>${T.s.cancel}</button></form><div class="fh-validation" id="${id}-err">${errorHtml(error)}</div></li>`;
+						}
+						const off = toggle && !rule.enabled;
+						return `<li class="fh-rule${off ? " is-off" : ""}" data-list="${list}" data-key="${esc(rule.key)}">${toggle ? `<input type="checkbox" class="fh-checkbox" data-act="toggle" data-focus="toggle:${esc(fk)}" aria-label="${esc(rule.pattern)}: ${rule.enabled ? T.s.on : T.s.off}"${rule.enabled ? " checked" : ""}${tab}>` : ""}<code class="fh-rule-pattern" title="${esc(rule.pattern)}">${esc(rule.pattern)}</code>${off ? labelHtml(T.s.off) : ""}<span class="fh-rule-actions"><button type="button" class="fh-iconbtn" data-act="edit" data-focus="edit:${esc(fk)}" aria-label="${T.s.edit} ${esc(rule.pattern)}" data-fh-tip="${T.s.edit}"${tab}>${icon("pencil")}</button><button type="button" class="fh-iconbtn is-danger" data-act="remove" data-focus="remove:${esc(fk)}" aria-label="${T.s.remove} ${esc(rule.pattern)}" data-fh-tip="${T.s.remove}"${tab}>${icon("trash")}</button></span></li>`;
+					}
+
+					function addFormHtml({ list, placeholder, draft = "", error = null, live = true }) {
+						const tab = live ? "" : ' tabindex="-1"';
+						const id = `fh-add-${list.replace(/[^\w-]/g, "_")}`;
+						return `<form class="fh-add" data-form="add" data-list="${list}"><label class="fh-sr" for="${id}">Add a rule to ${esc(listName(list))}</label><input id="${id}" class="fh-input is-mono" data-input="add:${list}" data-focus="input:add:${list}" placeholder="${esc(placeholder)}" value="${esc(draft)}" aria-invalid="${!!error}" aria-describedby="${id}-err" spellcheck="false" autocomplete="off"${tab}><button type="submit" class="fh-btn"${tab}>${icon("plus")}${T.s.addRule}</button></form><div class="fh-validation" id="${id}-err">${errorHtml(error)}</div>`;
+					}
+
+					function rulesListHtml({ list, toggle, empty }) {
+						const rules = listRules(list);
+						if (!rules.length) return empty;
+						return `<ul class="fh-rules" aria-label="${esc(listName(list))}">${rules
+							.map((rule) => {
+								const editing = ui.edit && ui.edit.list === list && ui.edit.key === rule.key;
+								return ruleRowHtml({ list, rule, toggle, editing, draft: ui.drafts.edit ?? rule.pattern, error: editing ? ui.errors.edit : null });
+							})
+							.join("")}</ul>`;
+					}
+
+					const compactBlankslate = (iconName, title, body) =>
+						`<div class="fh-blankslate is-compact"><div class="fh-blankslate-visual">${icon(iconName)}</div><h3 class="fh-blankslate-heading">${title}</h3><p class="fh-blankslate-desc">${codeify(body)}</p></div>`;
+
+					function syntaxHtml(open) {
+						return `<details class="fh-details"${open ? " open" : ""}><summary>${icon("chevronRight", "chev")}${T.s.syntaxTitle}</summary><div class="fh-details-body"><table class="fh-table"><thead><tr><th scope="col">Rule</th><th scope="col">Meaning</th><th scope="col">Example match</th></tr></thead><tbody>${SYNTAX_ROWS.map(([r, m, x]) => `<tr><td><code>${esc(r)}</code></td><td>${m}</td><td><code>${esc(x)}</code></td></tr>`).join("")}</tbody></table><p class="fh-caption">${T.s.syntaxBody}</p></div></details>`;
+					}
+
+					function pageGeneral(s) {
+						const radio = (value, title, body, extra = "") =>
+							`<label class="fh-choice"><input type="radio" class="fh-radio" name="fh-mode" value="${value}" data-act="mode" data-focus="radio:${value}"${s.mode === value ? " checked" : ""}><span class="fh-choice-text"><span class="fh-choice-label">${title}${extra}</span><span class="fh-caption">${body}</span></span></label>`;
+						return `<div class="fh-subhead"><h2 id="fh-page-title" tabindex="-1">${T.s.general}</h2></div><p class="fh-lede">${T.s.generalLede}</p><fieldset class="fh-fieldset"><legend class="fh-legend">${T.s.modeLegend}</legend><p class="fh-caption">${T.s.modeCaption}</p><div class="fh-choices">${radio("manual", T.s.manualTitle, T.s.manualBody, labelHtml(T.s.defaultLabel))}${radio("automatic", T.s.autoTitle, T.s.autoBody)}</div></fieldset><div class="fh-rule-divider"></div><div class="fh-setting"><div class="fh-setting-text"><h3 class="fh-setting-title" id="fh-tree-title">${T.s.treeTitle}</h3><p class="fh-caption" id="fh-tree-desc">${T.s.treeBody}</p></div>${switchControl({ on: s.treeFiltering, act: "tree", labelledby: "fh-tree-title", describedby: "fh-tree-desc", focusKey: "switch:tree" })}</div><div class="fh-subhead is-spacious"><h2>${T.s.scopeTitle}</h2></div><div class="fh-box"><div class="fh-box-row fh-fact">${icon("repo")}<div><b>${T.s.factRepoTitle}</b><p class="fh-caption">${T.s.factRepoBody}</p></div></div><div class="fh-box-row fh-fact">${icon("device")}<div><b>${T.s.factLocalTitle}</b><p class="fh-caption">${T.s.factLocalBody}</p></div></div><div class="fh-box-row fh-fact">${icon("eye")}<div><b>${T.s.factDisplayTitle}</b><p class="fh-caption">${T.s.factDisplayBody}</p></div></div></div>`;
+					}
+
+					function presetBoxHtml(p, s) {
+						const st = s.presets[p.id];
+						const meta = PRESET_META[p.id];
+						const modified = FH.isPresetModified(p.id);
+						const list = `p:${p.id}`;
+						return `<section class="fh-box fh-preset" aria-labelledby="fh-preset-${p.id}-name"><div class="fh-box-header"><span class="fh-preset-icon">${icon(meta.icon)}</span><div class="fh-preset-text"><div class="fh-preset-title"><h3 id="fh-preset-${p.id}-name">${p.name}</h3>${modified ? labelHtml(T.s.modified, "attention") : ""}</div><p class="fh-caption" id="fh-preset-${p.id}-desc">${esc(p.description)}</p></div>${switchControl({ on: st.enabled, act: "preset-enable", data: `data-preset="${p.id}"`, labelledby: `fh-preset-${p.id}-name`, describedby: `fh-preset-${p.id}-desc`, focusKey: `switch:preset:${p.id}` })}</div>${rulesListHtml({ list, toggle: false, empty: `<div class="fh-rules-empty">${T.s.presetEmpty}</div>` })}<div class="fh-box-footer">${addFormHtml({ list, placeholder: meta.placeholder, draft: ui.drafts[`add:${list}`] || "", error: ui.errors[`add:${list}`] || null })}<div class="fh-preset-foot"><p class="fh-caption">${T.s.matchesLike} ${meta.examples.map((x) => `<code>${esc(x)}</code>`).join(", ")}</p><button type="button" class="fh-btn is-small is-invisible" data-act="restore" data-preset="${p.id}" data-focus="restore:${p.id}"${modified ? "" : ` aria-disabled="true" data-fh-tip="${T.s.restoreDisabled}"`}>${icon("undo")}${T.s.restore}</button></div></div></section>`;
+					}
+
+					function pagePresets(s) {
+						return `<div class="fh-subhead"><h2 id="fh-page-title" tabindex="-1">${T.presets}</h2></div><p class="fh-lede">${T.s.presetsLede}</p>${FH.presets.map((p) => presetBoxHtml(p, s)).join("")}`;
+					}
+
+					function pageCustom(s) {
+						const on = s.customRules.filter((r) => r.enabled).length;
+						const total = s.customRules.length;
+						return `<div class="fh-subhead"><h2 id="fh-page-title" tabindex="-1">${T.customRules}</h2></div><p class="fh-lede">${T.s.customLede}</p><section class="fh-box" aria-labelledby="fh-custom-title"><div class="fh-box-header"><h3 class="fh-box-title" id="fh-custom-title">${T.s.customBox}</h3>${counterHtml(total)}${total ? `<span class="fh-caption">${T.s.rulesOn(on, total)}</span>` : ""}</div>${rulesListHtml({ list: "c", toggle: true, empty: compactBlankslate("filter", T.s.customEmptyTitle, T.s.customEmptyBody) })}<div class="fh-box-footer">${addFormHtml({ list: "c", placeholder: T.s.placeholderCustom, draft: ui.drafts["add:c"] || "", error: ui.errors["add:c"] || null })}</div></section>${syntaxHtml(true)}`;
+					}
+
+					function pageAlways(s) {
+						const total = s.alwaysShow.length;
+						return `<div class="fh-subhead"><h2 id="fh-page-title" tabindex="-1">${T.alwaysShow}</h2></div><p class="fh-lede">${T.s.alwaysLede}</p><div class="fh-example" aria-label="Example"><span class="fh-example-k">${T.s.exampleHide}</span><code>**/*.spec.ts</code><span class="fh-example-k">${T.s.exampleAlways}</span><code>src/payments/checkout.spec.ts</code><p>${codeify(T.s.exampleResult)}</p></div><section class="fh-box" aria-labelledby="fh-always-title"><div class="fh-box-header"><h3 class="fh-box-title" id="fh-always-title">${T.s.alwaysBox}</h3>${counterHtml(total)}</div>${rulesListHtml({ list: "a", toggle: false, empty: compactBlankslate("eye", T.s.alwaysEmptyTitle, T.s.alwaysEmptyBody) })}<div class="fh-box-footer">${addFormHtml({ list: "a", placeholder: T.s.placeholderAlways, draft: ui.drafts["add:a"] || "", error: ui.errors["add:a"] || null })}</div></section>${syntaxHtml(false)}`;
+					}
+
+					function navHtml(s) {
+						const item = (p) => {
+							const count = p.id === "custom" ? s.customRules.length : p.id === "always" ? s.alwaysShow.length : p.id === "presets" ? FH.presets.filter((x) => s.presets[x.id].enabled).length : null;
+							const counter = count === null ? "" : `<span class="fh-counter" aria-hidden="true">${count}</span>`;
+							const sr = count === null ? "" : `<span class="fh-sr">, ${count} ${p.id === "presets" ? "on" : plural(count, "rule", "rules")}</span>`;
+							return `<li><button type="button" class="fh-navlist-item" data-page="${p.id}" data-focus="nav:${p.id}"${ui.page === p.id ? ' aria-current="page"' : ""}>${icon(p.icon)}<span>${p.label}${sr}</span>${counter}</button></li>`;
+						};
+						return `<ul class="fh-navlist">${PAGES.filter((p) => !p.group).map(item).join("")}</ul><div class="fh-navlist-divider"></div><h2 class="fh-navlist-heading" id="fh-nav-rules">${T.s.rulesGroup}</h2><ul class="fh-navlist" aria-labelledby="fh-nav-rules">${PAGES.filter((p) => p.group).map(item).join("")}</ul><div class="fh-nav-note">${icon("device")}<span>${T.s.navNote}</span></div>`;
+					}
+
+					function frame() {
+						root.innerHTML = `<div class="fh-chrome" aria-hidden="true"><span class="fh-chrome-btn">${icon("arrowLeft")}</span><span class="fh-chrome-btn is-off">${icon("arrowRight")}</span><span class="fh-chrome-btn">${icon("reload")}</span><div class="fh-omnibox"><span class="fh-omnibox-chip">${icon("puzzle")}${T.product}</span><span class="fh-omnibox-url">chrome-extension://<b>hkfgmbdnjleiopmcobngfilpdcnbaaaj</b>/options.html</span></div><span class="fh-chrome-ext">${logo(18)}</span><span class="fh-chrome-btn">${icon("puzzle")}</span><span class="fh-chrome-btn">${icon("kebab")}</span></div><header class="fh-appheader">${logo(32)}<nav class="fh-crumbs" aria-label="Breadcrumb"><b>${T.product}</b><span class="sep">/</span><span>${T.s.crumb}</span></nav><div class="fh-appheader-end"><span class="fh-saved" aria-hidden="true">${icon("checkCircle")}${T.s.saved}</span><button type="button" class="fh-btn is-small" data-act="source">${icon("code")}${T.s.viewSource}${icon("linkExternal")}</button></div></header><div class="fh-page"><div class="fh-context">${logoTile(48, 28)}<div><h1>${T.product}</h1><p>${T.s.contextSub}</p></div><div class="fh-context-end">${labelHtml("MIT")}</div></div><div class="fh-grid"><nav class="fh-nav" aria-label="Settings"></nav><main class="fh-main" id="fh-main"></main></div></div>`;
+					}
+
+					function render() {
+						const s = FH.state;
+						const active = document.activeElement;
+						const prevKey = root.contains(active) ? active.closest("[data-focus]")?.dataset.focus : null;
+						const selection = active?.matches?.("input.fh-input") ? [active.selectionStart, active.selectionEnd] : null;
+						$(".fh-nav", root).innerHTML = navHtml(s);
+						const pages = { general: pageGeneral, presets: pagePresets, custom: pageCustom, always: pageAlways };
+						$("#fh-main", root).innerHTML = pages[ui.page](s);
+						const key = ui.focus || prevKey;
+						ui.focus = null;
+						if (key) {
+							const el = root.querySelector(`[data-focus="${CSS.escape(key)}"]`);
+							if (el) {
+								el.focus({ preventScroll: true });
+								if (selection && el.matches("input.fh-input") && key === prevKey) el.setSelectionRange(...selection);
+							}
+						}
+					}
+
+					function flashSaved() {
+						const el = $(".fh-saved", root);
+						el.classList.add("is-on");
+						clearTimeout(savedTimer);
+						savedTimer = setTimeout(() => el.classList.remove("is-on"), 1600);
+					}
+
+					function commit(fn, { focus = null, message = "" } = {}) {
+						ui.focus = focus;
+						fn();
+						flashSaved();
+						if (message) announce(message);
+					}
+
+					function open(page) {
+						ui.page = page;
+						ui.edit = null;
+						ui.errors = {};
+						render();
+						Proto.go("settings");
+						$("#fh-page-title", root)?.focus({ preventScroll: true });
+					}
+
+					function showFieldError(input, key, message) {
+						ui.errors[key] = message;
+						input.setAttribute("aria-invalid", String(!!message));
+						const box = document.getElementById(input.getAttribute("aria-describedby"));
+						if (box) box.innerHTML = errorHtml(message);
+					}
+
+					function rowFocusAfterRemove(li) {
+						const next = li.nextElementSibling || li.previousElementSibling;
+						if (next) return `remove:${next.dataset.list}:${next.dataset.key}`;
+						return `input:add:${li.dataset.list}`;
+					}
+
+					function rowFocusAfterPresetRemove(li) {
+						const list = li.dataset.list;
+						const index = Number(li.dataset.key);
+						const count = FH.state.presets[list.slice(2)].rules.length;
+						if (count <= 1) return `input:add:${list}`;
+						return `remove:${list}:${Math.min(index, count - 2)}`;
+					}
+
+					root.addEventListener("click", (e) => {
+						const nav = e.target.closest("[data-page]");
+						if (nav) {
+							ui.page = nav.dataset.page;
+							ui.edit = null;
+							ui.errors = {};
+							ui.focus = `nav:${ui.page}`;
+							render();
+							return;
+						}
+						const btn = e.target.closest("button[data-act]");
+						if (!btn || btn.getAttribute("aria-disabled") === "true") return;
+						const act = btn.dataset.act;
+						const li = btn.closest(".fh-rule");
+						if (act === "source") Proto.toast("Opens the public GitHub repository");
+						if (act === "tree") commit(() => FH.setTreeFiltering(!FH.state.treeFiltering), { focus: "switch:tree" });
+						if (act === "preset-enable") {
+							const id = btn.dataset.preset;
+							const on = !FH.state.presets[id].enabled;
+							commit(() => FH.setPresetEnabled(id, on), { focus: `switch:preset:${id}` });
+						}
+						if (act === "restore") {
+							const id = btn.dataset.preset;
+							ui.edit = null;
+							commit(() => FH.restorePreset(id), {
+								focus: `input:add:p:${id}`,
+								message: T.live.restored(FH.presets.find((p) => p.id === id).name),
+							});
+						}
+						if (act === "edit" && li) {
+							const rule = listRules(li.dataset.list).find((r) => r.key === li.dataset.key);
+							ui.edit = { list: li.dataset.list, key: li.dataset.key };
+							ui.drafts.edit = rule.pattern;
+							ui.errors.edit = null;
+							ui.focus = "input:edit";
+							render();
+							const input = $('[data-input="edit"]', root);
+							input?.select();
+						}
+						if (act === "cancel" && li) {
+							const fk = `edit:${li.dataset.list}:${li.dataset.key}`;
+							ui.edit = null;
+							ui.drafts.edit = undefined;
+							ui.errors.edit = null;
+							ui.focus = fk;
+							render();
+						}
+						if (act === "remove" && li) {
+							const list = li.dataset.list;
+							const key = li.dataset.key;
+							if (ui.edit?.list === list) ui.edit = null;
+							if (list.startsWith("p:"))
+								commit(() => FH.removePresetRule(list.slice(2), Number(key)), { focus: rowFocusAfterPresetRemove(li), message: T.live.ruleRemoved });
+							else if (list === "c") commit(() => FH.removeCustomRule(key), { focus: rowFocusAfterRemove(li), message: T.live.ruleRemoved });
+							else commit(() => FH.removeAlwaysShow(key), { focus: rowFocusAfterRemove(li), message: T.live.ruleRemoved });
+						}
+					});
+
+					root.addEventListener("change", (e) => {
+						const t = e.target;
+						if (t.dataset.act === "mode") commit(() => FH.setMode(t.value), { focus: `radio:${t.value}` });
+						if (t.dataset.act === "toggle") {
+							const li = t.closest(".fh-rule");
+							commit(() => FH.updateCustomRule(li.dataset.key, { enabled: t.checked }), { focus: `toggle:c:${li.dataset.key}` });
+						}
+					});
+
+					root.addEventListener("input", (e) => {
+						const input = e.target.closest("[data-input]");
+						if (!input) return;
+						const key = input.dataset.input;
+						ui.drafts[key] = input.value;
+						const form = input.closest("form");
+						const list = form.dataset.list;
+						const except = key === "edit" ? form.dataset.key : null;
+						const hasError = !!ui.errors[key];
+						if (input.value.trim() || hasError) showFieldError(input, key, input.value.trim() ? validate(list, input.value, except) : null);
+					});
+
+					root.addEventListener("keydown", (e) => {
+						if (e.key === "Escape" && e.target.matches('[data-input="edit"]')) {
+							e.preventDefault();
+							const li = e.target.closest(".fh-rule");
+							$('[data-act="cancel"]', li)?.click();
+						}
+					});
+
+					root.addEventListener("submit", (e) => {
+						e.preventDefault();
+						const form = e.target;
+						const list = form.dataset.list;
+						const input = $("[data-input]", form);
+						const key = input.dataset.input;
+						const value = input.value;
+						if (form.dataset.form === "add") {
+							const error = validate(list, value);
+							if (error) {
+								showFieldError(input, key, error);
+								announce(error);
+								input.focus();
+								return;
+							}
+							ui.drafts[key] = "";
+							ui.errors[key] = null;
+							const v = value.trim();
+							const focus = `input:${key}`;
+							if (list.startsWith("p:")) commit(() => FH.addPresetRule(list.slice(2), v), { focus, message: T.live.ruleAdded });
+							else if (list === "c") commit(() => FH.addCustomRule(v), { focus, message: T.live.ruleAdded });
+							else commit(() => FH.addAlwaysShow(v), { focus, message: T.live.ruleAdded });
+							return;
+						}
+						const ruleKey = form.dataset.key;
+						const error = validate(list, value, ruleKey);
+						if (error) {
+							showFieldError(input, key, error);
+							announce(error);
+							input.focus();
+							return;
+						}
+						const v = value.trim();
+						ui.edit = null;
+						ui.drafts.edit = undefined;
+						ui.errors.edit = null;
+						const focus = `edit:${list}:${ruleKey}`;
+						if (list.startsWith("p:")) commit(() => FH.updatePresetRule(list.slice(2), Number(ruleKey), v), { focus, message: T.live.ruleSaved });
+						else if (list === "c") commit(() => FH.updateCustomRule(ruleKey, { pattern: v }), { focus, message: T.live.ruleSaved });
+						else commit(() => FH.updateAlwaysShow(ruleKey, { pattern: v }), { focus, message: T.live.ruleSaved });
+					});
+
+					frame();
+					render();
+					FH.on("settings", () => {
+						if (ui.edit && !listRules(ui.edit.list).some((r) => r.key === ui.edit.key)) ui.edit = null;
+						render();
+					});
+
+					return { open, ruleRowHtml, addFormHtml };
+				})();
+
+				const Handoff = (() => {
+					const root = $("#ho");
+
+					const TOKENS = [
+						["--fh-fg", "fgColor-default", "#1f2328", "#f0f6fc", "Text"],
+						["--fh-fg-muted", "fgColor-muted", "#59636e", "#9198a1", "Descriptions, counts, icons"],
+						["--fh-bg", "bgColor-default", "#ffffff", "#0d1117", "Page, Box, inputs"],
+						["--fh-bg-muted", "bgColor-muted", "#f6f8fa", "#151b23", "Box header, editing row"],
+						["--fh-overlay-bg", "overlay-bgColor", "#ffffff", "#151b23", "ActionMenu surface"],
+						["--fh-border", "borderColor-default", "#d1d9e0", "#3d444d", "Box, inputs, Label"],
+						["--fh-border-muted", "borderColor-muted", "#d1d9e0b3", "#3d444db3", "Dividers, Box rows"],
+						["--fh-accent", "fgColor-accent", "#0969da", "#4493f8", "The one accent: active count, notice icon, logomark band"],
+						["--fh-accent-emphasis", "bgColor-accent-emphasis", "#0969da", "#1f6feb", "Revealed file outline, selected nav marker"],
+						["--fh-accent-muted", "bgColor-accent-muted", "#ddf4ff", "#388bfd1a", "Flash, active Counter, revealed halo"],
+						["--fh-accent-border", "borderColor-accent-muted", "#54aeff66", "#388bfd66", "Flash border"],
+						["--fh-neutral-muted", "bgColor-neutral-muted", "#818b981f", "#656c7633", "Counter, inline code"],
+						["--fh-attention", "fgColor-attention", "#9a6700", "#d29922", "Modified Label"],
+						["--fh-danger", "fgColor-danger", "#d1242f", "#f85149", "Validation, remove on hover"],
+						["--fh-success", "fgColor-success", "#1a7f37", "#3fb950", "Saved confirmation"],
+						["--fh-checked", "control-checked-bgColor-rest", "#0969da", "#1f6feb", "ToggleSwitch on, checkbox, radio"],
+						["--fh-track-bg", "control-track-bgColor-rest", "#e6eaef", "#262c36", "ToggleSwitch off"],
+						["--fh-transparent-hover", "control-transparent-bgColor-hover", "#818b981a", "#656c7633", "Item and invisible button hover"],
+						["--fh-tooltip-bg", "tooltip-bgColor", "#25292e", "#3d444d", "Tooltip"],
+						["--fh-focus", "focus-outlineColor", "#0969da", "#1f6feb", "2px focus ring"],
+					];
+
+					const TYPE = [
+						["Display", "Handoff only", "Feels built-in", "font: 620 76px/1 Mona Sans; wdth 112; -0.04em", "font-size:44px;line-height:1;font-weight:620;font-stretch:112%;letter-spacing:-0.04em"],
+						["Subhead", "Settings page title", "Custom rules", "24px / 36px · 400", "font-size:24px;line-height:36px;font-weight:400"],
+						["Title medium", "Blankslate heading", "All files are hidden", "20px / 30px · 600", "font-size:20px;line-height:30px;font-weight:600"],
+						["Body large", "Blankslate description", "Hidden files are still part of the pull request.", "16px / 24px · 400", "font-size:16px;line-height:24px"],
+						["Body medium", "Menu items, Flash, settings", "Hide files in this pull request", "14px / 20px · 400", "font-size:14px;line-height:20px"],
+						["Body semibold", "Menu title, legends, rule names", "GitHub File Hider", "14px / 20px · 600", "font-size:14px;line-height:20px;font-weight:600"],
+						["Body small", "Descriptions, captions, toolbar", "Remembered for #482", "12px / 16–18px · 400", "font-size:12px;line-height:18px"],
+						["Label, Counter", "Status pills and counts", "10 files hidden", "12px / 18px · 500", "font-size:12px;line-height:18px;font-weight:500"],
+						["Code", "Rule patterns", "**/__tests__/**", "12px / 20px · mono · 13px in inputs", "font:12px/20px var(--fh-mono)"],
+					];
+
+					const MOTION = [
+						["Instant", "80ms", "cubic-bezier(0.5, 1, 0.89, 1)", [0.5, 1, 0.89, 1], "ToggleSwitch knob, checkbox, button background"],
+						["Fast", "120ms", "cubic-bezier(0.33, 1, 0.68, 1)", [0.33, 1, 0.68, 1], "Item hover, tooltip, nav selection"],
+						["Base", "200ms", "cubic-bezier(0.33, 1, 0.68, 1)", [0.33, 1, 0.68, 1], "ActionMenu appear, Counter roll, status pop"],
+						["Slow", "240ms", "cubic-bezier(0.33, 1, 0.68, 1)", [0.33, 1, 0.68, 1], "Flash and Blankslate enter"],
+					];
+
+					const COPY = [
+						[
+							"Toolbar control",
+							"toolbar-start",
+							[
+								["toolbar.hide", T.hideFiles, "Inactive. Followed by a Counter with the number of matching files."],
+								["toolbar.hidden", "{n} file hidden · {n} files hidden", "Filtering. {n} renders as an accent Counter. Singular at 1."],
+								["toolbar.hideAgain", T.hideAgain, "Showing all files temporarily. Counter shows matching files."],
+								["toolbar.mode", T.automatic, "Label inside the button in automatic mode."],
+								["toolbar.options", T.options, "Accessible name and tooltip of the caret button."],
+								["toolbar.tip.hide", T.tipHide(10), `Tooltip on Hide files. With 0 matches: “${T.tipHide(0)}”.`],
+								["toolbar.tip.again", T.tipHideAgain, "Tooltip on Hide files again."],
+								["toolbar.tip.empty", T.tipEmpty, "Tooltip when no rule is turned on."],
+							],
+						],
+						[
+							"ActionMenu",
+							"overlay",
+							[
+								["menu.title", T.product, "Header, next to the logomark."],
+								["menu.mode", `${T.manual} · ${T.automatic}`, "Header Label. Automatic uses the accent variant."],
+								
+								["menu.toggle", T.menuToggle, "Manual mode only. menuitemcheckbox with a ToggleSwitch."],
+								["menu.toggle.desc", "Remembered for #{number}", "Explains per-pull-request memory. Stored by owner/repo#number."],
+								["menu.showAll", T.showAll, "While filtering."],
+								["menu.showAll.desc", T.menuShowAllDesc, "Manual mode."],
+								["menu.showAll.descAuto", T.menuShowAllAutoDesc, "Automatic mode."],
+								["menu.hideAgain", T.hideAgain, "While showing all files."],
+								["menu.hideAgain.desc", T.menuHideAgainDesc, ""],
+								["menu.empty.title", T.menuEmptyTitle, "No rule is turned on (first install)."],
+								["menu.empty.manual", T.menuEmptyManual, ""],
+								["menu.empty.auto", T.menuEmptyAuto, ""],
+								["menu.presets", T.presets, "Group heading."],
+								["menu.custom", T.customRules, "Summary row, opens settings."],
+								["menu.custom.none", T.menuCustomNone, ""],
+								["menu.custom.off", T.menuCustomOff(2), "{n} rule / {n} rules"],
+								["menu.tree", T.menuTree, ""],
+								["menu.tree.on", T.menuTreeOn, ""],
+								["menu.tree.off", T.menuTreeOff, ""],
+								["menu.settings", T.settings, "Opens the options page in a new tab."],
+							],
+						],
+						[
+							"Notices and file states",
+							"diff",
+							[
+								["notice.body", T.notice, "Flash above the revealed file. Exact sentence from the spec."],
+								["notice.file", T.noticeFile("the Tests preset **/*.test.*"), "Second line for file links. The pattern renders as inline code."],
+								["notice.comment", T.noticeComment("the Tests preset **/*.spec.*"), "Second line for comment links."],
+								["notice.action", T.hideRevealed, "Calls FH.hideRevealed(path)."],
+								["file.revealed", T.labelRevealed, "Accent Label in the file header."],
+								["file.revealed.tip", T.tipRevealed, ""],
+								["file.kept", T.labelKept, "Label in the file header when an Always show rule wins."],
+								["file.kept.tip", T.tipKept("src/payments/checkout.spec.ts", "the Tests preset (**/*.spec.*)"), ""],
+								["tree.hidden.tip", T.tipTreeHidden("the Tests preset (**/*.spec.*)"), "Tree filtering off. Muted entry with eye-off icon."],
+								["tree.revealed.tip", T.tipTreeRevealed, ""],
+								["tree.empty", `${T.treeEmptyTitle}. ${T.treeEmptyBody}`, "Tree bottom, when every entry is hidden."],
+							],
+						],
+						[
+							"Empty state",
+							"diff-top",
+							[
+								["empty.all", T.emptyAll, "Blankslate heading."],
+								["empty.all.body", T.emptyAllBody(true), "Before all files load: “Every file loaded so far…”."],
+								["empty.kept", T.emptyKept, "Only Always show files remain."],
+								["empty.kept.body", T.emptyKeptBody(1), ""],
+								["empty.primary", T.showAll, "Primary button."],
+								["empty.secondary", T.editRules, "Link to the settings page with the most hiding rules."],
+							],
+						],
+						[
+							"Settings page",
+							"options.html",
+							[
+								["s.general", T.s.general, "Nav item and page title."],
+								["s.general.lede", T.s.generalLede, ""],
+								["s.mode", T.s.modeLegend, "Legend."],
+								["s.mode.caption", T.s.modeCaption, ""],
+								["s.mode.manual", `${T.s.manualTitle} + Label “${T.s.defaultLabel}”`, ""],
+								["s.mode.manual.body", T.s.manualBody.replace(/<\/?b>/g, ""), ""],
+								["s.mode.auto", T.s.autoTitle, ""],
+								["s.mode.auto.body", T.s.autoBody.replace(/<\/?b>/g, ""), ""],
+								["s.tree", T.s.treeTitle, "ToggleSwitch, default On."],
+								["s.tree.body", T.s.treeBody, ""],
+								["s.scope", T.s.scopeTitle, "Subhead."],
+								["s.scope.repo", `${T.s.factRepoTitle}. ${T.s.factRepoBody}`, ""],
+								["s.scope.local", `${T.s.factLocalTitle}. ${T.s.factLocalBody}`, ""],
+								["s.scope.display", `${T.s.factDisplayTitle}. ${T.s.factDisplayBody}`, ""],
+								["s.presets.lede", T.s.presetsLede, ""],
+								["s.preset.modified", T.s.modified, "Attention Label when rules differ from defaults."],
+								["s.preset.restore", T.s.restore, `Disabled tooltip: “${T.s.restoreDisabled}”.`],
+								["s.preset.empty", T.s.presetEmpty, ""],
+								["s.custom.lede", T.s.customLede, ""],
+								["s.custom.box", T.s.customBox, "Box header."],
+								["s.custom.empty", `${T.s.customEmptyTitle}. ${plainCopy(T.s.customEmptyBody)}`, "Patterns render as inline code."],
+								["s.always.lede", T.s.alwaysLede, ""],
+								["s.always.example", plainCopy(T.s.exampleResult), "Under the priority example."],
+								["s.always.empty", `${T.s.alwaysEmptyTitle}. ${plainCopy(T.s.alwaysEmptyBody)}`, ""],
+								["s.rule.add", T.s.addRule, "Button next to the rule field."],
+								["s.rule.save", `${T.s.save} · ${T.s.cancel}`, "Inline edit."],
+								["s.rule.edit", `${T.s.edit} · ${T.s.remove}`, "Icon button names and tooltips."],
+								["s.syntax", T.s.syntaxTitle, "Collapsible help with the spec's examples."],
+								["s.saved", T.s.saved, "Header confirmation after every change."],
+								["s.nav.note", T.s.navNote, "Under the navigation."],
+							],
+						],
+						[
+							"Validation",
+							"FH.validatePattern",
+							[
+								["v.empty", "Enter a path or pattern.", "From the engine."],
+								["v.leadingSlash", "Use a repository-relative path. Remove the leading /.", "From the engine."],
+								["v.backslash", "Use forward slashes (/) in paths.", "From the engine."],
+								["v.space", "Patterns cannot contain spaces.", "From the engine."],
+								["v.stars", "Use * or **, not ***.", "From the engine."],
+								["v.duplicate", T.s.duplicate, "Checked by the settings page."],
+							],
+						],
+						[
+							"Live announcements",
+							"role=status",
+							[
+								["live.hidden", T.live.hidden(10), "On activation, restore, and every count change."],
+								["live.showing", T.live.showing(10), "On Show all files."],
+								["live.off", T.live.off, "When Hide files is turned off for the pull request."],
+								["live.notice", T.notice, "When a direct link reveals a file."],
+								["live.hiddenAgain", T.live.hiddenAgain("src/components/CheckoutForm.test.tsx"), "After Hide again."],
+								["live.rules", `${T.live.ruleAdded} ${T.live.ruleSaved} ${T.live.ruleRemoved}`, "Settings page."],
+								["live.restored", T.live.restored("Tests"), "Restore defaults."],
+							],
+						],
+					];
+
+					const fakeMenu = (over = {}) => ({
+						view: "filtering",
+						auto: false,
+						prKey: "acme/storefront#482",
+						active: true,
+						filtering: true,
+						hidden: 10,
+						match: 10,
+						tree: true,
+						presets: [
+							{ id: "tests", name: "Tests", enabled: true, count: 7 },
+							{ id: "lockfiles", name: "Lockfiles", enabled: true, count: 2 },
+						],
+						custom: { on: 1, total: 2, preview: ["**/generated/**"], count: 1 },
+						...over,
+					});
+
+					const pair = (fn, cls = "") =>
+						`<div class="ho-pair">${["light", "dark"].map((t) => `<div class="ho-stage ${cls}" data-gh-theme="${t}" inert><span class="ho-stage-tag">${t}</span>${fn(t)}</div>`).join("")}</div>`;
+
+					const variant = (label, html, wide = false) => `<div class="ho-variant${wide ? " is-wide" : ""}">${html}<small>${label}</small></div>`;
+
+					const miniToolbar = (inner) =>
+						`<div class="ho-mini-toolbar"><button class="gh-btn invisible sm" tabindex="-1">File filter ${GH.icon("caret")}</button><button class="gh-btn invisible sm" tabindex="-1">${GH.icon("gear")}${GH.icon("caret")}</button>${inner}</div>`;
+
+					const card = (title, primer, desc, body, classes = "") =>
+						`<article class="ho-card"><header class="ho-card-head"><h3>${title}</h3><span class="ho-primer">${primer}</span>${classes ? `<span class="ho-classes">${classes}</span>` : ""}<p class="ho-p">${desc}</p></header>${body}</article>`;
+
+					function bezierPath([x1, y1, x2, y2]) {
+						const s = 100;
+						return `M0 ${s} C${x1 * s} ${s - y1 * s} ${x2 * s} ${s - y2 * s} ${s} 0`;
+					}
+
+					function treeRow(name, kind, tip, depth = 1) {
+						const state = kind === "hidden" ? "diff-hidden" : kind === "revealed" ? "revealed" : "";
+						return `<li class="gh-tree-file" data-fh-state="${state}"><div class="gh-tree-row" style="padding-left:${8 + depth * 16}px"><span style="width:16px;flex:none"></span>${GH.icon("file")}<span class="name">${name}</span>${kind ? treeHintHtml(kind, tip) : ""}<span class="gh-status modified"></span></div></li>`;
+					}
+
+					function fileHeader(path, labelKind) {
+						const tip = labelKind === "kept" ? T.tipKept("src/payments/checkout.spec.ts", "the Tests preset (**/*.spec.*)") : T.tipRevealed;
+						return `<div class="gh-file${labelKind === "revealed" ? " fh-revealed" : ""}"><div class="gh-file-header"><button class="gh-file-collapse" tabindex="-1">${GH.icon("chevronDown")}</button><span class="gh-file-stat">12 <span class="gh-blocks"><i class="a"></i><i class="a"></i><i class="a"></i><i class="d"></i><i></i></span></span><span class="gh-file-path">${path}</span><div class="gh-file-actions">${fileLabelHtml(labelKind, tip).replace('tabindex="0"', 'tabindex="-1"')}<button class="gh-viewed" tabindex="-1"><span class="box"></span>Viewed</button></div></div></div>`;
+					}
+
+					function concept() {
+						const states = [
+							{
+								v: { view: "empty", hidden: 0, match: 0, auto: false },
+								title: "No rules",
+								tag: "ruleCount 0",
+								body: "First install. The control stays and opens a menu that turns on presets right there.",
+							},
+							{
+								v: { view: "inactive", hidden: 0, match: 10, auto: false },
+								title: "Ready",
+								tag: "manual, inactive",
+								body: "One click on Hide files activates filtering for this pull request. The Counter previews the result.",
+							},
+							{
+								v: { view: "filtering", hidden: 10, match: 10, auto: false },
+								title: "Filtering",
+								tag: "active",
+								body: "The count is the status. It rolls on change and is announced. The caret opens the menu.",
+							},
+							{
+								v: { view: "showing", hidden: 0, match: 10, auto: false },
+								title: "Showing all",
+								tag: "temporary",
+								body: "Hide files again restores in one click. Rules and mode do not change.",
+							},
+						];
+						return `<section class="ho-section" id="ho-concept" data-ho-section><div class="ho-section-head"><span class="ho-num">01</span><h2 class="ho-h2">Concept</h2><p class="ho-intro">A reviewer should believe GitHub shipped this. The extension borrows Primer's components at Primer's metrics and adds nothing GitHub would not add itself: one control next to File filter, one menu, and quiet signals where files are affected.</p></div><div class="ho-principles"><div class="ho-principle"><span class="ho-principle-n">1</span><h3>Borrow, don't invent</h3><p>ActionMenu, ToggleSwitch, Counter, Label, Flash, Blankslate, NavList, Box. Same sizes, radii, tokens and focus rings, so the UI follows GitHub's themes for free.</p></div><div class="ho-principle"><span class="ho-principle-n">2</span><h3>One control, one place</h3><p>Everything starts from the toolbar, where GitHub keeps its own view filters. The count is the status; the menu is the detail.</p></div><div class="ho-principle"><span class="ho-principle-n">3</span><h3>Never touch GitHub's numbers</h3><p>Files changed, diffstat, viewed progress and review state stay exactly as GitHub renders them. Only the display of matching files changes.</p></div></div><div class="ho-sub"><h3 class="ho-h3">State model of the toolbar control</h3><p class="ho-p">Rendered live from the same functions the pull request screen uses.</p></div><div class="ho-states">${states
+							.map(
+								(s) =>
+									`<div class="ho-state"><div class="ho-state-stage" inert>${controlHtml(s.v)}</div><div class="ho-state-body"><h4>${s.title} <code>${s.tag}</code></h4><p>${s.body}</p></div></div>`,
+							)
+							.join("")}</div><div class="ho-flow">${icon("info")}<span>Transitions:</span><code class="ho-code">Hide files → FH.activate()</code>${icon("arrowRight")}<code class="ho-code">Show all files → FH.showAll()</code>${icon("arrowRight")}<code class="ho-code">Hide files again → FH.restore()</code><span>· Off in the menu → <code class="ho-code">FH.deactivate()</code> · Automatic mode opens in Filtering.</span></div><div class="ho-sub"><h3 class="ho-h3">Identity</h3><p class="ho-p">The logomark is a file crossed by a band. Above the band the outline is solid; below it, dashed: the file is still part of the pull request, it is just not shown. It uses the text color plus the single accent, and appears only where GitHub would show an app identity: the menu header, the options page and the browser toolbar.</p></div><div class="ho-grid-3">${["light", "dark"].map((t) => `<div class="ho-tile ho-id" data-gh-theme="${t}"><h4>${t === "light" ? "Light" : "Dark"}</h4><div class="ho-id-marks">${logoTile(64, 36)}${logo(32)}${logo(20)}${logo(16)}</div><div class="ho-id-sample">${logo(20)}<b>${T.product}</b>${labelHtml(T.manual)}</div></div>`).join("")}<div class="ho-tile"><h4>Construction</h4><p class="ho-p" style="margin:0">24px grid. Outline 1.75px, round joins. The outline is solid above the band and dashed below it: the file is still there, only part of it is shown. Band 18 × 3.5, radius 1.25, with a 1px gap to the outline on both sides. The band is <code class="ho-code">--fh-logo-band</code> (accent); the outline is <code class="ho-code">currentColor</code>. Never the Octocat, never GitHub's mark.</p></div></div></section>`;
+					}
+
+					function tokens() {
+						const swatch = (c) => `<span class="ho-swatch"><i style="--c:${c}"></i>${c}</span>`;
+						const rows = TOKENS.map(([n, p, l, d, u]) => `<tr><td>${n}</td><td class="muted">${p}</td><td>${swatch(l)}</td><td>${swatch(d)}</td><td class="muted">${u}</td></tr>`).join("");
+						const type = TYPE.map(
+							([n, use, sample, spec, style]) =>
+								`<div class="ho-type-row"><div class="ho-type-name">${n}<small>${use}</small></div><div style="${style};min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sample)}</div><div class="ho-type-spec">${spec}</div></div>`,
+						).join("");
+						const space = [4, 8, 12, 16, 24, 32, 40].map((n) => `<div class="ho-space-row"><span>${n}px</span><i style="width:${n * 4}px"></i></div>`).join("");
+						const radii = [
+							["3px", "Checkbox"],
+							["6px", "Button, input, Box, item, switch"],
+							["12px", "ActionMenu"],
+							["2em", "Counter, Label"],
+						]
+							.map(([r, u]) => `<div class="ho-radius"><i style="border-radius:${r}"></i><b>${r}</b><span>${u}</span></div>`)
+							.join("");
+						const shadows = [
+							["Resting small", "--fh-shadow-resting-small", "ToggleSwitch knob, logomark tile"],
+							["Floating small", "--fh-shadow-floating-small", "ActionMenu"],
+							["Button", "--fh-shadow-button", "Default buttons (light only)"],
+						]
+							.map(([n, v, u]) => `<div class="ho-shadow"><i style="box-shadow:var(${v})"></i><div><b>${n}</b><code class="ho-code">${v}</code> · ${u}</div></div>`)
+							.join("");
+						const motion = MOTION.map(
+							([n, d, e, curve, u]) =>
+								`<div class="ho-curve" tabindex="0" style="--d:${d === "80ms" ? "480ms" : d === "120ms" ? "640ms" : d === "200ms" ? "800ms" : "960ms"};--e:${e}"><svg viewBox="-4 -4 108 108" aria-hidden="true"><rect x="0" y="0" width="100" height="100" fill="none" stroke="var(--fh-border-muted)" stroke-dasharray="2 3"/><path d="${bezierPath(curve)}" fill="none" stroke="var(--fh-accent)" stroke-width="2.5" stroke-linecap="round"/></svg><div class="ho-track"><i></i></div><b>${n} · ${d}</b><span><code>${e}</code></span><span>${u}</span></div>`,
+						).join("");
+						return `<section class="ho-section" id="ho-tokens" data-ho-section><div class="ho-section-head"><span class="ho-num">02</span><h2 class="ho-h2">Design tokens</h2><p class="ho-intro">Every value maps to a Primer token. In the extension, read GitHub's own custom properties with these values as fallbacks, for example <code class="ho-code">var(--fgColor-accent, #0969da)</code>. The UI then follows every GitHub theme, including dimmed, high contrast and colorblind variants.</p></div><div class="ho-sub"><h3 class="ho-h3">Color</h3></div><table class="ho-tokens"><thead><tr><th>Token</th><th>Primer source</th><th>Light</th><th>Dark</th><th>Used for</th></tr></thead><tbody>${rows}</tbody></table><div class="ho-sub"><h3 class="ho-h3">Type scale</h3><p class="ho-p">Mona Sans everywhere, GitHub's mono stack for patterns: <code class="ho-code">ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace</code>.</p></div><div class="ho-type">${type}</div><div class="ho-sub"><h3 class="ho-h3">Spacing, radii, elevation</h3></div><div class="ho-grid-3"><div class="ho-tile"><h4>Spacing · 4px base</h4><div class="ho-space">${space}</div></div><div class="ho-tile"><h4>Radii</h4><div class="ho-radii">${radii}</div></div><div class="ho-tile is-muted"><h4>Shadows</h4><div class="ho-shadows">${shadows}</div></div></div><div class="ho-sub"><h3 class="ho-h3">Motion</h3><p class="ho-p">Hover or focus a card to preview the easing. With <code class="ho-code">prefers-reduced-motion: reduce</code> every duration becomes 0 and smooth scrolling becomes instant.</p></div><div class="ho-motion">${motion}</div></section>`;
+					}
+
+					function components() {
+						const toolbarCard = card(
+							"Toolbar control",
+							"ButtonGroup · Button invisible small · Counter",
+							"28px high, 12px medium text, muted like GitHub's other view filters. Split into an action and a caret when there is a one-click action; a single menu button while filtering.",
+							pair(
+								() =>
+									`<div class="ho-variants">${variant("Ready · manual", miniToolbar(controlHtml({ view: "inactive", match: 10, hidden: 0 })))}${variant("Hover on action", miniToolbar(controlHtml({ view: "inactive", match: 10, hidden: 0 }, { state: "hover-main" })))}${variant("Filtering", miniToolbar(controlHtml({ view: "filtering", match: 10, hidden: 10 })))}${variant("Filtering · 1 file", miniToolbar(controlHtml({ view: "filtering", match: 1, hidden: 1 })))}${variant("Filtering · automatic", miniToolbar(controlHtml({ view: "filtering", match: 10, hidden: 10, auto: true })))}${variant("Menu open", miniToolbar(controlHtml({ view: "filtering", match: 10, hidden: 10 }, { expanded: true })))}${variant("Showing all", miniToolbar(controlHtml({ view: "showing", match: 10, hidden: 0 })))}${variant("No rules", miniToolbar(controlHtml({ view: "empty", match: 0, hidden: 0 })))}${variant("Keyboard focus", miniToolbar(controlHtml({ view: "filtering", match: 10, hidden: 10 }, { state: "focus-menu" })))}</div>`,
+							),
+							".fh-ctl .fh-ctl-main .fh-ctl-menu .fh-counter .fh-roll",
+						);
+						const menuCard = card(
+							"ActionMenu",
+							"ActionMenu · ActionList · ToggleSwitch small",
+							"320px wide, 12px radius, floating-small shadow. Items 32px minimum, 6px 8px padding, 8px inset. Checkbox items and switches keep the menu open; actions close it.",
+							pair((t) => `<div class="ho-variants">${variant("Filtering · manual · keyboard focus on Show all files", `<div class="fh-overlay is-static" role="presentation">${menuHtml(fakeMenu(), { uid: `a-${t}`, states: { "show-all": "focus" } })}</div>`)}</div>`) +
+								pair(
+									(t) =>
+										`<div class="ho-variants">${variant("First install · no rules", `<div class="fh-overlay is-static" role="presentation">${menuHtml(fakeMenu({ view: "empty", active: false, filtering: false, hidden: 0, match: 0, presets: [{ id: "tests", name: "Tests", enabled: false, count: 7 }, { id: "lockfiles", name: "Lockfiles", enabled: false, count: 2 }], custom: { on: 0, total: 0, preview: [], count: 0 } }), { uid: `b-${t}`, states: { "preset:tests": "hover" } })}</div>`)}${variant("Automatic · showing all · tree off", `<div class="fh-overlay is-static" role="presentation">${menuHtml(fakeMenu({ view: "showing", auto: true, filtering: false, hidden: 0, tree: false }), { uid: `c-${t}` })}</div>`)}</div>`,
+								),
+							".fh-overlay .fh-al-item .fh-al-heading .fh-al-divider",
+						);
+						const switchCard = card(
+							"ToggleSwitch, checkbox, radio",
+							"ToggleSwitch small · Checkbox · Radio",
+							"48 × 24 track, 6px radius, knob slides in 80ms. The status text sits on the left and is hidden from assistive technology; the button carries aria-pressed.",
+							pair(
+								() =>
+									`<div class="ho-variants">${variant("Off", `<span class="fh-switch"><span class="fh-switch-status">Off</span>${switchVisual(false)}</span>`)}${variant("On", `<span class="fh-switch"><span class="fh-switch-status">On</span>${switchVisual(true)}</span>`)}${variant("Focus", `<span class="fh-switch"><span class="fh-switch-status">On</span>${switchVisual(true).replace("fh-switch-track", "fh-switch-track is-focus")}</span>`)}${variant("Disabled", `<span class="fh-switch"><span class="fh-switch-status is-disabled">Off</span>${switchVisual(false, true)}</span>`)}${variant("Checkbox", `<span style="display:flex;gap:10px"><input type="checkbox" class="fh-checkbox" tabindex="-1"><input type="checkbox" class="fh-checkbox" checked tabindex="-1"></span>`)}${variant("Radio", `<span style="display:flex;gap:10px"><input type="radio" class="fh-radio" tabindex="-1"><input type="radio" class="fh-radio" checked tabindex="-1"></span>`)}</div>`,
+							),
+							".fh-switch .fh-switch-track .fh-switch-knob .fh-checkbox .fh-radio",
+						);
+						const labelCard = card(
+							"Counter, Label, Tooltip",
+							"CounterLabel · Label · Tooltip",
+							"Labels are 20px with a 1px border and no fill. The accent appears only on states that need attention now.",
+							pair(
+								() =>
+									`<div class="ho-variants">${variant("Counter", counterHtml(10))}${variant("Counter · accent", counterHtml(10, true))}${variant("Mode", `<span style="display:flex;gap:6px">${labelHtml(T.manual)}${labelHtml(T.automatic, "accent")}</span>`)}${variant("File states", `<span style="display:flex;gap:6px">${labelHtml(T.labelKept)}${labelHtml(T.labelRevealed, "accent")}</span>`)}${variant("Settings", `<span style="display:flex;gap:6px">${labelHtml(T.s.modified, "attention")}${labelHtml(T.s.defaultLabel)}${labelHtml(T.s.off)}</span>`)}${variant("Tooltip", `<span class="fh-tooltip is-static">${T.tipHide(10)}</span>`)}</div>`,
+							),
+							".fh-counter .fh-label .fh-tooltip",
+						);
+						const noticeCard = card(
+							"Direct-link notice and file states",
+							"Flash · Label",
+							"The Flash sits 8px above the revealed file, which gets an accent outline and a Temporarily visible Label in its sticky header. An Always show file gets a neutral Label only while filtering.",
+							pair(
+								() =>
+									`<div class="ho-variants" style="flex-direction:column;align-items:stretch">${variant("Flash · file link", `<div class="fh-flash" style="width:100%"><span class="fh-flash-icon">${icon("info")}</span><div class="fh-flash-text"><p>${T.notice}</p><p class="fh-flash-detail">${T.noticeFile("the Tests preset <code>**/*.test.*</code>")}</p></div><div class="fh-flash-actions"><button class="fh-btn is-small" tabindex="-1">${icon("eyeOff")}${T.hideRevealed}</button></div></div>`, true)}${variant("Revealed file header", fileHeader("src/components/CheckoutForm.test.tsx", "revealed"), true)}${variant("Always shown file header", fileHeader("src/payments/checkout.spec.ts", "kept"), true)}</div>`,
+							),
+							".fh-flash .fh-file-label .gh-file.fh-revealed",
+						);
+						const treeCard = card(
+							"Sidebar tree entries",
+							"TreeView item · Octicon",
+							"With tree filtering off, matching entries stay, muted, with an eye-off icon before the status; the tooltip names the rule. Selecting one opens it as a direct link.",
+							pair(
+								() =>
+									`<div class="ho-variants">${variant("Tree filtering off · revealed entry", `<ul class="gh-tree" style="flex:none">${treeRow("Button.spec.tsx", "hidden", "")}${treeRow("Button.tsx", "", "")}${treeRow("CheckoutForm.test.tsx", "revealed", "")}${treeRow("CheckoutForm.tsx", "", "")}</ul>`)}${variant("Tree empty", `<div class="fh-tree-empty" style="width:280px">${icon("eyeOff")}<div><strong>${T.treeEmptyTitle}</strong>${T.treeEmptyBody} <button class="fh-link" tabindex="-1">${T.showAll}</button></div></div>`)}</div>`,
+							),
+							".fh-tree-hint [data-fh-state=diff-hidden] .fh-tree-empty",
+						);
+						const emptyCard = card(
+							"All files hidden",
+							"Blankslate",
+							"Bordered Blankslate in the diff column. The primary action is the way out; the link opens the settings page that holds most of the hiding rules.",
+							pair(() => blankslateHtml({ kind: "all", allLoaded: true, keptCount: 0, live: false })) +
+								pair(() => blankslateHtml({ kind: "kept", allLoaded: true, keptCount: 1, live: false })),
+							".fh-blankslate",
+						);
+						const presetDemo = () => {
+							const rows = [
+								Settings.ruleRowHtml({ list: "p:tests", rule: { key: "0", pattern: "**/*.spec.*", enabled: true }, toggle: false, live: false }),
+								Settings.ruleRowHtml({ list: "p:tests", rule: { key: "1", pattern: "**/*.test.*", enabled: true }, toggle: false, editing: true, draft: "**/*.test.*", live: false }),
+								Settings.ruleRowHtml({ list: "p:tests", rule: { key: "2", pattern: "**/__tests__/**", enabled: true }, toggle: false, editing: true, draft: "/src/__tests__/**", error: "Use a repository-relative path. Remove the leading /.", live: false }),
+								Settings.ruleRowHtml({ list: "c", rule: { key: "x", pattern: "docs/**", enabled: false }, toggle: true, live: false }),
+							].join("");
+							return `<div class="ho-variants" style="flex-direction:column;align-items:stretch">${variant("Rule rows · rest, editing, invalid, custom rule off", `<div class="fh-box" style="width:100%"><div class="fh-box-header"><span class="fh-preset-icon">${icon("beaker")}</span><div class="fh-preset-text"><div class="fh-preset-title"><h3>Tests</h3>${labelHtml(T.s.modified, "attention")}</div><p class="fh-caption">Spec and test files, and everything inside __tests__ folders.</p></div><span class="fh-switch"><span class="fh-switch-status" aria-hidden="true">On</span>${switchVisual(true)}</span></div><ul class="fh-rules">${rows}</ul><div class="fh-box-footer">${Settings.addFormHtml({ list: "p:tests", placeholder: "**/*.integration.ts", draft: "**/*.integration.ts", error: T.s.duplicate, live: false })}</div></div>`, true)}</div>`;
+						};
+						const settingsCard = card(
+							"Settings rows and fields",
+							"Box · TextInput · FormControl validation · IconButton",
+							"Rows are 45px with 12px monospace patterns. Edit swaps the row for a TextInput with Save and Cancel; errors use the danger border and a 12px semibold message tied by aria-describedby.",
+							pair(presetDemo),
+							".fh-box .fh-rule .fh-input .fh-validation .fh-iconbtn",
+						);
+						return `<section class="ho-section" id="ho-components" data-ho-section><div class="ho-section-head"><span class="ho-num">03</span><h2 class="ho-h2">Component inventory</h2><p class="ho-intro">Every state rendered live with the production classes, in both GitHub themes side by side. Nothing here is a picture.</p></div>${toolbarCard}${menuCard}${switchCard}${labelCard}${noticeCard}${treeCard}${emptyCard}${settingsCard}</section>`;
+					}
+
+					function injection() {
+						const rows = [
+							["1", "Toolbar", '<code>[data-gh-slot="toolbar-start"]</code>, after the File filter group', "ButtonGroup: Hide files + caret", "GitHub keeps its own view filters here. The toolbar is sticky, so status and the way back are always one click away."],
+							["2", "Overlay root", "<code>document.body</code>", "ActionMenu, Tooltip, live region", "Escapes the sticky toolbar's stacking context. Positioned to the control's rect; repositions on scroll and resize. z-index 100, above file headers (5) and the toolbar (20)."],
+							["3", "Diff list", "<code>#gh-files</code>, immediately before <code>.gh-file#diff-&lt;hash&gt;</code>", "Flash notice", "The explanation sits next to the file it explains and scrolls with it. Inserted idempotently because the list is observed."],
+							["4", "File header", '<code>[data-gh-slot="file-actions"]</code>, first child', "Label: Temporarily visible / Always shown", "The sticky header keeps the state in view while reading. Placed left of Viewed so GitHub's controls never move."],
+							["5", "Tree row", "<code>.gh-tree-file &gt; .gh-tree-row</code>, before <code>.gh-status</code>", "eye-off hint (tree filtering off), eye (revealed)", "Keeps the tree complete when asked to. The status icon stays last so columns align."],
+							["6", "Diff column", '<code>[data-gh-slot="diff-top"]</code>', "Blankslate", "Replaces an empty diff with an explanation and a way out."],
+							["7", "Tree bottom", '<code>[data-gh-slot="tree-bottom"]</code>', "Empty tree note", "Only when tree filtering hides every entry."],
+							["8", "Options page", "<code>options_ui.page</code> → <code>chrome-extension://&lt;id&gt;/options.html</code>", "Settings", "Opened from the menu. Uses GitHub's settings anatomy so it feels like part of the same product."],
+						];
+						const map = `<div class="ho-map" aria-hidden="true"><div class="ho-map-page"><div class="ho-map-bar"><span class="ho-map-pill" style="width:16px;height:16px;border-radius:4px"></span><span class="ho-map-pill" style="width:120px"></span><span class="ho-map-pill" style="width:80px"></span><span class="ho-map-pill" style="width:100px"></span><span class="ho-map-pill" style="width:36px"></span><span class="ho-pin">1</span><span class="ho-map-anchor"><span class="ho-map-pill is-ext">${icon("eyeOff")}10 files hidden ${GH.icon("caret")}</span><span class="ho-map-overlay"><span class="ho-pin">2</span><i style="width:60%"></i><i></i><i style="width:80%"></i><i style="width:70%"></i><i style="width:40%"></i></span></span><span style="flex:1"></span><span class="ho-map-pill" style="width:90px"></span><span class="ho-map-pill is-primary"></span></div><div class="ho-map-body"><div class="ho-map-tree"><div class="ho-map-row"><i></i></div><div class="ho-map-row"><i></i></div><div class="ho-map-row is-ext">${icon("eyeOff")}<i style="background:var(--fh-accent-border)"></i><span class="ho-pin">5</span></div><div class="ho-map-row"><i></i></div><div class="ho-map-row"><i></i></div><div class="ho-map-zone" style="height:30px"><span class="ho-pin">7</span>tree-bottom</div></div><div class="ho-map-diff"><div class="ho-map-zone"><span class="ho-pin">6</span>diff-top · Blankslate</div><div class="ho-map-flash"><span class="ho-pin">3</span>${icon("info")}Temporarily visible…</div><div class="ho-map-file" style="border-color:var(--fh-accent-emphasis)"><div class="ho-map-file-head"><span class="ho-map-pill" style="width:200px"></span><span style="flex:1"></span><span class="ho-pin">4</span>${labelHtml(T.labelRevealed, "accent")}<span class="ho-map-pill" style="width:54px;height:18px;border-radius:5px"></span></div><div class="ho-map-file-body"><i style="width:80%"></i><i style="width:64%"></i><i style="width:72%"></i></div></div><div class="ho-map-file"><div class="ho-map-file-head"><span class="ho-map-pill" style="width:160px"></span><span style="flex:1"></span><span class="ho-map-pill" style="width:54px;height:18px;border-radius:5px"></span></div><div class="ho-map-file-body"><i style="width:70%"></i><i style="width:50%"></i></div></div></div></div></div></div>`;
+						return `<section class="ho-section" id="ho-injection" data-ho-section><div class="ho-section-head"><span class="ho-num">04</span><h2 class="ho-h2">Injection points</h2><p class="ho-intro">Selectors are the prototype's slots. Map each to GitHub's equivalent anchor and re-check them on every GitHub release: diff, tree, lazy-loaded files and direct links.</p></div>${map}<table class="ho-table" style="margin-top:32px"><thead><tr><th></th><th>Surface</th><th>Anchor</th><th>Injects</th><th>Why</th></tr></thead><tbody>${rows.map(([n, s, a, w, y]) => `<tr><td><span class="ho-pin">${n}</span></td><td class="str" style="white-space:nowrap">${s}</td><td>${a}</td><td>${w}</td><td class="muted">${y}</td></tr>`).join("")}</tbody></table><div class="ho-notes"><div class="ho-note"><h4>${icon("lock")}Never touched</h4><ul><li><code class="ho-code">[data-gh-files-count]</code> Files changed counter</li><li><code class="ho-code">.gh-diffstat</code> additions, deletions and blocks</li><li><code class="ho-code">[data-gh-viewed]</code> viewed progress and every <code class="ho-code">.gh-viewed</code> checkbox</li><li>Review changes, comments, review state</li><li>GitHub nodes are hidden with a class, never removed</li></ul></div><div class="ho-note"><h4>${icon("reload")}Dynamic page rules</h4><ul><li>Re-run the sync on <b>gh:files-added</b> and on every engine change; each injection is idempotent.</li><li>Inserting the Flash into the observed file list triggers one extra pass; it must find nothing to change.</li><li>Count = distinct paths hidden in diff ∪ tree, never double counted.</li><li>Direct links: hash targets reveal the file, everything else stays hidden.</li></ul></div></div></section>`;
+					}
+
+					function interaction() {
+						const keys = [
+							["Toolbar", "<kbd class=\"ho-kbd\">Tab</kbd>", "Hide files (when shown), then the menu button."],
+							["", "<kbd class=\"ho-kbd\">Enter</kbd> <kbd class=\"ho-kbd\">Space</kbd> on Hide files", "Activates. Focus moves to the menu button, which now reads “10 files hidden”."],
+							["", "<kbd class=\"ho-kbd\">Enter</kbd> <kbd class=\"ho-kbd\">Space</kbd> <kbd class=\"ho-kbd\">↓</kbd> on the menu button", "Opens the menu with focus on the first item."],
+							["", "<kbd class=\"ho-kbd\">↑</kbd> on the menu button", "Opens the menu with focus on the last item (Settings)."],
+							["Menu", "<kbd class=\"ho-kbd\">↓</kbd> <kbd class=\"ho-kbd\">↑</kbd>", "Next or previous item, wrapping."],
+							["", "<kbd class=\"ho-kbd\">Home</kbd> <kbd class=\"ho-kbd\">End</kbd>", "First or last item."],
+							["", "<kbd class=\"ho-kbd\">Enter</kbd> <kbd class=\"ho-kbd\">Space</kbd>", "Runs the item. Checkbox items and switches keep the menu open and keep focus."],
+							["", "<kbd class=\"ho-kbd\">A</kbd>–<kbd class=\"ho-kbd\">Z</kbd>", "Typeahead to the next item that starts with the letters."],
+							["", "<kbd class=\"ho-kbd\">Esc</kbd> <kbd class=\"ho-kbd\">Tab</kbd>", "Closes; focus returns to the menu button. Outside click closes without moving focus."],
+							["Notice", "<kbd class=\"ho-kbd\">Enter</kbd> on Hide again", "Hides the file, announces it, focus returns to the toolbar menu button."],
+							["Tree", "Select a muted entry", "Opens it as a direct link: revealed temporarily, with the notice."],
+							["Settings", "<kbd class=\"ho-kbd\">Enter</kbd> in a rule field", "Adds or saves. Focus stays in the add field for the next rule."],
+							["", "<kbd class=\"ho-kbd\">Esc</kbd> while editing", "Cancels and returns focus to the row's edit button."],
+						];
+						return `<section class="ho-section" id="ho-interaction" data-ho-section><div class="ho-section-head"><span class="ho-num">05</span><h2 class="ho-h2">Interaction and keyboard</h2><p class="ho-intro">The control follows Primer's ActionMenu contract. Everything is reachable without a pointer and every change is announced once.</p></div><table class="ho-table"><thead><tr><th>Surface</th><th>Input</th><th>Result</th></tr></thead><tbody>${keys.map(([s, k, r]) => `<tr><td class="str">${s}</td><td>${k}</td><td class="muted">${r}</td></tr>`).join("")}</tbody></table><div class="ho-notes"><div class="ho-note"><h4>${icon("keyboard")}ARIA</h4><ul><li>Menu button: <code class="ho-code">aria-haspopup="menu"</code>, <code class="ho-code">aria-expanded</code>, <code class="ho-code">aria-controls</code>. Caret-only button: <code class="ho-code">aria-label="${T.options}"</code>.</li><li>Menu: <code class="ho-code">role="menu"</code>; items <code class="ho-code">menuitem</code> or <code class="ho-code">menuitemcheckbox</code> with <code class="ho-code">aria-checked</code>; groups labelled by their heading.</li><li>Settings switches: <code class="ho-code">&lt;button aria-pressed&gt;</code> labelled by the setting title; the On/Off text is <code class="ho-code">aria-hidden</code>.</li><li>Live region <code class="ho-code">role="status"</code>, polite, debounced 150ms.</li><li>Tooltips: <code class="ho-code">role="tooltip"</code>, linked with <code class="ho-code">aria-describedby</code> while open; shown on hover after 350ms and on keyboard focus.</li><li>Fields: <code class="ho-code">aria-invalid</code> + <code class="ho-code">aria-describedby</code> to the message.</li></ul></div><div class="ho-note"><h4>${icon("check")}Behavior</h4><ol><li>Filtering inactive or showing all → every file is visible.</li><li>Always show match → visible, labelled “Always shown” while filtering.</li><li>Any enabled preset rule or active custom rule → hidden.</li><li>Otherwise visible.</li></ol><ul style="margin-top:12px"><li><b>Manual</b>: activation is stored per <code class="ho-code">owner/repo#number</code> and survives reload; a new pull request starts inactive.</li><li><b>Automatic</b>: opens in Filtering; the button carries an Automatic Label.</li><li><b>Show all files</b> is session-only and never changes settings or mode.</li><li>Contrast: all text ≥ 4.5:1, icons and borders that carry meaning ≥ 3:1 in both themes. Focus ring 2px <code class="ho-code">--fh-focus</code>.</li></ul></div></div></section>`;
+					}
+
+					function copy() {
+						const groups = COPY.map(
+							([title, where, rows]) =>
+								`<div class="ho-copy-group"><h3>${title} <small>${where}</small></h3><table class="ho-table is-copy"><thead><tr><th>Key</th><th>String</th><th>Notes</th></tr></thead><tbody>${rows.map(([k, s, n]) => `<tr><td><code>${esc(k)}</code></td><td class="str">${esc(s)}</td><td class="muted">${esc(n)}</td></tr>`).join("")}</tbody></table></div>`,
+						).join("");
+						return `<section class="ho-section" id="ho-copy" data-ho-section><div class="ho-section-head"><span class="ho-num">06</span><h2 class="ho-h2">Copy deck</h2><p class="ho-intro">English, sentence case, no exclamation marks. These are the exact strings the prototype renders; they come from one table in the source, so the deck cannot drift.</p></div>${groups}<div class="ho-footer">${logo(16)}<span>${T.product} · ${T.slogan}</span></div></section>`;
+					}
+
+					function render() {
+						root.innerHTML = `<div class="ho-wrap"><nav class="ho-toc" aria-label="Handoff sections"><div class="ho-toc-title">${logo(20)}Native</div><ol>${[
+							["ho-concept", "01", "Concept"],
+							["ho-tokens", "02", "Design tokens"],
+							["ho-components", "03", "Components"],
+							["ho-injection", "04", "Injection points"],
+							["ho-interaction", "05", "Interaction"],
+							["ho-copy", "06", "Copy deck"],
+						]
+							.map(([id, n, l]) => `<li><a href="#${id}" data-ho-link="${id}"><span>${n}</span>${l}</a></li>`)
+							.join("")}</ol></nav><main class="ho-main"><header class="ho-hero"><div class="ho-hero-top">${logoTile(56, 32)}<p class="ho-eyebrow">Design handoff · ${T.product}</p></div><h1 class="ho-title">Feels <em>built-in</em>.</h1><p class="ho-lede">File Hider should read as a feature GitHub shipped. Every surface is a <b>Primer component at Primer metrics</b>; the only identity cues are the logomark and <b>one restrained accent</b>.</p><dl class="ho-meta"><div><dt>Surfaces</dt><dd>Toolbar control, ActionMenu, notices, tree hints, empty state, options page</dd></div><div><dt>Themes</dt><dd>GitHub light and dark through Primer tokens</dd></div><div><dt>Accessibility</dt><dd>WCAG 2.2 AA, full keyboard, reduced motion</dd></div><div><dt>Source of truth</dt><dd>docs/product.md</dd></div></dl></header>${concept()}${tokens()}${components()}${injection()}${interaction()}${copy()}</main></div>`;
+						root.addEventListener("click", (e) => {
+							const link = e.target.closest("[data-ho-link]");
+							if (!link) return;
+							e.preventDefault();
+							document.getElementById(link.dataset.hoLink)?.scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
+						});
+						const links = $$("[data-ho-link]", root);
+						const io = new IntersectionObserver(
+							(entries) => {
+								for (const en of entries) {
+									if (!en.isIntersecting) continue;
+									for (const l of links) l.classList.toggle("is-current", l.dataset.hoLink === en.target.id);
+								}
+							},
+							{ rootMargin: "-30% 0px -60% 0px" },
+						);
+						for (const s of $$("[data-ho-section]", root)) io.observe(s);
+					}
+
+					return { render };
+				})();
+
+				Handoff.render();
+
+				Proto.on("screen", () => {
+					Menu.close({ restore: false });
+					Tip.hide();
+				});
+
+				Proto.init({
+					id: "prototype",
+					title: "Native",
+					screens: [
+						{ id: "github", label: "Pull request" },
+						{ id: "settings", label: "Settings page" },
+						{ id: "handoff", label: "Handoff" },
+					],
+				});
+			})();
+		</script>
+	</body>
+</html>
