@@ -5,13 +5,19 @@ import {
 } from "./filtering-session";
 import {
 	applyVisibility,
+	directLinkTarget,
+	type LinkTarget,
 	listedPaths,
 	placeEmptyStates,
 	placeFileLabel,
+	placeFileNotice,
+	removeDirectLink,
 	restoreVisibility,
+	scrollToTarget,
 	toolbarAnchor,
 } from "./github-page";
 import { pullRequestKey } from "./route";
+import { evaluate } from "./rules";
 import {
 	firstInstallSettings,
 	readSettings,
@@ -27,9 +33,24 @@ let ui: PageUI | null = null;
 let queued = false;
 let signature = "";
 let lastUrl = location.href;
+let handledLink = "";
+let resolvingLink = "";
+let pendingTarget: LinkTarget | null = null;
+let nextAnnouncement: string | undefined;
 async function action(action: string) {
 	const current = session;
 	if (!current) return;
+	if (action.startsWith("hide-revealed:")) {
+		const path = action.slice(14);
+		current.revealed.delete(path);
+		removeDirectLink();
+		handledLink = "";
+		pendingTarget = null;
+		queueRefresh();
+		ui?.menuButton.focus();
+		nextAnnouncement = `${path} is hidden again.`;
+		return;
+	}
 	if (action === "show-all" || action === "hide-again") {
 		current.showingAll = action === "show-all";
 		if (current.showingAll) current.revealed.clear();
@@ -67,6 +88,8 @@ function refresh() {
 		ui?.destroy();
 		ui = null;
 		session = null;
+		handledLink = "";
+		pendingTarget = null;
 		signature = "";
 		restoreVisibility();
 		return;
@@ -76,6 +99,8 @@ function refresh() {
 		ui = null;
 		restoreVisibility();
 		session = createSession(key);
+		handledLink = "";
+		pendingTarget = null;
 		signature = "";
 	}
 	const anchor = toolbarAnchor();
@@ -91,6 +116,13 @@ function refresh() {
 	applyVisibility(model.files, settings.treeFiltering);
 	placeEmptyStates(ui.emptyDiff, ui.emptyTree);
 	for (const [path, label] of ui.fileLabels(model)) placeFileLabel(path, label);
+	for (const [path, notice] of ui.fileNotices(model))
+		placeFileNotice(path, notice);
+	if (pendingTarget && scrollToTarget(pendingTarget)) {
+		nextAnnouncement = `${pendingTarget.path} is temporarily visible.`;
+		pendingTarget = null;
+	}
+	if (model.filtering) void revealLink(paths);
 	const nextSignature = JSON.stringify([
 		settings,
 		paths,
@@ -99,7 +131,36 @@ function refresh() {
 	]);
 	if (signature !== nextSignature) {
 		signature = nextSignature;
-		ui.render(model, settings);
+		ui.render(model, settings, nextAnnouncement);
+		nextAnnouncement = undefined;
+	}
+}
+async function revealLink(paths: string[]) {
+	const url = location.href;
+	const current = session;
+	if (
+		!current ||
+		!location.hash ||
+		handledLink === url ||
+		resolvingLink === url
+	)
+		return;
+	resolvingLink = url;
+	try {
+		const target = await directLinkTarget(paths);
+		if (
+			!target ||
+			session !== current ||
+			location.href !== url ||
+			!evaluate(target.path, settings).matching
+		)
+			return;
+		current.revealed.add(target.path);
+		handledLink = url;
+		pendingTarget = target;
+		queueRefresh();
+	} finally {
+		if (resolvingLink === url) resolvingLink = "";
 	}
 }
 function queueRefresh() {
@@ -129,6 +190,11 @@ setInterval(() => {
 	}
 }, 250);
 watchSettings((next) => {
+	if (session && !filteringModel(next, session, []).active) {
+		session.revealed.clear();
+		handledLink = "";
+		pendingTarget = null;
+	}
 	settings = next;
 	queueRefresh();
 });

@@ -1,5 +1,5 @@
 import type { filteringModel } from "./filtering-session";
-import { evaluate, matches, presetRules, presets } from "./rules";
+import { evaluate, matches, presetRules, presets, reasonLabel } from "./rules";
 import type { Settings } from "./types";
 export type Model = ReturnType<typeof filteringModel>;
 export function element<K extends keyof HTMLElementTagNameMap>(
@@ -19,6 +19,7 @@ export function button(text: string, action: () => void): HTMLButtonElement {
 	return node;
 }
 export class PageUI {
+	readonly notices = new Map<string, HTMLElement>();
 	readonly labels = new Map<string, HTMLElement>();
 	readonly control = element("div");
 	readonly main = button("Hide files", () => this.action("activate"));
@@ -155,7 +156,7 @@ export class PageUI {
 			node.setAttribute("aria-checked", String(checked));
 		return node;
 	}
-	render(model: Model, settings: Settings) {
+	render(model: Model, settings: Settings, message?: string) {
 		this.model = model;
 		this.settings = settings;
 		this.main.hidden = model.view === "filtering";
@@ -190,7 +191,7 @@ export class PageUI {
 			: model.view === "showing"
 				? `Showing all files. ${model.matchCount} files match your rules.`
 				: "All files are visible.";
-		this.announce(announcement);
+		this.announce(message ?? announcement);
 	}
 	announce(message: string) {
 		if (message === this.lastAnnouncement) return;
@@ -287,26 +288,62 @@ export class PageUI {
 	fileLabels(model: Model) {
 		for (const file of model.files) {
 			let label = this.labels.get(file.path);
-			if (file.state !== "kept") {
+			if (file.state !== "kept" && file.state !== "temporarily-visible") {
 				label?.remove();
 				this.labels.delete(file.path);
 				continue;
 			}
-			if (file.state === "kept" && !label) {
+			if (!label) {
 				label = element("span", "Always shown", "fh-file-label");
 				label.dataset.fhOwned = "";
 				this.labels.set(file.path, label);
 			}
 			if (label) {
-				label.hidden = file.state !== "kept";
-				label.title = `Kept visible by the Always show rule ${file.reason?.pattern}.`;
+				label.textContent =
+					file.state === "kept" ? "Always shown" : "Temporarily visible";
+				label.hidden = false;
+				label.title =
+					file.state === "kept"
+						? `Kept visible by the Always show rule ${file.reason?.pattern}.`
+						: "Opened from a direct link. Your rules have not changed.";
 			}
 		}
 		return this.labels;
 	}
 
+	fileNotices(model: Model) {
+		const paths = new Set(
+			model.files
+				.filter((file) => file.state === "temporarily-visible")
+				.map((file) => file.path),
+		);
+		for (const [path, notice] of this.notices)
+			if (!paths.has(path)) {
+				notice.remove();
+				this.notices.delete(path);
+			}
+		for (const file of model.files) {
+			if (file.state !== "temporarily-visible" || !file.reason) continue;
+			let notice = this.notices.get(file.path);
+			if (!notice) {
+				notice = element("section", "", "fh-notice");
+				notice.dataset.fhOwned = "";
+				notice.setAttribute("aria-label", `Temporarily visible: ${file.path}`);
+				this.notices.set(file.path, notice);
+			}
+			const text = `This file is temporarily visible because you opened a direct link. It matches ${reasonLabel(file.reason)}. Other matching files stay hidden.`;
+			if (notice.firstElementChild?.textContent !== text)
+				notice.replaceChildren(
+					element("p", text),
+					button("Hide again", () => this.action(`hide-revealed:${file.path}`)),
+				);
+		}
+		return this.notices;
+	}
+
 	destroy() {
 		this.control.remove();
+		for (const notice of this.notices.values()) notice.remove();
 		for (const label of this.labels.values()) label.remove();
 		this.emptyDiff.remove();
 		this.emptyTree.remove();

@@ -6,6 +6,7 @@ import {
 	type BrowserContext,
 	test as base,
 	chromium,
+	expect,
 	type Page,
 } from "@playwright/test";
 export const demo = "https://github.com/ribeirogab/github-file-hider-demo/pull";
@@ -41,12 +42,17 @@ export const test = base.extend<{ extension: BrowserContext; page: Page }>({
 				`--load-extension=${extension}`,
 			],
 		});
+		const pageErrors: string[] = [];
+		context.on("page", (page) =>
+			page.on("pageerror", (error) => pageErrors.push(error.message)),
+		);
 		await context.route("**/*", async (route) => {
 			if (route.request().url().startsWith("chrome-extension://"))
 				await route.continue();
 			else await route.abort();
 		});
 		await use(context);
+		expect(pageErrors).toEqual([]);
 		await context.close();
 		await rm(directory, { recursive: true, force: true });
 	},
