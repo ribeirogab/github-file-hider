@@ -36,12 +36,15 @@ export const test = base.extend<{ extension: BrowserContext; page: Page }>({
 			channel: "chromium",
 			headless: true,
 			args: [
+				"--enable-unsafe-extension-debugging",
 				`--disable-extensions-except=${extension}`,
 				`--load-extension=${extension}`,
 			],
 		});
 		await context.route("**/*", async (route) => {
-			await route.abort();
+			if (route.request().url().startsWith("chrome-extension://"))
+				await route.continue();
+			else await route.abort();
 		});
 		await use(context);
 		await context.close();

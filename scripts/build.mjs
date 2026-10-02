@@ -9,7 +9,7 @@ const tags = execFileSync("git", ["tag", "-l", "v*"], { encoding: "utf8" })
 const release = releaseVersion(new Date(), tags);
 await mkdir("dist", { recursive: true });
 await build({
-	entryPoints: ["src/content.ts", "src/background.ts"],
+	entryPoints: ["src/content.ts", "src/background.ts", "src/settings.ts"],
 	outdir: "dist",
 	bundle: true,
 	format: "iife",
@@ -17,7 +17,7 @@ await build({
 	legalComments: "none",
 	minify: true,
 });
-for (const file of ["content.css", "settings.html"])
+for (const file of ["content.css", "settings.html", "settings.css"])
 	await copyFile(`src/${file}`, `dist/${file}`);
 export const manifest = {
 	manifest_version: 3,
