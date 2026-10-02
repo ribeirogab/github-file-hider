@@ -21,6 +21,12 @@ import {
 	mainAction,
 	menuAction,
 } from "./page-actions";
+import {
+	largestRulePage,
+	removeDecorations,
+	syncBlankslate,
+	syncTreeNote,
+} from "./page-decorations";
 import { firstInstallSettings, type Settings } from "./settings";
 import { readSettings, watchSettings, writeSettings } from "./settings-store";
 import { createPageUi, type PageUi } from "./ui/page-ui";
@@ -74,6 +80,23 @@ function onMenuItem(key: string) {
 	if (mounted) apply(menuAction(key, context(mounted)));
 }
 
+function onPageAction(event: MouseEvent) {
+	const target =
+		event.target instanceof Element
+			? event.target.closest<HTMLElement>("[data-fh-act]")
+			: null;
+	if (!target || !mounted?.model) return;
+	const action = target.dataset.fhAct;
+	if (action === "show-all") {
+		apply({ events: [{ type: "show-all" }] });
+		mounted.ui.control.focus();
+	} else if (action === "edit-rules") {
+		openSettings(largestRulePage(mounted.model));
+	}
+}
+
+document.addEventListener("click", onPageAction);
+
 function mount(route: Route): Mounted {
 	return {
 		route,
@@ -86,6 +109,7 @@ function mount(route: Route): Mounted {
 function unmount() {
 	if (!mounted) return;
 	mounted.ui.remove();
+	removeDecorations();
 	restoreVisibility();
 	mounted = null;
 }
@@ -109,6 +133,8 @@ async function render(state: Mounted) {
 		model.treeFiltering,
 	);
 	state.ui.update(model);
+	syncBlankslate(model);
+	syncTreeNote(model);
 }
 
 async function sync() {

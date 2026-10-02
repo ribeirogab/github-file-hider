@@ -1,11 +1,10 @@
 import type { Page } from "@playwright/test";
-import type { HarnessState, Rect } from "./harness.ts";
+import type { HarnessState, Part, Rect } from "./harness.ts";
 import {
 	backgroundOf,
 	demo,
 	firstInstall,
 	isolate,
-	type Layer,
 	layerOf,
 	NO_MOTION,
 	openPrototype,
@@ -19,8 +18,7 @@ import {
 export type Recorded = {
 	clip: Rect;
 	background: string;
-	layer: Layer | null;
-	rects: Record<string, Rect>;
+	parts: Part[];
 	state?: HarnessState;
 };
 
@@ -44,11 +42,27 @@ const TARGETS = {
 	caret: ".fh-ctl .fh-ctl-menu",
 	menu: "#fh-menu",
 	tooltip: "#fh-tooltip.is-open",
+	blankslate: ".fh-blankslate",
+	blankslateShowAll: '.fh-blankslate [data-fh-act="show-all"]',
+	blankslateEdit: '.fh-blankslate [data-fh-act="edit-rules"]',
+	treeEmpty: ".fh-tree-empty",
+	treeEmptyShowAll: '.fh-tree-empty [data-fh-act="show-all"]',
 } as const;
 
 type Target = keyof typeof TARGETS | `item:${string}`;
 
-const IN_REPLICA = new Set<string>(["control", "main", "caret"]);
+type Component = "control" | "blankslate" | "treeEmpty";
+
+const IN_REPLICA = new Set<string>([
+	"control",
+	"main",
+	"caret",
+	"blankslate",
+	"blankslateShowAll",
+	"blankslateEdit",
+	"treeEmpty",
+	"treeEmptyShowAll",
+]);
 
 export function selector(side: Side, target: Target) {
 	if (target.startsWith("item:"))
@@ -87,9 +101,9 @@ async function run(page: Page, side: Side, steps: Step[]) {
 
 type HarnessApi = {
 	setTheme: (theme: Theme) => void;
-	backdrop: (rect: Rect, color: string, layer: Layer | null) => void;
+	backdrop: (rect: Rect, color: string) => void;
 	fontsReady: () => Promise<void>;
-	control: (state: HarnessState, rect: Rect) => void;
+	mount: (state: HarnessState, parts: Part[]) => void;
 };
 
 async function openHarness(
@@ -104,21 +118,40 @@ async function openHarness(
 		async ({ theme, recorded }) => {
 			const { harness } = window as unknown as { harness: HarnessApi };
 			harness.setTheme(theme);
-			harness.backdrop(recorded.clip, recorded.background, recorded.layer);
+			harness.backdrop(recorded.clip, recorded.background);
 			await harness.fontsReady();
 		},
 		{ theme, recorded },
 	);
 }
 
+async function partOf(page: Page, component: Component): Promise<Part> {
+	const css = selector("prototype", component);
+	const meta = await page
+		.locator(css)
+		.first()
+		.evaluate(
+			(element) =>
+				({ ...(element as HTMLElement).dataset }) as Record<string, string>,
+		);
+	return {
+		component,
+		rect: await rectOf(page, css),
+		layer: await layerOf(page, css),
+		meta,
+	};
+}
+
 function pageScene(options: {
 	name: string;
 	state: () => PrototypeState;
 	steps?: Step[];
+	mount?: Component[];
 	capture: Target[];
 	padding?: number;
 }): Scene {
 	const steps = options.steps ?? [];
+	const mount = options.mount ?? ["control"];
 	const padding = options.padding ?? 8;
 	return {
 		name: options.name,
@@ -129,16 +162,15 @@ function pageScene(options: {
 				theme,
 				state: options.state(),
 			});
+			await page.waitForTimeout(1500);
 			const state = await prototypeState(page);
-			const control = await rectOf(page, selector("prototype", "control"));
-			const background = await backgroundOf(
-				page,
-				selector("prototype", "control"),
-			);
-			const layer = await layerOf(page, selector("prototype", "control"));
+			const first = selector("prototype", mount[0] ?? "control");
+			const background = await backgroundOf(page, `${first}`, true);
+			const parts: Part[] = [];
+			for (const component of mount) parts.push(await partOf(page, component));
 			await run(page, "prototype", steps);
 			await isolate(page, [
-				selector("prototype", "control"),
+				...mount.map((component) => selector("prototype", component)),
 				"#fh-menu",
 				"#fh-tooltip",
 			]);
@@ -147,26 +179,17 @@ function pageScene(options: {
 					rectOf(page, selector("prototype", target)),
 				),
 			);
-			return {
-				clip: union(rects, padding),
-				background,
-				layer,
-				rects: { control },
-				state,
-			};
+			return { clip: union(rects, padding), background, parts, state };
 		},
 		async extension(page, { origin, theme, recorded }) {
 			await openHarness(page, origin, theme, recorded);
 			await page.evaluate(
-				({ state, rect }) =>
-					(window as unknown as { harness: HarnessApi }).harness.control(
+				({ state, parts }) =>
+					(window as unknown as { harness: HarnessApi }).harness.mount(
 						state,
-						rect,
+						parts,
 					),
-				{
-					state: recorded.state as HarnessState,
-					rect: recorded.rects.control as Rect,
-				},
+				{ state: recorded.state as HarnessState, parts: recorded.parts },
 			);
 			await run(page, "extension", steps);
 		},
@@ -206,7 +229,20 @@ const treeOff = (): PrototypeState => ({
 	treeFiltering: false,
 });
 
+const allHidden = (): PrototypeState => ({
+	...firstInstall(),
+	customRules: [{ id: "all", pattern: "**", enabled: true }],
+	activePRs: { [KEY]: true },
+});
+
+const allHiddenKept = (): PrototypeState => ({
+	...allHidden(),
+	alwaysShow: [{ id: "checkout", pattern: "src/payments/checkout.spec.ts" }],
+});
+
 const MENU: Target[] = ["control", "menu"];
+
+const SHOW_ALL: Step[] = [{ click: "caret" }, { click: "item:show-all" }];
 
 export const SCENES: Scene[] = [
 	pageScene({
@@ -328,6 +364,76 @@ export const SCENES: Scene[] = [
 		steps: [{ click: "caret" }],
 		capture: MENU,
 		padding: 32,
+	}),
+	pageScene({
+		name: "control-showing",
+		state: () => active(demo()),
+		steps: SHOW_ALL,
+		capture: ["control"],
+	}),
+	pageScene({
+		name: "control-showing-hover-main",
+		state: () => active(demo()),
+		steps: [...SHOW_ALL, { hover: "main" }],
+		capture: ["control", "tooltip"],
+	}),
+	pageScene({
+		name: "menu-showing",
+		state: () => active(demo()),
+		steps: [...SHOW_ALL, { click: "caret" }],
+		capture: MENU,
+		padding: 32,
+	}),
+	pageScene({
+		name: "blankslate-all",
+		state: allHidden,
+		mount: ["blankslate"],
+		capture: ["blankslate"],
+	}),
+	pageScene({
+		name: "blankslate-kept",
+		state: allHiddenKept,
+		mount: ["blankslate"],
+		capture: ["blankslate"],
+	}),
+	pageScene({
+		name: "blankslate-focus",
+		state: allHidden,
+		mount: ["blankslate"],
+		steps: [{ focus: "blankslateShowAll" }],
+		capture: ["blankslate"],
+	}),
+	pageScene({
+		name: "blankslate-hover",
+		state: allHidden,
+		mount: ["blankslate"],
+		steps: [{ hover: "blankslateShowAll" }],
+		capture: ["blankslate"],
+	}),
+	pageScene({
+		name: "blankslate-edit-hover",
+		state: allHidden,
+		mount: ["blankslate"],
+		steps: [{ hover: "blankslateEdit" }],
+		capture: ["blankslate"],
+	}),
+	pageScene({
+		name: "tree-empty",
+		state: allHidden,
+		mount: ["treeEmpty"],
+		capture: ["treeEmpty"],
+	}),
+	pageScene({
+		name: "tree-empty-focus",
+		state: allHidden,
+		mount: ["treeEmpty"],
+		steps: [{ focus: "treeEmptyShowAll" }],
+		capture: ["treeEmpty"],
+	}),
+	pageScene({
+		name: "control-all-hidden",
+		state: allHidden,
+		capture: ["control"],
 	}),
 	pageScene({
 		name: "menu-empty-automatic",

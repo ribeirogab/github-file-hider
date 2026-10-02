@@ -6,32 +6,39 @@
 		"height": 481
 	},
 	"background": "rgb(13, 17, 23)",
-	"layer": {
-		"rect": {
-			"x": 0,
-			"y": 311,
-			"width": 1440,
-			"height": 52
-		},
-		"background": "rgb(13, 17, 23)",
-		"position": "sticky",
-		"top": "40px",
-		"zIndex": "20",
-		"border": [
-			"0px none rgb(240, 246, 252)",
-			"0px none rgb(240, 246, 252)",
-			"1px solid rgba(61, 68, 77, 0.7)",
-			"0px none rgb(240, 246, 252)"
-		]
-	},
-	"rects": {
-		"control": {
-			"x": 541.515625,
-			"y": 322.5,
-			"width": 142.15625,
-			"height": 28
+	"parts": [
+		{
+			"component": "control",
+			"rect": {
+				"x": 541.515625,
+				"y": 322.5,
+				"width": 142.15625,
+				"height": 28
+			},
+			"layer": {
+				"rect": {
+					"x": 0,
+					"y": 311,
+					"width": 1440,
+					"height": 52
+				},
+				"background": "rgb(13, 17, 23)",
+				"position": "sticky",
+				"top": "40px",
+				"zIndex": "20",
+				"border": [
+					"0px none rgb(240, 246, 252)",
+					"0px none rgb(240, 246, 252)",
+					"1px solid rgba(61, 68, 77, 0.7)",
+					"0px none rgb(240, 246, 252)"
+				]
+			},
+			"meta": {
+				"view": "inactive",
+				"split": ""
+			}
 		}
-	},
+	],
 	"state": {
 		"settings": {
 			"mode": "manual",

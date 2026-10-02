@@ -140,12 +140,16 @@ export async function isolate(page: Page, selectors: string[]) {
 	}, selectors);
 }
 
-export async function backgroundOf(page: Page, selector: string) {
+export async function backgroundOf(
+	page: Page,
+	selector: string,
+	behind = false,
+) {
 	return page
 		.locator(selector)
 		.first()
-		.evaluate((element) => {
-			let node: Element | null = element;
+		.evaluate((element, skipSelf) => {
+			let node: Element | null = skipSelf ? element.parentElement : element;
 			while (node) {
 				const color = getComputedStyle(node).backgroundColor;
 				if (color !== "rgba(0, 0, 0, 0)" && color !== "transparent")
@@ -153,7 +157,7 @@ export async function backgroundOf(page: Page, selector: string) {
 				node = node.parentElement;
 			}
 			return getComputedStyle(document.documentElement).backgroundColor;
-		});
+		}, behind);
 }
 
 export type Layer = {

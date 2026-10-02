@@ -6,32 +6,39 @@
 		"height": 481
 	},
 	"background": "rgb(255, 255, 255)",
-	"layer": {
-		"rect": {
-			"x": 0,
-			"y": 311,
-			"width": 1440,
-			"height": 52
-		},
-		"background": "rgb(255, 255, 255)",
-		"position": "sticky",
-		"top": "40px",
-		"zIndex": "20",
-		"border": [
-			"0px none rgb(31, 35, 40)",
-			"0px none rgb(31, 35, 40)",
-			"1px solid rgba(209, 217, 224, 0.7)",
-			"0px none rgb(31, 35, 40)"
-		]
-	},
-	"rects": {
-		"control": {
-			"x": 541.515625,
-			"y": 322.5,
-			"width": 146.75,
-			"height": 28
+	"parts": [
+		{
+			"component": "control",
+			"rect": {
+				"x": 541.515625,
+				"y": 322.5,
+				"width": 146.75,
+				"height": 28
+			},
+			"layer": {
+				"rect": {
+					"x": 0,
+					"y": 311,
+					"width": 1440,
+					"height": 52
+				},
+				"background": "rgb(255, 255, 255)",
+				"position": "sticky",
+				"top": "40px",
+				"zIndex": "20",
+				"border": [
+					"0px none rgb(31, 35, 40)",
+					"0px none rgb(31, 35, 40)",
+					"1px solid rgba(209, 217, 224, 0.7)",
+					"0px none rgb(31, 35, 40)"
+				]
+			},
+			"meta": {
+				"view": "inactive",
+				"split": ""
+			}
 		}
-	},
+	],
 	"state": {
 		"settings": {
 			"mode": "manual",
