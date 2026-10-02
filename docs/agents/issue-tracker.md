@@ -13,6 +13,17 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 Infer the repo from `git remote -v` — `gh` does this automatically when run inside a clone.
 
+## Specs and tickets
+
+> [!IMPORTANT]
+> **Every ticket is a sub-issue of its spec issue.** A spec is one parent issue. `/to-tickets` publishes each ticket as a native GitHub sub-issue of that spec, never as a standalone issue.
+
+- **Spec**: one issue created by `/to-spec`, labelled `ready-for-agent`. It stays open while its tickets are in progress; skills never close or edit it.
+- **Ticket**: an issue with a `## Parent` section that references the spec. Link it to the spec right after creation: `gh api --method POST repos/<owner>/<repo>/issues/<spec>/sub_issues -F sub_issue_id=<ticket-db-id>`.
+- **Blocking**: native issue dependencies: `gh api --method POST repos/<owner>/<repo>/issues/<ticket>/dependencies/blocked_by -F issue_id=<blocker-db-id>`. The ticket body also lists its blockers under `## Blocked by`.
+- **Database id**: `gh api repos/<owner>/<repo>/issues/<n> --jq .id`. The sub-issue and dependency endpoints need this id, not the `#number` or the `node_id`.
+- **List a spec's tickets**: `gh api repos/<owner>/<repo>/issues/<spec>/sub_issues`.
+
 ## Pull requests as a triage surface
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_

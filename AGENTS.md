@@ -4,7 +4,7 @@
 
 ### Issue tracker
 
-Issues are tracked in GitHub Issues (`ribeirogab/github-file-hider`) with the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues are tracked in GitHub Issues (`ribeirogab/github-file-hider`) with the `gh` CLI. **Every ticket is a sub-issue of its spec issue.** See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

@@ -1,6 +1,6 @@
 # Design prototype
 
-High-fidelity prototype of GitHub File Hider. It is the design reference for development and implements the behavior defined in [docs/product.md](../docs/product.md). Terms follow the glossary in [CONTEXT.md](../CONTEXT.md).
+High-fidelity prototype of GitHub File Hider. It is the design reference for development and implements the behavior defined in the [spec](https://github.com/ribeirogab/github-file-hider/issues/1) and summarized in [docs/product.md](../docs/product.md). Terms follow the glossary in [CONTEXT.md](../CONTEXT.md).
 
 ## Open it
 
