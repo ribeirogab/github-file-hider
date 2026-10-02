@@ -23,6 +23,7 @@ export class PageUI {
 	readonly control = element("div");
 	readonly main = button("Hide files", () => this.action("activate"));
 	readonly menuButton = button("▾", () => this.toggle());
+	readonly modeLabel = element("span", "Automatic", "fh-mode-label");
 	readonly menu = element("div", "", "fh-menu");
 	readonly emptyDiff = element("section", "", "fh-empty");
 	readonly emptyTree = element("div", "", "fh-tree-empty");
@@ -61,7 +62,7 @@ export class PageUI {
 		this.menuButton.setAttribute("aria-controls", "fh-menu");
 		this.status.setAttribute("role", "status");
 		this.status.setAttribute("aria-live", "polite");
-		this.control.append(this.main, this.menuButton);
+		this.control.append(this.main, this.menuButton, this.modeLabel);
 		document.body.append(this.menu, this.status);
 		this.main.onclick = () => {
 			if (this.model?.view === "empty") this.toggle();
@@ -158,6 +159,7 @@ export class PageUI {
 		this.model = model;
 		this.settings = settings;
 		this.main.hidden = model.view === "filtering";
+		this.modeLabel.hidden = settings.mode !== "automatic";
 		this.main.textContent =
 			model.view === "showing"
 				? `Hide files again · ${model.matchCount}`
@@ -209,12 +211,19 @@ export class PageUI {
 				element("strong", "Choose what to hide"),
 				element(
 					"p",
-					"Turn on a preset or add custom rules. Nothing is hidden until you select Hide files.",
+					settings.mode === "automatic"
+						? "Turn on a preset or add custom rules. Automatic mode hides matching files when Files changed opens."
+						: "Turn on a preset or add custom rules. Nothing is hidden until you select Hide files.",
 				),
 			);
-		nodes.push(
-			this.item("Hide files in this pull request", "activation", model.active),
-		);
+		if (settings.mode === "manual")
+			nodes.push(
+				this.item(
+					"Hide files in this pull request",
+					"activation",
+					model.active,
+				),
+			);
 		if (model.active && model.view !== "empty")
 			nodes.push(
 				this.item(

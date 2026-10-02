@@ -231,3 +231,31 @@ td {
 	border-bottom: 1px solid var(--borderColor-default);
 	padding: 8px;
 }
+fieldset {
+	border: 0;
+	padding: 0;
+	margin: 24px 0;
+}
+legend {
+	font-weight: 600;
+}
+.mode-option {
+	display: block;
+	padding: 16px;
+	margin: 12px 0;
+	border: 1px solid var(--borderColor-default);
+	border-radius: 6px;
+	cursor: pointer;
+}
+.mode-option:has(input:checked) {
+	border-color: var(--fgColor-accent);
+}
+.mode-option input {
+	min-width: 0;
+	width: 16px;
+	margin-right: 12px;
+	accent-color: var(--fgColor-accent);
+}
+.mode-option p {
+	margin: 8px 0 0 32px;
+}

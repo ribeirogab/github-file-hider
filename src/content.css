@@ -143,3 +143,11 @@
 .fh-file-label[hidden] {
 	display: none;
 }
+.fh-mode-label {
+	align-self: center;
+	border: 1px solid var(--borderColor-accent-muted, #54aeff66);
+	border-radius: 12px;
+	padding: 0 6px;
+	font-size: 12px;
+	color: var(--fgColor-accent, #0969da);
+}

@@ -44,13 +44,14 @@ async function action(action: string) {
 	await updateSettings((settings) => {
 		if (action === "activate") {
 			current.showingAll = false;
-			settings.activations[current.key] = true;
+			if (settings.mode === "manual") settings.activations[current.key] = true;
 		}
 		if (action === "activation") {
 			if (settings.activations[current.key]) {
 				delete settings.activations[current.key];
 				current.revealed.clear();
-			} else settings.activations[current.key] = true;
+			} else if (settings.mode === "manual")
+				settings.activations[current.key] = true;
 		}
 		if (action.startsWith("preset:")) {
 			const id = action.slice(7) as PresetId;

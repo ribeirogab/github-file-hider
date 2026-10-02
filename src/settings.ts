@@ -319,6 +319,43 @@ function render(preferredFocus?: string) {
 		"General",
 		"These settings apply to every repository on github.com.",
 	);
+	const mode = element("fieldset");
+	mode.append(
+		element("legend", "Activation mode"),
+		element(
+			"p",
+			"Choose when your rules hide files. Turning rules on and hiding files are separate steps.",
+		),
+	);
+	for (const [value, title, description] of [
+		[
+			"manual",
+			"Manual",
+			"Each pull request starts with all files visible. Select Hide files in a pull request to filter it. File Hider remembers that choice for that pull request only.",
+		],
+		[
+			"automatic",
+			"Automatic",
+			"Your rules apply as soon as you open Files changed in any pull request. Show all files stays one click away.",
+		],
+	] as const) {
+		const option = element("label", "", "mode-option");
+		const input = focusKey(element("input"), `mode:${value}`);
+		input.type = "radio";
+		input.name = "mode";
+		input.value = value;
+		input.checked = settings.mode === value;
+		input.setAttribute("aria-label", title);
+		input.onchange = () => {
+			void save((settings) => {
+				settings.mode = value;
+			});
+		};
+		option.append(input, element("strong", title), element("p", description));
+		mode.append(option);
+	}
+	general.append(mode);
+
 	general.append(
 		element("h3", "Scope and storage"),
 		element("h4", "Every repository"),
