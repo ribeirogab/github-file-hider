@@ -1,9 +1,15 @@
 import {
 	derivePage,
 	type PageModel,
+	reduceSession,
 	type SessionState,
 } from "../../src/filtering-session";
-import { normalizeSettings } from "../../src/settings";
+import {
+	type ActionResult,
+	mainAction,
+	menuAction,
+} from "../../src/page-actions";
+import { normalizeSettings, type Settings } from "../../src/settings";
 import { createPageUi, type PageUi } from "../../src/ui/page-ui";
 
 export type HarnessState = {
@@ -17,17 +23,41 @@ export type HarnessState = {
 export type Rect = { x: number; y: number; width: number; height: number };
 
 let ui: PageUi | null = null;
+let settings: Settings | null = null;
+let session: SessionState = { showingAll: false, revealed: new Set() };
+let key = "";
+let paths: string[] = [];
+let current: PageModel | null = null;
+
+function refresh() {
+	if (!ui || !settings) return;
+	current = derivePage({ settings, pullRequestKey: key, paths, session });
+	ui.update(current);
+}
+
+function apply(result: ActionResult) {
+	for (const event of result.events) session = reduceSession(session, event);
+	if (result.closeMenu)
+		ui?.menu.close({ restore: result.closeMenu === "restore-focus" });
+	if (result.settings) settings = result.settings;
+	refresh();
+}
+
+const actionContext = () => ({
+	settings: settings as Settings,
+	pullRequestKey: key,
+	active: current?.active ?? false,
+});
 
 function model(state: HarnessState): PageModel {
-	const session: SessionState = {
-		showingAll: state.showingAll,
-		revealed: new Set(state.revealed),
-	};
 	return derivePage({
 		settings: normalizeSettings(state.settings),
 		pullRequestKey: state.pullRequestKey,
 		paths: state.paths,
-		session,
+		session: {
+			showingAll: state.showingAll,
+			revealed: new Set(state.revealed),
+		},
 	});
 }
 
@@ -63,6 +93,7 @@ export type Layer = {
 	position: string;
 	top: string;
 	zIndex: string;
+	border: string[];
 };
 
 function box(rect: Rect, color: string, parent: HTMLElement) {
@@ -101,6 +132,11 @@ function backdrop(rect: Rect, color: string, layer: Layer | null) {
 		height: `${layer.rect.height}px`,
 		background: layer.background,
 		zIndex: layer.zIndex,
+		boxSizing: "border-box",
+		borderTop: layer.border[0],
+		borderRight: layer.border[1],
+		borderBottom: layer.border[2],
+		borderLeft: layer.border[3],
 	});
 	if (layer.position !== "sticky") container.style.willChange = "transform";
 	document.body.append(container);
@@ -120,8 +156,18 @@ const harness = {
 	},
 	control(state: HarnessState, rect: Rect) {
 		ui?.remove();
-		ui = createPageUi({ onMain: () => {} });
-		ui.update(model(state));
+		settings = normalizeSettings(state.settings);
+		session = {
+			showingAll: state.showingAll,
+			revealed: new Set(state.revealed),
+		};
+		key = state.pullRequestKey;
+		paths = state.paths;
+		ui = createPageUi({
+			onMain: (view) => apply(mainAction(view, actionContext())),
+			onMenuItem: (item) => apply(menuAction(item, actionContext())),
+		});
+		refresh();
 		place(ui.control.element, rect);
 	},
 	async fontsReady() {

@@ -1,0 +1,79 @@
+{
+	"clip": {
+		"x": 509,
+		"y": 290,
+		"width": 385,
+		"height": 481
+	},
+	"background": "rgb(255, 255, 255)",
+	"layer": {
+		"rect": {
+			"x": 0,
+			"y": 311,
+			"width": 1440,
+			"height": 52
+		},
+		"background": "rgb(255, 255, 255)",
+		"position": "sticky",
+		"top": "40px",
+		"zIndex": "20",
+		"border": [
+			"0px none rgb(31, 35, 40)",
+			"0px none rgb(31, 35, 40)",
+			"1px solid rgba(209, 217, 224, 0.7)",
+			"0px none rgb(31, 35, 40)"
+		]
+	},
+	"rects": {
+		"control": {
+			"x": 541.515625,
+			"y": 322.5,
+			"width": 146.75,
+			"height": 28
+		}
+	},
+	"state": {
+		"settings": {
+			"mode": "manual",
+			"treeFiltering": true,
+			"presets": {
+				"tests": {
+					"enabled": true
+				},
+				"lockfiles": {
+					"enabled": true
+				}
+			},
+			"customRules": [],
+			"alwaysShow": [],
+			"activations": {}
+		},
+		"paths": [
+			"docs/payments.md",
+			"e2e/checkout.spec.ts",
+			"examples/node/package-lock.json",
+			"src/__tests__/checkout.ts",
+			"src/components/Button.spec.tsx",
+			"src/components/Button.tsx",
+			"src/components/CheckoutForm.test.tsx",
+			"src/components/CheckoutForm.tsx",
+			"src/generated/client.ts",
+			"src/payments/__tests__/gateway.ts",
+			"src/payments/checkout.spec.ts",
+			"src/payments/checkout.ts",
+			"src/payments/gateway.ts",
+			"src/payments/retry-policy.spec.ts",
+			"src/payments/retry-policy.ts",
+			"src/utils/format.test.ts",
+			"src/utils/format.ts",
+			"src/config.ts",
+			"src/test-utils.ts",
+			"package.json",
+			"pnpm-lock.yaml",
+			"README.md"
+		],
+		"pullRequestKey": "acme/storefront#482",
+		"showingAll": false,
+		"revealed": []
+	}
+}

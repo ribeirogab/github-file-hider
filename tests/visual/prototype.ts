@@ -43,6 +43,9 @@ export const demo = (): PrototypeState => ({
 	alwaysShow: [{ id: "checkout", pattern: "src/payments/checkout.spec.ts" }],
 });
 
+export const NO_MOTION =
+	"*, *::before, *::after { animation-duration: 0s !important; animation-delay: 0s !important; transition-duration: 0s !important; transition-delay: 0s !important; }";
+
 export async function routeFonts(page: Page, origin: string) {
 	await page.route("https://fonts.googleapis.com/**", (route) =>
 		route.fulfill({
@@ -76,6 +79,7 @@ export async function openPrototype(
 		{ state: options.state, theme: options.theme, screen: options.screen },
 	);
 	await page.goto(url);
+	await page.addStyleTag({ content: NO_MOTION });
 	await page.evaluate(async () => {
 		await document.fonts.load('500 12px "Mona Sans"');
 		await document.fonts.ready;
@@ -158,6 +162,7 @@ export type Layer = {
 	position: string;
 	top: string;
 	zIndex: string;
+	border: string[];
 };
 
 export async function layerOf(
@@ -189,6 +194,10 @@ export async function layerOf(
 						position: style.position,
 						top: style.top,
 						zIndex: style.zIndex,
+						border: ["top", "right", "bottom", "left"].map(
+							(side) =>
+								`${style.getPropertyValue(`border-${side}-width`)} ${style.getPropertyValue(`border-${side}-style`)} ${style.getPropertyValue(`border-${side}-color`)}`,
+						),
 					};
 				}
 				node = node.parentElement;

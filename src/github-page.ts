@@ -215,3 +215,38 @@ export function clearHash() {
 		`${location.pathname}${location.search}`,
 	);
 }
+
+export type Visibility = { path: string; hidden: boolean };
+
+export function applyVisibility(
+	files: readonly Visibility[],
+	treeFiltering: boolean,
+) {
+	for (const file of files) {
+		const block = diffBlock(file.path);
+		if (block) diffEntry(block).classList.toggle("fh-hidden", file.hidden);
+		treeItem(file.path)?.classList.toggle(
+			"fh-hidden",
+			treeFiltering && file.hidden,
+		);
+	}
+	for (const folder of treeFolders().reverse()) {
+		const leaves = [
+			...folder.querySelectorAll<HTMLElement>('[role="treeitem"][id]'),
+		].filter((item) => !item.hasAttribute("aria-expanded"));
+		folder.classList.toggle(
+			"fh-hidden",
+			leaves.length > 0 &&
+				leaves.every((item) => item.classList.contains("fh-hidden")),
+		);
+	}
+}
+
+export function restoreVisibility() {
+	for (const element of document.querySelectorAll(
+		".fh-hidden, .fh-revealed, .fh-target-line, [data-fh-state]",
+	)) {
+		element.classList.remove("fh-hidden", "fh-revealed", "fh-target-line");
+		element.removeAttribute("data-fh-state");
+	}
+}

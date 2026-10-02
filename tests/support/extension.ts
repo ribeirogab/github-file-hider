@@ -10,6 +10,7 @@ import {
 	type Page,
 	type Worker,
 } from "@playwright/test";
+import type { Settings } from "../../src/settings";
 
 export const DEMO = "https://github.com/ribeirogab/github-file-hider-demo";
 
@@ -103,14 +104,18 @@ export async function seedSettings(context: BrowserContext, settings: unknown) {
 	);
 }
 
-export async function storedSettings(context: BrowserContext) {
+export async function storedSettings(
+	context: BrowserContext,
+): Promise<Settings> {
 	const worker = await serviceWorker(context);
 	return worker.evaluate(
-		async () => (await chrome.storage.local.get("settings")).settings,
+		async () =>
+			(await chrome.storage.local.get("settings")).settings as Settings,
 	);
 }
 
 export const RENDERING_ARGS = [
+	"--disable-gpu",
 	"--disable-partial-raster",
 	"--force-color-profile=srgb",
 ];

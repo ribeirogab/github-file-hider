@@ -50,6 +50,7 @@ export async function manifestFor({ version, versionName }) {
 		},
 		permissions: ["storage"],
 		host_permissions: ["https://github.com/*"],
+		background: { service_worker: "background.js" },
 		action: {
 			default_title: "GitHub File Hider settings",
 			default_icon: { 16: "icons/16.png", 32: "icons/32.png" },
@@ -81,7 +82,7 @@ export async function buildExtension() {
 	await rm(OUT, { recursive: true, force: true });
 	await mkdir(OUT, { recursive: true });
 	await build({
-		entryPoints: ["src/content.ts"],
+		entryPoints: ["src/content.ts", "src/background.ts"],
 		outdir: OUT,
 		bundle: true,
 		format: "iife",
