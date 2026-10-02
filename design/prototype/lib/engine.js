@@ -20,7 +20,7 @@
 		return {
 			mode: "manual",
 			treeFiltering: true,
-			presets: Object.fromEntries(PRESETS.map((p) => [p.id, { enabled: false, rules: [...p.rules] }])),
+			presets: Object.fromEntries(PRESETS.map((p) => [p.id, { enabled: false }])),
 			customRules: [],
 			alwaysShow: [],
 			activePRs: {},
@@ -35,7 +35,7 @@
 			{ id: uid(), pattern: "**/generated/**", enabled: true },
 			{ id: uid(), pattern: "docs/**", enabled: false },
 		];
-		s.alwaysShow = [{ id: uid(), pattern: "src/payments/checkout.spec.ts", enabled: true }];
+		s.alwaysShow = [{ id: uid(), pattern: "src/payments/checkout.spec.ts" }];
 		return s;
 	}
 
@@ -45,7 +45,8 @@
 		if (regexCache.has(pattern)) return regexCache.get(pattern);
 		let src = "";
 		let i = 0;
-		const p = pattern.trim().replace(/^\.?\//, "");
+		let p = pattern.trim().replace(/^\.?\//, "");
+		if (p.endsWith("/")) p += "**";
 		while (i < p.length) {
 			if (p.startsWith("**/", i)) {
 				src += "(?:.*/)?";
@@ -82,9 +83,31 @@
 		if (!p) return { ok: false, error: "Enter a path or pattern." };
 		if (p.startsWith("/")) return { ok: false, error: "Use a repository-relative path. Remove the leading /." };
 		if (p.includes("\\")) return { ok: false, error: "Use forward slashes (/) in paths." };
-		if (/\s/.test(p)) return { ok: false, error: "Patterns cannot contain spaces." };
 		if (/\*\*\*/.test(p)) return { ok: false, error: "Use * or **, not ***." };
 		return { ok: true, error: null };
+	}
+
+	const defaultRules = (id) => PRESETS.find((p) => p.id === id).rules;
+
+	const sameRules = (a, b) => a.length === b.length && a.every((r, i) => r === b[i]);
+
+	function presetRules(id) {
+		return state.presets[id].rules ?? defaultRules(id);
+	}
+
+	function storePresetRules(s, id, rules) {
+		if (sameRules(rules, defaultRules(id))) delete s.presets[id].rules;
+		else s.presets[id].rules = rules;
+	}
+
+	function normalize(s) {
+		for (const p of PRESETS) {
+			s.presets[p.id] ??= { enabled: false };
+			if (s.presets[p.id].rules) storePresetRules(s, p.id, s.presets[p.id].rules);
+		}
+		for (const a of s.alwaysShow) delete a.enabled;
+		s.activePRs = Object.fromEntries(Object.keys(s.activePRs).map((k) => [k.toLowerCase(), true]));
+		return s;
 	}
 
 	const bus = new EventTarget();
@@ -100,7 +123,7 @@
 	function load() {
 		try {
 			const raw = localStorage.getItem(storageKey());
-			state = raw ? JSON.parse(raw) : demoState();
+			state = raw ? normalize(JSON.parse(raw)) : demoState();
 		} catch {
 			state = demoState();
 		}
@@ -112,7 +135,7 @@
 		} catch {}
 	}
 
-	const prKey = () => (window.GH ? GH.prKey : "acme/storefront#482");
+	const prKey = () => (window.GH ? GH.prKey : "acme/storefront#482").toLowerCase();
 
 	function isActive() {
 		return state.mode === "automatic" || !!state.activePRs[prKey()];
@@ -125,9 +148,8 @@
 	function evaluate(path) {
 		let hideReason = null;
 		for (const p of PRESETS) {
-			const ps = state.presets[p.id];
-			if (!ps?.enabled) continue;
-			const rule = ps.rules.find((r) => match(r, path));
+			if (!state.presets[p.id]?.enabled) continue;
+			const rule = presetRules(p.id).find((r) => match(r, path));
 			if (rule) {
 				hideReason = { kind: "preset", presetId: p.id, presetName: p.name, pattern: rule };
 				break;
@@ -137,7 +159,7 @@
 			const rule = state.customRules.find((r) => r.enabled && match(r.pattern, path));
 			if (rule) hideReason = { kind: "custom", ruleId: rule.id, pattern: rule.pattern };
 		}
-		const always = state.alwaysShow.find((r) => r.enabled !== false && match(r.pattern, path));
+		const always = state.alwaysShow.find((r) => match(r.pattern, path));
 		if (always && hideReason)
 			return { hidden: false, kept: true, reason: { kind: "always", ruleId: always.id, pattern: always.pattern }, overridden: hideReason };
 		if (always) return { hidden: false, kept: false, reason: { kind: "always", ruleId: always.id, pattern: always.pattern }, overridden: null };
@@ -153,7 +175,7 @@
 
 	function enabledRuleCount() {
 		let n = 0;
-		for (const p of PRESETS) if (state.presets[p.id]?.enabled) n += state.presets[p.id].rules.length;
+		for (const p of PRESETS) if (state.presets[p.id]?.enabled) n += presetRules(p.id).length;
 		n += state.customRules.filter((r) => r.enabled).length;
 		return n;
 	}
@@ -209,9 +231,9 @@
 			const allHidden = files.length > 0 && [...files].every((f) => f.classList.contains("fh-hidden"));
 			d.classList.toggle("fh-hidden", allHidden);
 		}
-		const hiddenPaths = [...new Set([...hiddenDiff, ...hiddenTree])];
 		const all = window.GH ? GH.paths : [];
 		const matchPaths = all.filter((p) => ev(p).hidden);
+		const hiddenPaths = filtering ? matchPaths.filter((p) => !revealed.has(p)) : [];
 		const keptPaths = all.filter((p) => ev(p).kept);
 		const byReason = {};
 		for (const p of hiddenPaths) {
@@ -367,26 +389,24 @@
 		setPresetEnabled(id, on) {
 			commit((s) => (s.presets[id].enabled = !!on));
 		},
+		presetRules,
 		setPresetRules(id, rules) {
-			commit((s) => (s.presets[id].rules = rules.map((r) => r.trim()).filter(Boolean)));
+			commit((s) => storePresetRules(s, id, rules.map((r) => r.trim()).filter(Boolean)));
 		},
 		addPresetRule(id, pattern) {
-			commit((s) => s.presets[id].rules.push(pattern.trim()));
+			commit((s) => storePresetRules(s, id, [...presetRules(id), pattern.trim()]));
 		},
 		updatePresetRule(id, index, pattern) {
-			commit((s) => (s.presets[id].rules[index] = pattern.trim()));
+			commit((s) => storePresetRules(s, id, presetRules(id).map((r, i) => (i === index ? pattern.trim() : r))));
 		},
 		removePresetRule(id, index) {
-			commit((s) => s.presets[id].rules.splice(index, 1));
+			commit((s) => storePresetRules(s, id, presetRules(id).filter((_, i) => i !== index)));
 		},
 		restorePreset(id) {
-			const def = PRESETS.find((p) => p.id === id);
-			commit((s) => (s.presets[id].rules = [...def.rules]));
+			commit((s) => delete s.presets[id].rules);
 		},
 		isPresetModified(id) {
-			const def = PRESETS.find((p) => p.id === id);
-			const cur = state.presets[id].rules;
-			return cur.length !== def.rules.length || cur.some((r, i) => r !== def.rules[i]);
+			return state.presets[id].rules !== undefined;
 		},
 		addCustomRule(pattern) {
 			const rule = { id: uid(), pattern: pattern.trim(), enabled: true };
@@ -400,7 +420,7 @@
 			commit((s) => (s.customRules = s.customRules.filter((r) => r.id !== id)));
 		},
 		addAlwaysShow(pattern) {
-			const rule = { id: uid(), pattern: pattern.trim(), enabled: true };
+			const rule = { id: uid(), pattern: pattern.trim() };
 			commit((s) => s.alwaysShow.push(rule));
 			return rule;
 		},

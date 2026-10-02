@@ -1,6 +1,6 @@
 # Design prototype
 
-High-fidelity prototype of GitHub File Hider. It is the design reference for development and implements the behavior defined in [docs/product.md](../docs/product.md).
+High-fidelity prototype of GitHub File Hider. It is the design reference for development and implements the behavior defined in [docs/product.md](../docs/product.md). Terms follow the glossary in [CONTEXT.md](../CONTEXT.md).
 
 ## Open it
 
@@ -11,7 +11,7 @@ Open `design/prototype/index.html` in Chrome. No build step or server is needed.
 The yellow bar at the top belongs to the prototype, not to the design. Use it to change screens:
 
 - **Pull request**: a replica of the Files changed tab of a pull request, with the extension's control injected.
-- **Settings page**: the extension options page.
+- **Settings page**: the extension settings page.
 - **Handoff**: design tokens, component states, injection points, keyboard notes, and the copy deck.
 
 Use **Light** and **Dark** to change GitHub's theme. Use **Scenarios** to:

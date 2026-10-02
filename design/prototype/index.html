@@ -465,6 +465,15 @@
 				color: var(--fh-fg-muted);
 			}
 
+			.fh-al-heading-note {
+				float: right;
+				font-weight: 400;
+			}
+
+			.fh-nav-note + .fh-nav-note {
+				margin-top: 8px;
+			}
+
 			.fh-al-item {
 				position: relative;
 				display: flex;
@@ -3215,7 +3224,7 @@
 
 				const T = {
 					product: "GitHub File Hider",
-					slogan: "Hide files in GitHub's Changes tab.",
+					slogan: "Hide files in GitHub's Files changed tab.",
 					hideFiles: "Hide files",
 					filesHidden: (n) => plural(n, "file hidden", "files hidden"),
 					hideAgain: "Hide files again",
@@ -3226,7 +3235,7 @@
 					alwaysShow: "Always show",
 					manual: "Manual",
 					automatic: "Automatic",
-					options: "GitHub File Hider options",
+					options: "GitHub File Hider settings",
 					tipHide: (n) =>
 						n === 0
 							? "No files in this pull request match your rules"
@@ -3240,9 +3249,10 @@
 					menuHideAgainDesc: "Showing all files for now",
 					menuEmptyTitle: "Choose what to hide",
 					menuEmptyManual: "Turn on a preset or add custom rules. Nothing is hidden until you select Hide files.",
-					menuEmptyAuto: "Turn on a preset or add custom rules. Automatic mode hides matching files when Changes opens.",
+					menuEmptyAuto: "Turn on a preset or add custom rules. Automatic mode hides matching files when Files changed opens.",
 					menuCustomNone: "No custom rules yet",
 					menuCustomOff: (n) => `${n} ${plural(n, "rule", "rules")}, all off`,
+					menuScope: "All repositories",
 					menuTree: "Hide in sidebar tree",
 					menuTreeOn: "Matching files leave the tree",
 					menuTreeOff: "The tree stays complete",
@@ -3285,6 +3295,7 @@
 						general: "General",
 						rulesGroup: "Rules",
 						navNote: "Settings apply to every repository and are stored only in this browser.",
+						disclaimer: "GitHub File Hider is not affiliated with GitHub.",
 						generalLede: "These settings apply to every repository on github.com.",
 						modeLegend: "Activation mode",
 						modeCaption: "Choose when your rules hide files. Turning rules on and hiding files are separate steps.",
@@ -3293,7 +3304,7 @@
 						manualBody:
 							"Each pull request starts with all files visible. Select <b>Hide files</b> in a pull request to filter it. File Hider remembers that choice for that pull request only.",
 						autoTitle: "Automatic",
-						autoBody: "Your rules apply as soon as you open Changes in any pull request. <b>Show all files</b> stays one click away.",
+						autoBody: "Your rules apply as soon as you open Files changed in any pull request. <b>Show all files</b> stays one click away.",
 						treeTitle: "Hide matching files in the sidebar tree",
 						treeBody: "When off, the tree stays complete and matching files appear muted with an icon. The diff is filtered either way.",
 						scopeTitle: "Scope and storage",
@@ -3331,7 +3342,7 @@
 						rulesOn: (n, total) => `${n} of ${total} on`,
 						syntaxTitle: "Pattern syntax",
 						syntaxBody:
-							"<code class=\"fh-code\">*</code> matches characters inside one folder or file name. <code class=\"fh-code\">**/</code> matches zero or more folders, so <code class=\"fh-code\">**/yarn.lock</code> matches <code class=\"fh-code\">yarn.lock</code> at the root and in <code class=\"fh-code\">apps/web/</code>.",
+							"<code class=\"fh-code\">*</code> matches characters inside one folder or file name. <code class=\"fh-code\">**/</code> matches zero or more folders, so <code class=\"fh-code\">**/yarn.lock</code> matches <code class=\"fh-code\">yarn.lock</code> at the root and in <code class=\"fh-code\">apps/web/</code>. Every pattern starts at the repository root, so <code class=\"fh-code\">*.lock</code> matches only root files. A trailing <code class=\"fh-code\">/</code> matches a whole folder: <code class=\"fh-code\">docs/</code> is the same as <code class=\"fh-code\">docs/**</code>.",
 						duplicate: "This rule is already in the list.",
 						placeholderCustom: "docs/** or **/generated/**",
 						placeholderAlways: "src/payments/**",
@@ -3356,6 +3367,7 @@
 					["**/*.test.*", "Test filenames at any directory level", "src/utils/format.test.js"],
 					["**/generated/**", "Files inside generated directories", "src/generated/client.ts"],
 					["docs/**", "Files inside the root docs directory", "docs/setup.md"],
+					["docs/", "Same as docs/**", "docs/setup.md"],
 				];
 
 				const codeify = (text) => esc(text).replace(/`([^`]+)`/g, '<code class="fh-code">$1</code>');
@@ -3441,7 +3453,7 @@
 						return d.matchPaths.filter((p) => FH.evaluate(p).reason?.presetId === preset.id).length;
 					}
 					return GH.paths.filter(
-						(p) => st.rules.some((r) => FH.match(r, p)) && !s.alwaysShow.some((a) => a.enabled !== false && FH.match(a.pattern, p)),
+						(p) => FH.presetRules(preset.id).some((r) => FH.match(r, p)) && !s.alwaysShow.some((a) => FH.match(a.pattern, p)),
 					).length;
 				}
 
@@ -3546,7 +3558,7 @@
 						trail: icon("linkExternal"),
 						state: states.settings,
 					});
-					return `${head}${top}<div class="fh-al-divider" role="separator"></div><div role="group" aria-labelledby="fh-menu-presets-${uid}"><p class="fh-al-heading" id="fh-menu-presets-${uid}">${T.presets}</p>${presetItems}${customItem}</div><div class="fh-al-divider" role="separator"></div>${treeItem}<div class="fh-al-divider" role="separator"></div>${settingsItem}`;
+					return `${head}${top}<div class="fh-al-divider" role="separator"></div><div role="group" aria-labelledby="fh-menu-presets-${uid}"><p class="fh-al-heading" id="fh-menu-presets-${uid}">${T.presets}<span class="fh-sr">, </span><span class="fh-al-heading-note">${T.menuScope}</span></p>${presetItems}${customItem}<div class="fh-al-divider" role="separator"></div>${treeItem}</div><div class="fh-al-divider" role="separator"></div>${settingsItem}`;
 				}
 
 				function noticeHtml(path, meta, { live = true } = {}) {
@@ -4066,9 +4078,9 @@
 					}
 
 					function listRules(list, s = FH.state) {
-						if (list.startsWith("p:")) return s.presets[list.slice(2)].rules.map((pattern, i) => ({ key: String(i), pattern, enabled: true }));
+						if (list.startsWith("p:")) return FH.presetRules(list.slice(2)).map((pattern, i) => ({ key: String(i), pattern, enabled: true }));
 						if (list === "c") return s.customRules.map((r) => ({ key: r.id, pattern: r.pattern, enabled: r.enabled }));
-						return s.alwaysShow.map((r) => ({ key: r.id, pattern: r.pattern, enabled: r.enabled !== false }));
+						return s.alwaysShow.map((r) => ({ key: r.id, pattern: r.pattern, enabled: true }));
 					}
 
 					function validate(list, value, exceptKey = null) {
@@ -4152,7 +4164,7 @@
 							const sr = count === null ? "" : `<span class="fh-sr">, ${count} ${p.id === "presets" ? "on" : plural(count, "rule", "rules")}</span>`;
 							return `<li><button type="button" class="fh-navlist-item" data-page="${p.id}" data-focus="nav:${p.id}"${ui.page === p.id ? ' aria-current="page"' : ""}>${icon(p.icon)}<span>${p.label}${sr}</span>${counter}</button></li>`;
 						};
-						return `<ul class="fh-navlist">${PAGES.filter((p) => !p.group).map(item).join("")}</ul><div class="fh-navlist-divider"></div><h2 class="fh-navlist-heading" id="fh-nav-rules">${T.s.rulesGroup}</h2><ul class="fh-navlist" aria-labelledby="fh-nav-rules">${PAGES.filter((p) => p.group).map(item).join("")}</ul><div class="fh-nav-note">${icon("device")}<span>${T.s.navNote}</span></div>`;
+						return `<ul class="fh-navlist">${PAGES.filter((p) => !p.group).map(item).join("")}</ul><div class="fh-navlist-divider"></div><h2 class="fh-navlist-heading" id="fh-nav-rules">${T.s.rulesGroup}</h2><ul class="fh-navlist" aria-labelledby="fh-nav-rules">${PAGES.filter((p) => p.group).map(item).join("")}</ul><div class="fh-nav-note">${icon("device")}<span>${T.s.navNote}</span></div><div class="fh-nav-note">${icon("info")}<span>${T.s.disclaimer}</span></div>`;
 					}
 
 					function frame() {
@@ -4217,7 +4229,7 @@
 					function rowFocusAfterPresetRemove(li) {
 						const list = li.dataset.list;
 						const index = Number(li.dataset.key);
-						const count = FH.state.presets[list.slice(2)].rules.length;
+						const count = FH.presetRules(list.slice(2)).length;
 						if (count <= 1) return `input:add:${list}`;
 						return `remove:${list}:${Math.min(index, count - 2)}`;
 					}
@@ -4439,13 +4451,14 @@
 								["menu.empty.manual", T.menuEmptyManual, ""],
 								["menu.empty.auto", T.menuEmptyAuto, ""],
 								["menu.presets", T.presets, "Group heading."],
+								["menu.scope", T.menuScope, "Note in the Presets heading. Presets, custom rules, and the tree setting apply to every repository."],
 								["menu.custom", T.customRules, "Summary row, opens settings."],
 								["menu.custom.none", T.menuCustomNone, ""],
 								["menu.custom.off", T.menuCustomOff(2), "{n} rule / {n} rules"],
 								["menu.tree", T.menuTree, ""],
 								["menu.tree.on", T.menuTreeOn, ""],
 								["menu.tree.off", T.menuTreeOff, ""],
-								["menu.settings", T.settings, "Opens the options page in a new tab."],
+								["menu.settings", T.settings, "Opens the settings page in a new tab."],
 							],
 						],
 						[
@@ -4511,6 +4524,7 @@
 								["s.syntax", T.s.syntaxTitle, "Collapsible help with the spec's examples."],
 								["s.saved", T.s.saved, "Header confirmation after every change."],
 								["s.nav.note", T.s.navNote, "Under the navigation."],
+								["s.nav.disclaimer", T.s.disclaimer, "Under the navigation note."],
 							],
 						],
 						[
@@ -4520,7 +4534,6 @@
 								["v.empty", "Enter a path or pattern.", "From the engine."],
 								["v.leadingSlash", "Use a repository-relative path. Remove the leading /.", "From the engine."],
 								["v.backslash", "Use forward slashes (/) in paths.", "From the engine."],
-								["v.space", "Patterns cannot contain spaces.", "From the engine."],
 								["v.stars", "Use * or **, not ***.", "From the engine."],
 								["v.duplicate", T.s.duplicate, "Checked by the settings page."],
 							],
@@ -4615,7 +4628,7 @@
 								(s) =>
 									`<div class="ho-state"><div class="ho-state-stage" inert>${controlHtml(s.v)}</div><div class="ho-state-body"><h4>${s.title} <code>${s.tag}</code></h4><p>${s.body}</p></div></div>`,
 							)
-							.join("")}</div><div class="ho-flow">${icon("info")}<span>Transitions:</span><code class="ho-code">Hide files → FH.activate()</code>${icon("arrowRight")}<code class="ho-code">Show all files → FH.showAll()</code>${icon("arrowRight")}<code class="ho-code">Hide files again → FH.restore()</code><span>· Off in the menu → <code class="ho-code">FH.deactivate()</code> · Automatic mode opens in Filtering.</span></div><div class="ho-sub"><h3 class="ho-h3">Identity</h3><p class="ho-p">The logomark is a file crossed by a band. Above the band the outline is solid; below it, dashed: the file is still part of the pull request, it is just not shown. It uses the text color plus the single accent, and appears only where GitHub would show an app identity: the menu header, the options page and the browser toolbar.</p></div><div class="ho-grid-3">${["light", "dark"].map((t) => `<div class="ho-tile ho-id" data-gh-theme="${t}"><h4>${t === "light" ? "Light" : "Dark"}</h4><div class="ho-id-marks">${logoTile(64, 36)}${logo(32)}${logo(20)}${logo(16)}</div><div class="ho-id-sample">${logo(20)}<b>${T.product}</b>${labelHtml(T.manual)}</div></div>`).join("")}<div class="ho-tile"><h4>Construction</h4><p class="ho-p" style="margin:0">24px grid. Outline 1.75px, round joins. The outline is solid above the band and dashed below it: the file is still there, only part of it is shown. Band 18 × 3.5, radius 1.25, with a 1px gap to the outline on both sides. The band is <code class="ho-code">--fh-logo-band</code> (accent); the outline is <code class="ho-code">currentColor</code>. Never the Octocat, never GitHub's mark.</p></div></div></section>`;
+							.join("")}</div><div class="ho-flow">${icon("info")}<span>Transitions:</span><code class="ho-code">Hide files → FH.activate()</code>${icon("arrowRight")}<code class="ho-code">Show all files → FH.showAll()</code>${icon("arrowRight")}<code class="ho-code">Hide files again → FH.restore()</code><span>· Off in the menu → <code class="ho-code">FH.deactivate()</code> · Automatic mode opens in Filtering.</span></div><div class="ho-sub"><h3 class="ho-h3">Identity</h3><p class="ho-p">The logomark is a file crossed by a band. Above the band the outline is solid; below it, dashed: the file is still part of the pull request, it is just not shown. It uses the text color plus the single accent, and appears only where GitHub would show an app identity: the menu header, the settings page and the browser toolbar.</p></div><div class="ho-grid-3">${["light", "dark"].map((t) => `<div class="ho-tile ho-id" data-gh-theme="${t}"><h4>${t === "light" ? "Light" : "Dark"}</h4><div class="ho-id-marks">${logoTile(64, 36)}${logo(32)}${logo(20)}${logo(16)}</div><div class="ho-id-sample">${logo(20)}<b>${T.product}</b>${labelHtml(T.manual)}</div></div>`).join("")}<div class="ho-tile"><h4>Construction</h4><p class="ho-p" style="margin:0">24px grid. Outline 1.75px, round joins. The outline is solid above the band and dashed below it: the file is still there, only part of it is shown. Band 18 × 3.5, radius 1.25, with a 1px gap to the outline on both sides. The band is <code class="ho-code">--fh-logo-band</code> (accent); the outline is <code class="ho-code">currentColor</code>. Never the Octocat, never GitHub's mark.</p></div></div></section>`;
 					}
 
 					function tokens() {
@@ -4746,10 +4759,10 @@
 							["5", "Tree row", "<code>.gh-tree-file &gt; .gh-tree-row</code>, before <code>.gh-status</code>", "eye-off hint (tree filtering off), eye (revealed)", "Keeps the tree complete when asked to. The status icon stays last so columns align."],
 							["6", "Diff column", '<code>[data-gh-slot="diff-top"]</code>', "Blankslate", "Replaces an empty diff with an explanation and a way out."],
 							["7", "Tree bottom", '<code>[data-gh-slot="tree-bottom"]</code>', "Empty tree note", "Only when tree filtering hides every entry."],
-							["8", "Options page", "<code>options_ui.page</code> → <code>chrome-extension://&lt;id&gt;/options.html</code>", "Settings", "Opened from the menu. Uses GitHub's settings anatomy so it feels like part of the same product."],
+							["8", "Settings page", "<code>options_ui.page</code> → <code>chrome-extension://&lt;id&gt;/options.html</code>", "Settings", "Opened from the menu. Uses GitHub's settings anatomy so it feels like part of the same product."],
 						];
 						const map = `<div class="ho-map" aria-hidden="true"><div class="ho-map-page"><div class="ho-map-bar"><span class="ho-map-pill" style="width:16px;height:16px;border-radius:4px"></span><span class="ho-map-pill" style="width:120px"></span><span class="ho-map-pill" style="width:80px"></span><span class="ho-map-pill" style="width:100px"></span><span class="ho-map-pill" style="width:36px"></span><span class="ho-pin">1</span><span class="ho-map-anchor"><span class="ho-map-pill is-ext">${icon("eyeOff")}10 files hidden ${GH.icon("caret")}</span><span class="ho-map-overlay"><span class="ho-pin">2</span><i style="width:60%"></i><i></i><i style="width:80%"></i><i style="width:70%"></i><i style="width:40%"></i></span></span><span style="flex:1"></span><span class="ho-map-pill" style="width:90px"></span><span class="ho-map-pill is-primary"></span></div><div class="ho-map-body"><div class="ho-map-tree"><div class="ho-map-row"><i></i></div><div class="ho-map-row"><i></i></div><div class="ho-map-row is-ext">${icon("eyeOff")}<i style="background:var(--fh-accent-border)"></i><span class="ho-pin">5</span></div><div class="ho-map-row"><i></i></div><div class="ho-map-row"><i></i></div><div class="ho-map-zone" style="height:30px"><span class="ho-pin">7</span>tree-bottom</div></div><div class="ho-map-diff"><div class="ho-map-zone"><span class="ho-pin">6</span>diff-top · Blankslate</div><div class="ho-map-flash"><span class="ho-pin">3</span>${icon("info")}Temporarily visible…</div><div class="ho-map-file" style="border-color:var(--fh-accent-emphasis)"><div class="ho-map-file-head"><span class="ho-map-pill" style="width:200px"></span><span style="flex:1"></span><span class="ho-pin">4</span>${labelHtml(T.labelRevealed, "accent")}<span class="ho-map-pill" style="width:54px;height:18px;border-radius:5px"></span></div><div class="ho-map-file-body"><i style="width:80%"></i><i style="width:64%"></i><i style="width:72%"></i></div></div><div class="ho-map-file"><div class="ho-map-file-head"><span class="ho-map-pill" style="width:160px"></span><span style="flex:1"></span><span class="ho-map-pill" style="width:54px;height:18px;border-radius:5px"></span></div><div class="ho-map-file-body"><i style="width:70%"></i><i style="width:50%"></i></div></div></div></div></div></div>`;
-						return `<section class="ho-section" id="ho-injection" data-ho-section><div class="ho-section-head"><span class="ho-num">04</span><h2 class="ho-h2">Injection points</h2><p class="ho-intro">Selectors are the prototype's slots. Map each to GitHub's equivalent anchor and re-check them on every GitHub release: diff, tree, lazy-loaded files and direct links.</p></div>${map}<table class="ho-table" style="margin-top:32px"><thead><tr><th></th><th>Surface</th><th>Anchor</th><th>Injects</th><th>Why</th></tr></thead><tbody>${rows.map(([n, s, a, w, y]) => `<tr><td><span class="ho-pin">${n}</span></td><td class="str" style="white-space:nowrap">${s}</td><td>${a}</td><td>${w}</td><td class="muted">${y}</td></tr>`).join("")}</tbody></table><div class="ho-notes"><div class="ho-note"><h4>${icon("lock")}Never touched</h4><ul><li><code class="ho-code">[data-gh-files-count]</code> Files changed counter</li><li><code class="ho-code">.gh-diffstat</code> additions, deletions and blocks</li><li><code class="ho-code">[data-gh-viewed]</code> viewed progress and every <code class="ho-code">.gh-viewed</code> checkbox</li><li>Review changes, comments, review state</li><li>GitHub nodes are hidden with a class, never removed</li></ul></div><div class="ho-note"><h4>${icon("reload")}Dynamic page rules</h4><ul><li>Re-run the sync on <b>gh:files-added</b> and on every engine change; each injection is idempotent.</li><li>Inserting the Flash into the observed file list triggers one extra pass; it must find nothing to change.</li><li>Count = distinct paths hidden in diff ∪ tree, never double counted.</li><li>Direct links: hash targets reveal the file, everything else stays hidden.</li></ul></div></div></section>`;
+						return `<section class="ho-section" id="ho-injection" data-ho-section><div class="ho-section-head"><span class="ho-num">04</span><h2 class="ho-h2">Injection points</h2><p class="ho-intro">Selectors are the prototype's slots. Map each to GitHub's equivalent anchor and re-check them on every GitHub release: diff, tree, lazy-loaded files and direct links.</p></div>${map}<table class="ho-table" style="margin-top:32px"><thead><tr><th></th><th>Surface</th><th>Anchor</th><th>Injects</th><th>Why</th></tr></thead><tbody>${rows.map(([n, s, a, w, y]) => `<tr><td><span class="ho-pin">${n}</span></td><td class="str" style="white-space:nowrap">${s}</td><td>${a}</td><td>${w}</td><td class="muted">${y}</td></tr>`).join("")}</tbody></table><div class="ho-notes"><div class="ho-note"><h4>${icon("lock")}Never touched</h4><ul><li><code class="ho-code">[data-gh-files-count]</code> Files changed counter</li><li><code class="ho-code">.gh-diffstat</code> additions, deletions and blocks</li><li><code class="ho-code">[data-gh-viewed]</code> viewed progress and every <code class="ho-code">.gh-viewed</code> checkbox</li><li>Review changes, comments, review state</li><li>GitHub nodes are hidden with a class, never removed</li></ul></div><div class="ho-note"><h4>${icon("reload")}Dynamic page rules</h4><ul><li>Re-run the sync on <b>gh:files-added</b> and on every engine change; each injection is idempotent.</li><li>Inserting the Flash into the observed file list triggers one extra pass; it must find nothing to change.</li><li>Count = matching files that GitHub lists in this view, minus temporarily visible files. It does not depend on loaded diff blocks or on tree filtering.</li><li>Direct links: hash targets reveal the file, everything else stays hidden.</li></ul></div></div></section>`;
 					}
 
 					function interaction() {
@@ -4789,7 +4802,7 @@
 							["ho-copy", "06", "Copy deck"],
 						]
 							.map(([id, n, l]) => `<li><a href="#${id}" data-ho-link="${id}"><span>${n}</span>${l}</a></li>`)
-							.join("")}</ol></nav><main class="ho-main"><header class="ho-hero"><div class="ho-hero-top">${logoTile(56, 32)}<p class="ho-eyebrow">Design handoff · ${T.product}</p></div><h1 class="ho-title">Feels <em>built-in</em>.</h1><p class="ho-lede">File Hider should read as a feature GitHub shipped. Every surface is a <b>Primer component at Primer metrics</b>; the only identity cues are the logomark and <b>one restrained accent</b>.</p><dl class="ho-meta"><div><dt>Surfaces</dt><dd>Toolbar control, ActionMenu, notices, tree hints, empty state, options page</dd></div><div><dt>Themes</dt><dd>GitHub light and dark through Primer tokens</dd></div><div><dt>Accessibility</dt><dd>WCAG 2.2 AA, full keyboard, reduced motion</dd></div><div><dt>Source of truth</dt><dd>docs/product.md</dd></div></dl></header>${concept()}${tokens()}${components()}${injection()}${interaction()}${copy()}</main></div>`;
+							.join("")}</ol></nav><main class="ho-main"><header class="ho-hero"><div class="ho-hero-top">${logoTile(56, 32)}<p class="ho-eyebrow">Design handoff · ${T.product}</p></div><h1 class="ho-title">Feels <em>built-in</em>.</h1><p class="ho-lede">File Hider should read as a feature GitHub shipped. Every surface is a <b>Primer component at Primer metrics</b>; the only identity cues are the logomark and <b>one restrained accent</b>.</p><dl class="ho-meta"><div><dt>Surfaces</dt><dd>Toolbar control, ActionMenu, notices, tree hints, empty state, settings page</dd></div><div><dt>Themes</dt><dd>GitHub light and dark through Primer tokens</dd></div><div><dt>Accessibility</dt><dd>WCAG 2.2 AA, full keyboard, reduced motion</dd></div><div><dt>Source of truth</dt><dd>docs/product.md</dd></div></dl></header>${concept()}${tokens()}${components()}${injection()}${interaction()}${copy()}</main></div>`;
 						root.addEventListener("click", (e) => {
 							const link = e.target.closest("[data-ho-link]");
 							if (!link) return;

@@ -1,6 +1,6 @@
 {
 	"name": "github-file-hider",
-	"description": "Hide files in GitHub's Changes tab.",
+	"description": "Hide files in GitHub's Files changed tab.",
 	"license": "MIT",
 	"private": true,
 	"type": "module",

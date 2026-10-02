@@ -1,12 +1,14 @@
 # GitHub File Hider
 
-**Slogan:** Hide files in GitHub's Changes tab.
+**Slogan:** Hide files in GitHub's Files changed tab.
 
 **Status:** Agreed product definition. The extension has not been implemented.
 
+Terms follow the glossary in [CONTEXT.md](../CONTEXT.md).
+
 ## 1. Purpose
 
-GitHub File Hider is an open-source Chrome extension that hides selected files in the Changes tab of GitHub pull requests.
+GitHub File Hider is an open-source Chrome extension that hides selected files on the Files changed page of GitHub pull requests.
 
 Its purpose is to let reviewers choose which files they see during a review. Users can apply ready-made presets, customize their rules, and add rules for specific cases.
 
@@ -19,22 +21,26 @@ The extension changes only the browser display. It does not remove files, change
 | Item | Definition |
 | --- | --- |
 | Project name | GitHub File Hider |
-| Slogan | Hide files in GitHub's Changes tab. |
+| Slogan | Hide files in GitHub's Files changed tab. |
 | Audience | GitHub users worldwide who review pull requests |
+| Affiliation | Not affiliated with GitHub. The Settings page and the Chrome Web Store listing say so. |
 | License | [MIT](https://opensource.org/license/mit) |
 | Source code | Public GitHub repository |
 | Interface language | English |
 | Documentation language | English |
 | Distribution | Chrome Web Store and GitHub Releases |
 
+The name stays "GitHub File Hider" by decision. See [ADR 0002](adr/0002-keep-the-name-github-file-hider.md).
+
 ## 3. Initial Scope
 
-The first version supports Chrome and pull requests on `github.com`. Its product function is to hide files in the Changes view, including file blocks in the diff and, optionally, file entries in the sidebar tree.
+The first version supports Chrome and pull requests on `github.com`. It works on the current Files changed page at `/pull/<number>/changes`, including views of a single commit or a commit range of the pull request. Its product function is to hide files on that page, including file blocks in the diff and, optionally, file entries in the sidebar tree.
 
 The following are outside the initial scope:
 
 - Other browsers and GitHub Enterprise installations.
-- Filtering other GitHub pages.
+- The classic Files changed page at `/pull/<number>/files`. On that page, the extension does nothing.
+- Filtering other GitHub pages, such as commit pages and compare pages outside a pull request.
 - Settings for individual repositories.
 - Synchronization between devices.
 - Interface translations.
@@ -59,9 +65,9 @@ Documentation and generated-file presets are not included in the initial preset 
 
 Selecting filtering rules and activating filtering are separate actions. Saved rules do not hide files until filtering is active.
 
-## 5. Controls in Changes
+## 5. Controls on the Files Changed Page
 
-The extension provides a control inside the Changes view. It lets users activate filtering, show all files, see how many files are hidden, and open settings.
+The extension provides a control on the Files changed page. It lets users activate filtering, show all files, see how many files are hidden, and open settings.
 
 Example interface labels:
 
@@ -73,9 +79,13 @@ Example interface labels:
 - `Custom rules`
 - `Always show`
 
-The hidden-file count describes distinct files actually hidden by the extension. It must update when the page loads more files or the user changes the active filters. It must not count the same file twice because it appears in both the diff and the tree.
+The hidden count is the number of matching files among the files GitHub lists in the current view, after GitHub's own file filters. It does not include files that are temporarily visible. It counts each file once, whether the file appears in the diff, the sidebar tree, or both. It does not depend on which diff blocks GitHub has loaded or on the tree filtering setting. It must update when GitHub lists more files or the user changes the rules.
 
-If all displayed files match the filters, the control and the option to show all files must remain available.
+If all displayed files match the rules, the control and the option to show all files must remain available.
+
+The control's menu can turn presets and tree filtering on or off. These changes apply to every repository, and the menu says so.
+
+Selecting the extension icon in the Chrome toolbar opens the Settings page. The extension has no popup. Installation does not open a page; the menu's empty state guides the first use.
 
 ## 6. Activation Modes
 
@@ -83,7 +93,9 @@ If all displayed files match the filters, the control and the option to show all
 
 Manual mode is the default. Each new pull request starts with filtering inactive. The user chooses the rules and activates filtering in that pull request.
 
-The extension remembers activation separately for each pull request. Reloading that pull request preserves its activation state. Pull requests are identified by repository and pull request number.
+The extension remembers activation separately for each pull request. Reloading that pull request preserves its activation state. An activation stays until the user turns filtering off in that pull request; activations do not expire.
+
+Pull requests are identified by repository owner, repository name, and pull request number, without regard to letter case. If a repository is renamed or transferred, its pull requests start inactive again. The same activation applies to every view of the pull request, including a single commit or a commit range.
 
 Example:
 
@@ -95,19 +107,23 @@ Example:
 
 ### Automatic Mode
 
-Users can choose automatic mode in settings. In this mode, saved active rules apply when the user opens Changes, without a separate activation action for each pull request.
+Users can choose automatic mode in settings. In this mode, saved active rules apply when the user opens the Files changed page, without a separate activation action for each pull request.
 
-Example: with automatic mode and the Tests preset enabled, opening Changes hides matching test files immediately.
+Example: with automatic mode and the Tests preset enabled, opening the Files changed page hides matching test files immediately.
+
+Automatic mode has no setting to turn off filtering for one pull request. Users can show all files in that pull request for the current view.
 
 ### Show All Files
 
-Users can temporarily show all files and restore filtering afterward. Showing all files does not delete rules, reset presets, or change the selected activation mode.
+Users can temporarily show all files and restore filtering afterward. Showing all files does not delete rules, reset presets, change the selected activation mode, or remove the activation of the pull request.
+
+Show all files lasts for the current view of that pull request. It ends when the user selects `Hide files again`, reloads the page, or leaves the pull request.
 
 ## 7. Diff and Sidebar Tree
 
 When filtering is active, matching file blocks are hidden from the diff.
 
-The sidebar tree has a separate setting. By default, matching file entries are hidden there too. Users can turn that setting off to keep the tree complete while filtering the diff.
+The sidebar tree has a separate setting. By default, matching file entries are hidden there too. A folder in the tree is hidden when all its files are hidden. Users can turn that setting off to keep the tree complete while filtering the diff. With tree filtering off, matching entries appear muted with an icon.
 
 Example: `src/button.spec.ts` disappears from both areas by default. With tree filtering disabled, its tree entry remains visible while its diff block is hidden.
 
@@ -158,17 +174,31 @@ packages/service/pnpm-lock.yaml
 
 ### Preset Customization
 
-Users can enable or disable each preset, add rules, edit rules, remove rules, and restore a preset to its original rules.
+Users can enable or disable each preset, add rules, edit rules, remove rules, and restore a preset to its default rules. Preset rules do not have individual on/off switches; users turn the whole preset on or off.
 
 Example: a user adds `**/*.integration.ts` to the Tests preset to cover the naming convention in their project.
+
+A preset that the user has not modified follows the default rules of the installed version, so a later version can improve its defaults. A preset whose rules differ from the defaults is marked `Modified` and keeps the user's rules. Restoring a preset applies the current default rules. See [ADR 0003](adr/0003-store-preset-edits-only.md).
 
 ## 9. Custom Rules and Exceptions
 
 ### Custom Hide Rules
 
-Users can create hide rules independently of presets. Rules match repository-relative file paths, not file contents.
+Users can create hide rules independently of presets. Each custom rule can be turned on or off without deleting it.
 
-Required pattern support includes exact paths, `*` for characters within a path segment, and `**/` for zero or more directory levels. This allows rules to match files at the repository root and in nested directories.
+Rules match repository-relative file paths, not file contents. A file with review comments is hidden like any other matching file. For a renamed or moved file, rules match the new path. For a deleted file, rules match its old path.
+
+Every pattern starts at the repository root. A pattern without `**/` does not match files in nested directories: `*.lock` matches `yarn.lock` but not `apps/web/yarn.lock`. This differs from `.gitignore`. See [ADR 0001](adr/0001-anchor-patterns-at-repository-root.md).
+
+Pattern support:
+
+- Exact paths. Paths can contain spaces.
+- `*` matches characters within one path segment.
+- `?` matches one character within one path segment.
+- `**/` matches zero or more directory levels.
+- A trailing `/**` or `/` matches everything inside a directory: `docs/` is the same as `docs/**`.
+- Matching is case-sensitive.
+- Brace expansion (`{a,b}`), negation (`!`), and character classes (`[abc]`) are not supported.
 
 | Rule | Meaning | Example match |
 | --- | --- | --- |
@@ -176,10 +206,11 @@ Required pattern support includes exact paths, `*` for characters within a path 
 | `**/*.test.*` | Test filenames at any directory level | `src/utils/format.test.js` |
 | `**/generated/**` | Files inside generated directories | `src/generated/client.ts` |
 | `docs/**` | Files inside the root docs directory | `docs/setup.md` |
+| `docs/` | Same as `docs/**` | `docs/setup.md` |
 
 ### Always Show Rules
 
-Always show rules take priority over hide rules, including rules from presets.
+Always show rules take priority over hide rules, including rules from presets. Always show rules do not have an on/off switch; users remove a rule to stop it.
 
 Example:
 
@@ -194,16 +225,28 @@ Other matching `.spec.ts` files are hidden, but `src/payments/checkout.spec.ts` 
 
 1. If filtering is inactive or the user is showing all files, leave files visible.
 2. If a file matches an Always show rule, leave it visible.
-3. Otherwise, if it matches any rule in an enabled preset or any active custom hide rule, hide it.
+3. Otherwise, if it matches any rule in an enabled preset or any custom rule that is on, hide it.
 4. Leave files that match no hide rule visible.
 
 ## 10. Direct Links and Dynamic Page Changes
 
-If a direct link targets an otherwise hidden file or a comment inside that file, the extension temporarily reveals the target file and shows a notice. Other matching files remain hidden, and saved rules remain unchanged.
+### Direct Links
+
+If a direct link targets an otherwise hidden file, a line in that file, or a review comment inside it, the extension temporarily reveals the file and shows a notice. Other matching files remain hidden, and saved rules remain unchanged.
 
 Example notice: `This file is temporarily visible because you opened a direct link.`
 
-Filtering must continue to work when GitHub loads additional files or updates the Changes view during navigation. A reload must not be required for newly loaded files to receive the active filters.
+The file stays visible until the user selects `Hide again`, turns filtering off, or leaves the pull request. A reload with the same link reveals the file again.
+
+When GitHub's own navigation changes the URL to target a hidden file, the extension treats it as a direct link. With tree filtering off, selecting a muted tree entry also reveals the file as a direct link does.
+
+### Single File Mode
+
+On large pull requests, GitHub can show one file at a time. In that mode, the open file always stays visible. If it is a matching file, it is labelled as temporarily visible. The sidebar tree still follows the tree filtering setting.
+
+### Dynamic Page Changes
+
+Filtering must continue to work when GitHub loads additional files or updates the Files changed page during navigation. A reload must not be required for newly loaded files to receive the active rules.
 
 ## 11. Storage and Access
 
@@ -298,26 +341,42 @@ For example, whether a release starts from a manual command, a Git tag, or a wor
 
 ## 14. Acceptance Criteria
 
-- First installation uses manual activation and leaves both presets disabled.
+- First installation uses manual activation, leaves both presets disabled, and opens no page.
+- The extension runs on the current Files changed page, including single-commit and commit-range views, and does nothing on the classic page.
 - The Tests preset matches `.spec.*`, `.test.*`, and files inside `__tests__` at root or nested directory levels.
 - The Lockfiles preset matches its listed filenames at root or nested directory levels.
 - Users can edit preset rules, restore defaults, and create custom rules.
+- An unmodified preset follows the default rules of the installed version.
+- Patterns start at the repository root, accept spaces, and match case-sensitively.
+- Renamed files match by their new path.
 - Always show rules override every matching hide rule.
 - Active filtering hides matching diff blocks and, by default, their tree entries.
 - Disabling tree filtering preserves the full tree while filtering the diff.
-- The hidden-file count remains accurate, including when more files load.
-- Show all files restores visibility without deleting settings.
+- The hidden count equals the matching files GitHub lists in the current view, without temporarily visible files, and updates when more files load.
+- Show all files restores visibility without deleting settings and ends on reload or when the user leaves the pull request.
 - Manual activation is remembered for the same pull request after reload; a new pull request starts inactive.
-- Automatic mode applies the selected filters when Changes opens.
-- Direct links to hidden files or their comments reveal the target temporarily with a notice.
+- Automatic mode applies the selected rules when the Files changed page opens.
+- Direct links to hidden files, their lines, or their comments reveal the target temporarily with a notice.
+- In single file mode, the open file stays visible.
+- Menu changes to presets and tree filtering state that they apply to every repository.
+- Selecting the extension icon opens the Settings page.
 - Preferences remain local and apply globally across repositories.
 - Filtering does not modify repository content, comments, review submissions, or viewed-file state.
 - The interface and documentation use English, and the public source includes the MIT license.
+- The Settings page and the store listing state that the project is not affiliated with GitHub.
 - GitHub releases provide an installable ZIP and instructions for local installation and updates.
 - Release names follow the UTC date and daily counter, and store submissions use the same package as GitHub.
 
 ## 15. Maintenance Considerations
 
-GitHub File Hider depends on GitHub's page structure. Changes to that structure can require an extension update. Compatibility checks must cover the diff, the sidebar tree, dynamically loaded files, and direct links.
+GitHub File Hider depends on GitHub's page structure. Changes to that structure can require an extension update. Compatibility checks must cover the diff, the sidebar tree, dynamically loaded files, virtualized large pull requests, single file mode, and direct links.
 
 The extension is a visibility tool. Users retain control over when hidden files are shown and reviewed.
+
+### Known Limitations
+
+- The classic Files changed page is not supported.
+- In single file mode, GitHub's previous and next buttons do not skip matching files.
+- GitHub navigation that does not change the URL can move to a hidden file; that file stays hidden.
+- Renaming or transferring a repository resets the activation of its pull requests.
+- Files with review comments are hidden like other matching files.
