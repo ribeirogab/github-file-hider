@@ -1,4 +1,5 @@
-import type { Page } from "@playwright/test";
+import type { BrowserContext, Page } from "@playwright/test";
+import { extensionId, seedSettings } from "../support/extension.ts";
 import type { HarnessState, Part, Rect } from "./harness.ts";
 import {
 	backgroundOf,
@@ -30,8 +31,8 @@ export type Scene = {
 	prototype: (page: Page, context: SceneContext) => Promise<Recorded>;
 	extension: (
 		page: Page,
-		context: SceneContext & { recorded: Recorded },
-	) => Promise<void>;
+		context: SceneContext & { recorded: Recorded; browser: BrowserContext },
+	) => Promise<Rect | undefined>;
 };
 
 export type Side = "prototype" | "extension";
@@ -192,6 +193,105 @@ function pageScene(options: {
 				{ state: recorded.state as HarnessState, parts: recorded.parts },
 			);
 			await run(page, "extension", steps);
+			return undefined;
+		},
+	};
+}
+
+type RawStep =
+	| { click: string }
+	| { hover: string }
+	| { focus: string }
+	| { fill: string; value: string }
+	| { press: string }
+	| { wait: number };
+
+async function runRaw(page: Page, steps: RawStep[]) {
+	for (const step of steps) {
+		if ("click" in step) await page.locator(step.click).first().click();
+		if ("hover" in step) {
+			await page.locator(step.hover).first().hover();
+			await page.waitForTimeout(600);
+		}
+		if ("focus" in step) {
+			await page.keyboard.press("Shift");
+			await page.locator(step.focus).first().focus();
+			await page.waitForTimeout(200);
+		}
+		if ("fill" in step) await page.locator(step.fill).first().fill(step.value);
+		if ("press" in step) {
+			await page.keyboard.press(step.press);
+			await page.waitForTimeout(100);
+		}
+		if ("wait" in step) await page.waitForTimeout(step.wait);
+	}
+	await page.waitForTimeout(300);
+}
+
+const APP = "#fh-app";
+
+const WITHOUT_PROTOTYPE_CHROME =
+	":root { --proto-h: 0px !important; } body { padding-top: 0 !important; } .proto-bar, .proto-toast, #fh-app > .fh-chrome { display: none !important; }";
+
+const toSettings = (state: PrototypeState) => {
+	const { activePRs, ...rest } = state;
+	return { schemaVersion: 1, ...rest, activations: activePRs };
+};
+
+function settingsScene(options: {
+	name: string;
+	state: () => PrototypeState;
+	steps?: RawStep[];
+	capture: string[];
+	padding?: number;
+}): Scene {
+	const steps = options.steps ?? [];
+	const padding = options.padding ?? 0;
+	return {
+		name: options.name,
+		surface: "settings",
+		async prototype(page, { origin, theme }) {
+			await openPrototype(page, origin, {
+				screen: "settings",
+				theme,
+				state: options.state(),
+			});
+			await page.addStyleTag({ content: WITHOUT_PROTOTYPE_CHROME });
+			await runRaw(page, steps);
+			const anchor = await rectOf(page, `${APP} .fh-appheader`);
+			await isolate(page, [
+				`${APP} .fh-appheader`,
+				`${APP} .fh-page`,
+				"#fh-tooltip",
+			]);
+			const rects = await Promise.all(
+				options.capture.map((target) => rectOf(page, target)),
+			);
+			return {
+				clip: union(rects, padding),
+				background: await backgroundOf(page, `${APP} .fh-page`),
+				parts: [{ component: "anchor", rect: anchor, layer: null, meta: {} }],
+			};
+		},
+		async extension(page, { theme, recorded, browser }) {
+			await seedSettings(browser, toSettings(options.state()));
+			const id = await extensionId(browser);
+			await page.goto(`chrome-extension://${id}/settings.html#general`);
+			await page.locator("html[data-ready]").waitFor({ state: "attached" });
+			await page.addStyleTag({ content: NO_MOTION });
+			await page.evaluate(async () => {
+				await document.fonts.load('500 12px "FH Mona Sans"');
+				await document.fonts.ready;
+			});
+			void theme;
+			await runRaw(page, steps);
+			const anchor = await rectOf(page, `${APP} .fh-appheader`);
+			const expected = recorded.parts[0]?.rect ?? anchor;
+			return {
+				...recorded.clip,
+				x: recorded.clip.x + anchor.x - expected.x,
+				y: recorded.clip.y + anchor.y - expected.y,
+			};
 		},
 	};
 }
@@ -443,3 +543,206 @@ export const SCENES: Scene[] = [
 		padding: 32,
 	}),
 ];
+
+const PAGE = `${APP} .fh-page`;
+const HEADER = `${APP} .fh-appheader`;
+const MAIN = `${APP} #fh-main`;
+const nav = (page: string): RawStep => ({
+	click: `${APP} [data-page="${page}"]`,
+});
+
+const lockfilesEmpty = (): PrototypeState => ({
+	...demo(),
+	presets: {
+		tests: { enabled: true },
+		lockfiles: { enabled: true, rules: [] },
+	},
+});
+
+const noCustom = (): PrototypeState => ({ ...presetsOnly() });
+
+const noAlways = (): PrototypeState => ({ ...demo(), alwaysShow: [] });
+
+SCENES.push(
+	settingsScene({
+		name: "settings-general",
+		state: demo,
+		capture: [HEADER, PAGE],
+	}),
+	settingsScene({
+		name: "settings-general-first-install",
+		state: firstInstall,
+		capture: [HEADER, PAGE],
+	}),
+	settingsScene({
+		name: "settings-general-automatic",
+		state: () => automatic(demo()),
+		capture: [PAGE],
+	}),
+	settingsScene({
+		name: "settings-general-tree-off",
+		state: () => ({ ...demo(), treeFiltering: false }),
+		capture: [PAGE],
+	}),
+	settingsScene({
+		name: "settings-general-radio-focus",
+		state: demo,
+		steps: [{ focus: `${APP} [data-focus="radio:automatic"]` }],
+		capture: [MAIN],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-general-switch-focus",
+		state: demo,
+		steps: [{ focus: `${APP} [data-focus="switch:tree"]` }],
+		capture: [MAIN],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-saved",
+		state: demo,
+		steps: [{ click: `${APP} [data-focus="switch:tree"]` }],
+		capture: [HEADER],
+	}),
+	settingsScene({
+		name: "settings-view-source-hover",
+		state: demo,
+		steps: [{ hover: `${APP} [data-act="source"]` }],
+		capture: [HEADER],
+	}),
+	settingsScene({
+		name: "settings-nav-focus",
+		state: demo,
+		steps: [{ focus: `${APP} [data-page="custom"]` }],
+		capture: [`${APP} .fh-nav`],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-nav-hover",
+		state: demo,
+		steps: [{ hover: `${APP} [data-page="always"]` }],
+		capture: [`${APP} .fh-nav`],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-presets",
+		state: demo,
+		steps: [nav("presets")],
+		capture: [HEADER, PAGE],
+	}),
+	settingsScene({
+		name: "settings-presets-first-install",
+		state: firstInstall,
+		steps: [nav("presets")],
+		capture: [PAGE],
+	}),
+	settingsScene({
+		name: "settings-presets-modified",
+		state: demo,
+		steps: [
+			nav("presets"),
+			{ fill: `${APP} [data-input="add:p:tests"]`, value: "**/*.e2e.ts" },
+			{ press: "Enter" },
+		],
+		capture: [MAIN],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-presets-editing",
+		state: demo,
+		steps: [
+			nav("presets"),
+			{ click: `${APP} [data-list="p:tests"][data-key="1"] [data-act="edit"]` },
+		],
+		capture: [MAIN],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-presets-edit-error",
+		state: demo,
+		steps: [
+			nav("presets"),
+			{ click: `${APP} [data-list="p:tests"][data-key="1"] [data-act="edit"]` },
+			{ fill: `${APP} [data-input="edit"]`, value: "/src/__tests__/**" },
+		],
+		capture: [MAIN],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-presets-add-error",
+		state: demo,
+		steps: [
+			nav("presets"),
+			{ fill: `${APP} [data-input="add:p:lockfiles"]`, value: "**/yarn.lock" },
+			{ press: "Enter" },
+		],
+		capture: [MAIN],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-presets-restore-tip",
+		state: demo,
+		steps: [
+			nav("presets"),
+			{ hover: `${APP} [data-act="restore"][data-preset="lockfiles"]` },
+		],
+		capture: [MAIN, "#fh-tooltip.is-open"],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-presets-rule-hover",
+		state: demo,
+		steps: [
+			nav("presets"),
+			{
+				hover: `${APP} [data-list="p:tests"][data-key="0"] [data-act="remove"]`,
+			},
+		],
+		capture: [MAIN, "#fh-tooltip.is-open"],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-presets-empty",
+		state: lockfilesEmpty,
+		steps: [nav("presets")],
+		capture: [MAIN],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-custom",
+		state: demo,
+		steps: [nav("custom")],
+		capture: [HEADER, PAGE],
+	}),
+	settingsScene({
+		name: "settings-custom-empty",
+		state: noCustom,
+		steps: [nav("custom")],
+		capture: [PAGE],
+	}),
+	settingsScene({
+		name: "settings-custom-checkbox-focus",
+		state: demo,
+		steps: [nav("custom"), { focus: `${APP} .fh-rule .fh-checkbox` }],
+		capture: [MAIN],
+		padding: 8,
+	}),
+	settingsScene({
+		name: "settings-always",
+		state: demo,
+		steps: [nav("always")],
+		capture: [HEADER, PAGE],
+	}),
+	settingsScene({
+		name: "settings-always-empty",
+		state: noAlways,
+		steps: [nav("always")],
+		capture: [PAGE],
+	}),
+	settingsScene({
+		name: "settings-always-syntax-open",
+		state: demo,
+		steps: [nav("always"), { click: `${APP} .fh-details > summary` }],
+		capture: [PAGE],
+	}),
+);

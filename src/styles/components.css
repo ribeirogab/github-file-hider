@@ -141,6 +141,15 @@
 	height: 12px;
 }
 
+.fh-flash-detail code,
+code.fh-code {
+	padding: 0.15em 0.4em;
+	border-radius: 6px;
+	background: var(--fh-neutral-muted);
+	font: 85% / 1 var(--fh-mono);
+	white-space: nowrap;
+}
+
 .fh-switch {
 	display: inline-flex;
 	align-items: center;

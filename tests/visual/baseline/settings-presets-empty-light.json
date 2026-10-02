@@ -1,0 +1,22 @@
+{
+	"clip": {
+		"x": 502,
+		"y": 169,
+		"width": 708,
+		"height": 699
+	},
+	"background": "rgb(255, 255, 255)",
+	"parts": [
+		{
+			"component": "anchor",
+			"rect": {
+				"x": 0,
+				"y": 0,
+				"width": 1440,
+				"height": 64
+			},
+			"layer": null,
+			"meta": {}
+		}
+	]
+}

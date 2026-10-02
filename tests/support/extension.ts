@@ -136,6 +136,7 @@ export async function launchExtension(options: {
 		deviceScaleFactor: options.deviceScaleFactor ?? 1,
 		args: [
 			...RENDERING_ARGS,
+			"--enable-unsafe-extension-debugging",
 			`--disable-extensions-except=${extension}`,
 			`--load-extension=${extension}`,
 		],
@@ -180,3 +181,32 @@ export const test = base.extend<{
 });
 
 export { expect } from "@playwright/test";
+
+export async function clickExtensionIcon(context: BrowserContext) {
+	const browser = context.browser();
+	if (!browser) throw new Error("The extension context has no browser");
+	const session = await browser.newBrowserCDPSession();
+	const { targetInfos } = (await session.send("Target.getTargets", {
+		filter: [{ type: "tab" }],
+	} as never)) as { targetInfos: { targetId: string }[] };
+	const id = await extensionId(context);
+	await session.send(
+		"Extensions.triggerAction" as never,
+		{
+			id,
+			targetId: targetInfos[0]?.targetId,
+		} as never,
+	);
+	await session.detach();
+}
+
+export async function openSettings(
+	context: BrowserContext,
+	page: Page,
+	hash = "general",
+) {
+	await page.goto(
+		`chrome-extension://${await extensionId(context)}/settings.html#${hash}`,
+	);
+	await page.locator("html[data-ready]").waitFor({ state: "attached" });
+}

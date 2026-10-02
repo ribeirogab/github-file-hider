@@ -27,8 +27,14 @@ for (const scene of SCENES)
 			});
 			try {
 				const page = context.pages()[0] ?? (await context.newPage());
-				await scene.extension(page, { origin, theme, recorded });
-				const actual = await capture(page, recorded.clip);
+				const clip =
+					(await scene.extension(page, {
+						origin,
+						theme,
+						recorded,
+						browser: context,
+					})) ?? recorded.clip;
+				const actual = await capture(page, clip);
 				const { result, diff } = comparePng(actual, expected);
 				if (result.different > 0)
 					await writeResult(`${scene.name}-${theme}`, {

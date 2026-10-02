@@ -188,10 +188,6 @@ button.fh-ctl-btn[aria-expanded="true"] {
 	font-weight: 400;
 }
 
-.fh-nav-note + .fh-nav-note {
-	margin-top: 8px;
-}
-
 .fh-al-item {
 	position: relative;
 	display: flex;
@@ -386,15 +382,6 @@ button.fh-ctl-btn[aria-expanded="true"] {
 	font-size: 12px;
 	line-height: 18px;
 	color: var(--fh-fg-muted);
-}
-
-.fh-flash-detail code,
-code.fh-code {
-	padding: 0.15em 0.4em;
-	border-radius: 6px;
-	background: var(--fh-neutral-muted);
-	font: 85% / 1 var(--fh-mono);
-	white-space: nowrap;
 }
 
 .fh-flash-actions {
