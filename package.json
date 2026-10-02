@@ -21,7 +21,8 @@
 		"test:visual": "pnpm build:test && playwright test --project visual",
 		"visual:baseline": "playwright test --project baseline",
 		"test": "pnpm test:unit && pnpm build:test && playwright test --project e2e --project visual",
-		"icons": "node scripts/icons.mjs"
+		"icons": "node scripts/icons.mjs",
+		"release": "node scripts/release.mjs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.15",
