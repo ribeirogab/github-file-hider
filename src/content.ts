@@ -16,6 +16,7 @@ import {
 	type LinkTarget,
 	linkTarget,
 	listedPaths,
+	openFilePath,
 	parseRoute,
 	type Route,
 	restoreVisibility,
@@ -253,6 +254,7 @@ async function render(state: Mounted) {
 		pullRequestKey: state.route.key,
 		paths,
 		session: state.session,
+		openPath: state.route.singleFile ? openFilePath() : null,
 	});
 	state.model = model;
 	applyVisibility(

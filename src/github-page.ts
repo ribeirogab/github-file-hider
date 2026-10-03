@@ -111,13 +111,16 @@ export function diffBlock(path: string): HTMLElement | null {
 	return anchor ? document.getElementById(anchor) : null;
 }
 
+const DIFF_LISTS =
+	'[data-testid="progressive-diffs-list"], [data-testid="virtualized-diffs-list"]';
+
 export function diffEntry(block: HTMLElement): HTMLElement {
-	const parent = block.parentElement;
-	return parent?.parentElement?.matches(
-		'[data-testid="progressive-diffs-list"]',
-	)
-		? parent
-		: block;
+	let entry: HTMLElement = block;
+	while (entry.parentElement && !entry.parentElement.matches(DIFF_LISTS)) {
+		if (entry.parentElement === document.body) return block;
+		entry = entry.parentElement;
+	}
+	return entry.parentElement ? entry : block;
 }
 
 export function fileHeaderActions(block: HTMLElement): HTMLElement | null {
