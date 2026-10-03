@@ -4,7 +4,9 @@ import {
 	diffEntry,
 	diffTop,
 	fileHeaderActions,
+	treeItem,
 	treeRoot,
+	treeRowContent,
 } from "./github-page";
 import {
 	blankslateHtml,
@@ -14,7 +16,10 @@ import {
 	type NoticeKind,
 	noticeHtml,
 	noticeReason,
+	type TreeHintKind,
 	treeEmptyHtml,
+	treeHintHtml,
+	treeHintTip,
 } from "./ui/markup";
 
 function fromHtml(html: string) {
@@ -142,9 +147,47 @@ export function syncFileStates(model: PageModel) {
 	}
 }
 
+function treeState(file: ListedFile, treeFiltering: boolean) {
+	if (file.state === "hidden" && !treeFiltering) return "diff-hidden";
+	if (file.state === "revealed") return "revealed";
+	return null;
+}
+
+export function syncTreeHints(model: PageModel) {
+	for (const file of model.files) {
+		const item = treeItem(file.path);
+		if (!item) continue;
+		const state = treeState(file, model.treeFiltering);
+		if (state) item.dataset.fhState = state;
+		else item.removeAttribute("data-fh-state");
+		const content = treeRowContent(item);
+		const current = content?.querySelector<HTMLElement>(
+			":scope > .fh-tree-hint",
+		);
+		const kind: TreeHintKind | null =
+			state === "diff-hidden"
+				? "hidden"
+				: state === "revealed"
+					? "revealed"
+					: null;
+		if (!kind || !content) {
+			current?.remove();
+			continue;
+		}
+		const tip = treeHintTip(kind, file.evaluation);
+		if (current?.dataset.kind === kind) {
+			current.dataset.fhTip = tip;
+			current.setAttribute("aria-label", tip);
+			continue;
+		}
+		current?.remove();
+		content.append(fromHtml(treeHintHtml(kind, tip)));
+	}
+}
+
 export function removeDecorations() {
 	for (const element of document.querySelectorAll(
-		".fh-blankslate, .fh-tree-empty, .fh-flash[data-fh-notice], .fh-file-label",
+		".fh-blankslate, .fh-tree-empty, .fh-flash[data-fh-notice], .fh-file-label, .fh-tree-hint",
 	))
 		element.remove();
 }

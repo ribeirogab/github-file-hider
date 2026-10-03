@@ -103,14 +103,15 @@ export type Step =
 
 async function run(page: Page, side: Side, steps: Step[]) {
 	for (const step of steps) {
-		if ("click" in step) await page.locator(selector(side, step.click)).click();
+		if ("click" in step)
+			await page.locator(selector(side, step.click)).first().click();
 		if ("hover" in step) {
-			await page.locator(selector(side, step.hover)).hover();
+			await page.locator(selector(side, step.hover)).first().hover();
 			await page.waitForTimeout(600);
 		}
 		if ("focus" in step) {
 			await page.keyboard.press("Shift");
-			await page.locator(selector(side, step.focus)).focus();
+			await page.locator(selector(side, step.focus)).first().focus();
 			await page.waitForTimeout(200);
 		}
 		if ("press" in step) {
@@ -205,6 +206,11 @@ function pageScene(options: {
 				theme,
 				state: options.state(),
 			});
+			if (options.bare)
+				await page.addStyleTag({
+					content:
+						".gh-file-header, .gh-tree-row, .gh-sidebar { position: static !important; } .gh-tree, .gh-sidebar { overflow: visible !important; max-height: none !important; }",
+				});
 			if (options.scenario)
 				await page.evaluate(
 					(id) =>
@@ -222,11 +228,6 @@ function pageScene(options: {
 				await page.waitForTimeout(300);
 			}
 			const state = await prototypeState(page);
-			if (options.bare)
-				await page.addStyleTag({
-					content:
-						".gh-file-header, .gh-tree-row { position: static !important; }",
-				});
 			const first = selector("prototype", mount[0] ?? "control");
 			const background = options.bare
 				? await backgroundOf(page, "html")
@@ -689,6 +690,40 @@ export const SCENES: Scene[] = [
 		mount: ["keptLabel"],
 		steps: [{ hover: "keptLabel" }],
 		capture: ["keptLabel", "tooltip"],
+	}),
+	pageScene({
+		name: "tree-hint-hidden",
+		state: treeOff,
+		bare: true,
+		mount: ["hiddenHint"],
+		capture: ["hiddenHint"],
+	}),
+	pageScene({
+		name: "tree-hint-hidden-hover",
+		state: treeOff,
+		bare: true,
+		mount: ["hiddenHint"],
+		steps: [{ hover: "hiddenHint" }],
+		capture: ["hiddenHint", "tooltip"],
+	}),
+	pageScene({
+		name: "tree-hint-revealed",
+		state: treeOff,
+		bare: true,
+		scenario: "link-file",
+		reveal: "revealedHint",
+		mount: ["revealedHint"],
+		capture: ["revealedHint"],
+	}),
+	pageScene({
+		name: "tree-hint-revealed-hover",
+		state: treeOff,
+		bare: true,
+		scenario: "link-file",
+		reveal: "revealedHint",
+		mount: ["revealedHint"],
+		steps: [{ hover: "revealedHint" }],
+		capture: ["revealedHint", "tooltip"],
 	}),
 	pageScene({
 		name: "control-revealed",

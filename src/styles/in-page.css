@@ -427,6 +427,10 @@ button.fh-ctl-btn[aria-expanded="true"] {
 	color: var(--fh-accent);
 }
 
+.fh-tree-hint .fh-icon {
+	color: var(--fh-fg-muted);
+}
+
 [data-fh-state="diff-hidden"] > div,
 [data-fh-state="diff-hidden"] > div a {
 	color: var(--fh-fg-muted) !important;

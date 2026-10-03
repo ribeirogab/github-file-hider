@@ -7,6 +7,7 @@ import {
 	type SessionState,
 } from "./filtering-session";
 import {
+	anchorFor,
 	applyVisibility,
 	clearHash,
 	diffBlock,
@@ -34,6 +35,7 @@ import {
 	syncBlankslate,
 	syncFileStates,
 	syncNotices,
+	syncTreeHints,
 	syncTreeNote,
 } from "./page-decorations";
 import { evaluate } from "./rules";
@@ -178,6 +180,48 @@ function scrollToTarget(target: LinkTarget) {
 
 document.addEventListener("click", onPageAction);
 
+function mutedTreeEntry(target: EventTarget | null) {
+	const item =
+		target instanceof Element
+			? target.closest<HTMLElement>(
+					'[role="treeitem"][data-fh-state="diff-hidden"]',
+				)
+			: null;
+	return mounted && item ? item : null;
+}
+
+function openAsDirectLink(path: string) {
+	const anchor = anchorFor(path);
+	if (!anchor) return;
+	if (location.hash === `#${anchor}`) clearHash();
+	location.hash = anchor;
+}
+
+document.addEventListener(
+	"click",
+	(event) => {
+		const item = mutedTreeEntry(event.target);
+		if (!item) return;
+		event.preventDefault();
+		event.stopPropagation();
+		openAsDirectLink(item.id);
+	},
+	true,
+);
+
+document.addEventListener(
+	"keydown",
+	(event) => {
+		if (event.key !== "Enter") return;
+		const item = mutedTreeEntry(event.target);
+		if (!item || event.target !== item) return;
+		event.preventDefault();
+		event.stopPropagation();
+		openAsDirectLink(item.id);
+	},
+	true,
+);
+
 function mount(route: Route): Mounted {
 	return {
 		route,
@@ -224,6 +268,7 @@ async function render(state: Mounted) {
 		state.pendingAnnouncement = null;
 	}
 	syncFileStates(model);
+	syncTreeHints(model);
 	syncNotices(model, state.reveals);
 	syncBlankslate(model);
 	syncTreeNote(model);
