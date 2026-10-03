@@ -9,17 +9,22 @@ import {
 	mainAction,
 	menuAction,
 } from "../../src/page-actions";
+import { evaluate } from "../../src/rules";
 import { normalizeSettings, type Settings } from "../../src/settings";
+import { createTooltip } from "../../src/ui/in-page";
 import {
 	type BlankslateKind,
 	blankslateHtml,
 	type FileLabelKind,
 	fileLabelHtml,
+	fileLabelTip,
 	type NoticeKind,
 	noticeHtml,
+	noticeReason,
 	type TreeHintKind,
 	treeEmptyHtml,
 	treeHintHtml,
+	treeHintTip,
 } from "../../src/ui/markup";
 import { createPageUi, type PageUi } from "../../src/ui/page-ui";
 
@@ -81,6 +86,7 @@ function setTheme(theme: "light" | "dark") {
 	root.dataset.colorMode = theme;
 	root.dataset.lightTheme = "light";
 	root.dataset.darkTheme = "dark";
+	root.style.colorScheme = theme;
 }
 
 function box(rect: Rect, color: string, parent: HTMLElement) {
@@ -97,23 +103,32 @@ function box(rect: Rect, color: string, parent: HTMLElement) {
 	return element;
 }
 
-function backdrop(rect: Rect, color: string) {
+let scroll = { x: 0, y: 0 };
+
+function backdrop(rect: Rect, color: string, scrolled = { x: 0, y: 0 }) {
+	scroll = scrolled;
+	document.body.style.minHeight = `${scroll.y + innerHeight + 2000}px`;
 	box(
 		{
-			x: rect.x - 32,
-			y: rect.y - 32,
+			x: rect.x - 32 + scroll.x,
+			y: rect.y - 32 + scroll.y,
 			width: rect.width + 64,
 			height: rect.height + 64,
 		},
 		color,
 		document.body,
 	);
+	window.scrollTo(scroll.x, scroll.y);
 }
 
 const layers = new Map<string, HTMLElement>();
 
 function layerContainer(layer: Layer | null) {
-	if (!layer) return { container: document.body, origin: { x: 0, y: 0 } };
+	if (!layer)
+		return {
+			container: document.body,
+			origin: { x: -scroll.x, y: -scroll.y },
+		};
 	const id = JSON.stringify(layer.rect);
 	let container = layers.get(id);
 	if (!container) {
@@ -121,9 +136,10 @@ function layerContainer(layer: Layer | null) {
 		const sticky = layer.position === "sticky";
 		Object.assign(container.style, {
 			position: sticky ? "sticky" : "absolute",
-			top: sticky ? layer.top : `${layer.rect.y}px`,
-			left: `${layer.rect.x}px`,
-			marginTop: sticky ? `${layer.rect.y}px` : "0",
+			top: sticky ? layer.top : `${layer.rect.y + scroll.y}px`,
+			left: sticky ? "auto" : `${layer.rect.x + scroll.x}px`,
+			marginLeft: sticky ? `${layer.rect.x + scroll.x}px` : "0",
+			marginTop: sticky ? `${layer.rect.y + scroll.y}px` : "0",
 			width: `${layer.rect.width}px`,
 			height: `${layer.rect.height}px`,
 			background: layer.background,
@@ -150,6 +166,11 @@ function place(element: HTMLElement, part: Part, width?: number) {
 	slot.style.left = `${left}px`;
 	slot.style.top = `${top}px`;
 	if (width !== undefined) slot.style.width = `${width}px`;
+	if (part.meta.parentDisplay?.includes("flex")) {
+		slot.style.display = "flex";
+		slot.style.flexDirection = part.meta.parentDirection ?? "row";
+		slot.style.alignItems = part.meta.parentAlign ?? "normal";
+	}
 	slot.append(element);
 	container.append(slot);
 	const actual = element.getBoundingClientRect();
@@ -199,30 +220,34 @@ function mountMarkup(part: Part) {
 	}
 	if (part.component === "treeEmpty")
 		place(fromHtml(treeEmptyHtml()), part, part.rect.width);
+	const path = meta.path ?? "";
+	const evaluation = evaluate(path, settings ?? normalizeSettings(undefined));
 	if (part.component === "notice")
 		place(
 			fromHtml(
-				noticeHtml(meta.path ?? "", meta.kind as NoticeKind, meta.reason ?? ""),
+				noticeHtml(path, meta.kind as NoticeKind, noticeReason(evaluation)),
 			),
 			part,
 			part.rect.width,
 		);
-	if (part.component === "fileLabel")
-		place(
-			fromHtml(fileLabelHtml(meta.kind as FileLabelKind, meta.tip ?? "")),
-			part,
-		);
-	if (part.component === "treeHint")
-		place(
-			fromHtml(treeHintHtml(meta.kind as TreeHintKind, meta.tip ?? "")),
-			part,
-		);
+	if (part.component === "revealedLabel" || part.component === "keptLabel") {
+		const kind: FileLabelKind =
+			part.component === "revealedLabel" ? "revealed" : "kept";
+		place(fromHtml(fileLabelHtml(kind, fileLabelTip(kind, evaluation))), part);
+	}
+	if (part.component === "hiddenHint" || part.component === "revealedHint") {
+		const kind: TreeHintKind =
+			part.component === "hiddenHint" ? "hidden" : "revealed";
+		place(fromHtml(treeHintHtml(kind, treeHintTip(kind, evaluation))), part);
+	}
 }
 
 const harness = {
 	setTheme,
 	backdrop,
 	mount(state: HarnessState, parts: Part[]) {
+		settings = normalizeSettings(state.settings);
+		if (!parts.some((part) => part.component === "control")) createTooltip();
 		for (const part of parts) {
 			if (part.component === "control") mountControl(state, part);
 			else mountMarkup(part);

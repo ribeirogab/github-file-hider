@@ -203,8 +203,12 @@ export function targetLine(block: HTMLElement, line: string | null) {
 	if (!line) return null;
 	const side = line.startsWith("L") ? "left" : "right";
 	const number = /^[LR]?(\d+)/.exec(line)?.[1];
-	return block.querySelector<HTMLElement>(
-		`[data-diff-side="${side}"][data-line-number="${number}"]`,
+	return (
+		block
+			.querySelector<HTMLElement>(
+				`[data-diff-side="${side}"][data-line-number="${number}"]`,
+			)
+			?.closest<HTMLElement>("tr") ?? null
 	);
 }
 

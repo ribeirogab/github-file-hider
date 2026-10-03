@@ -140,6 +140,14 @@ export async function isolate(page: Page, selectors: string[]) {
 	}, selectors);
 }
 
+export async function isolateBare(page: Page, selectors: string[]) {
+	await page.addStyleTag({
+		content: `body * { visibility: hidden !important; } ${selectors
+			.map((selector) => `${selector}, ${selector} *`)
+			.join(", ")} { visibility: visible !important; }`,
+	});
+}
+
 export async function backgroundOf(
 	page: Page,
 	selector: string,

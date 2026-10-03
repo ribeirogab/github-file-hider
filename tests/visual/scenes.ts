@@ -6,6 +6,7 @@ import {
 	demo,
 	firstInstall,
 	isolate,
+	isolateBare,
 	layerOf,
 	NO_MOTION,
 	openPrototype,
@@ -18,6 +19,7 @@ import {
 
 export type Recorded = {
 	clip: Rect;
+	scroll?: { x: number; y: number };
 	background: string;
 	parts: Part[];
 	state?: HarnessState;
@@ -48,11 +50,25 @@ const TARGETS = {
 	blankslateEdit: '.fh-blankslate [data-fh-act="edit-rules"]',
 	treeEmpty: ".fh-tree-empty",
 	treeEmptyShowAll: '.fh-tree-empty [data-fh-act="show-all"]',
+	notice: ".fh-flash[data-fh-notice]",
+	noticeHide: '.fh-flash [data-fh-act="hide-revealed"]',
+	revealedLabel: '.fh-file-label[data-kind="revealed"]',
+	keptLabel: '.fh-file-label[data-kind="kept"]',
+	hiddenHint: '.fh-tree-hint[data-kind="hidden"]',
+	revealedHint: '.fh-tree-hint[data-kind="revealed"]',
 } as const;
 
 type Target = keyof typeof TARGETS | `item:${string}`;
 
-type Component = "control" | "blankslate" | "treeEmpty";
+type Component =
+	| "control"
+	| "blankslate"
+	| "treeEmpty"
+	| "notice"
+	| "revealedLabel"
+	| "keptLabel"
+	| "hiddenHint"
+	| "revealedHint";
 
 const IN_REPLICA = new Set<string>([
 	"control",
@@ -63,6 +79,12 @@ const IN_REPLICA = new Set<string>([
 	"blankslateEdit",
 	"treeEmpty",
 	"treeEmptyShowAll",
+	"notice",
+	"noticeHide",
+	"revealedLabel",
+	"keptLabel",
+	"hiddenHint",
+	"revealedHint",
 ]);
 
 export function selector(side: Side, target: Target) {
@@ -102,7 +124,11 @@ async function run(page: Page, side: Side, steps: Step[]) {
 
 type HarnessApi = {
 	setTheme: (theme: Theme) => void;
-	backdrop: (rect: Rect, color: string) => void;
+	backdrop: (
+		rect: Rect,
+		color: string,
+		scroll?: { x: number; y: number },
+	) => void;
 	fontsReady: () => Promise<void>;
 	mount: (state: HarnessState, parts: Part[]) => void;
 };
@@ -119,7 +145,7 @@ async function openHarness(
 		async ({ theme, recorded }) => {
 			const { harness } = window as unknown as { harness: HarnessApi };
 			harness.setTheme(theme);
-			harness.backdrop(recorded.clip, recorded.background);
+			harness.backdrop(recorded.clip, recorded.background, recorded.scroll);
 			await harness.fontsReady();
 		},
 		{ theme, recorded },
@@ -131,10 +157,23 @@ async function partOf(page: Page, component: Component): Promise<Part> {
 	const meta = await page
 		.locator(css)
 		.first()
-		.evaluate(
-			(element) =>
-				({ ...(element as HTMLElement).dataset }) as Record<string, string>,
-		);
+		.evaluate((element) => {
+			const path =
+				(element as HTMLElement).dataset.fhNotice ??
+				element.closest<HTMLElement>("[data-path]")?.dataset.path ??
+				"";
+			let parent = element.parentElement;
+			while (parent && getComputedStyle(parent).display === "contents")
+				parent = parent.parentElement;
+			const style = parent ? getComputedStyle(parent) : null;
+			return {
+				...(element as HTMLElement).dataset,
+				path,
+				parentDisplay: style?.display ?? "block",
+				parentDirection: style?.flexDirection ?? "row",
+				parentAlign: style?.alignItems ?? "normal",
+			} as Record<string, string>;
+		});
 	return {
 		component,
 		rect: await rectOf(page, css),
@@ -146,6 +185,9 @@ async function partOf(page: Page, component: Component): Promise<Part> {
 function pageScene(options: {
 	name: string;
 	state: () => PrototypeState;
+	bare?: boolean;
+	scenario?: string;
+	reveal?: Component;
 	steps?: Step[];
 	mount?: Component[];
 	capture: Target[];
@@ -163,13 +205,50 @@ function pageScene(options: {
 				theme,
 				state: options.state(),
 			});
+			if (options.scenario)
+				await page.evaluate(
+					(id) =>
+						(
+							window as unknown as { Proto: { run: (id: string) => void } }
+						).Proto.run(id),
+					options.scenario,
+				);
 			await page.waitForTimeout(1500);
+			if (options.reveal) {
+				await page
+					.locator(selector("prototype", options.reveal))
+					.first()
+					.evaluate((element) => element.scrollIntoView({ block: "center" }));
+				await page.waitForTimeout(300);
+			}
 			const state = await prototypeState(page);
+			if (options.bare)
+				await page.addStyleTag({
+					content:
+						".gh-file-header, .gh-tree-row { position: static !important; }",
+				});
 			const first = selector("prototype", mount[0] ?? "control");
-			const background = await backgroundOf(page, `${first}`, true);
+			const background = options.bare
+				? await backgroundOf(page, "html")
+				: await backgroundOf(page, `${first}`, true);
 			const parts: Part[] = [];
-			for (const component of mount) parts.push(await partOf(page, component));
+			for (const component of mount) {
+				const part = await partOf(page, component);
+				if (options.bare && part.layer)
+					part.layer = {
+						...part.layer,
+						background: "rgba(0, 0, 0, 0)",
+						border: part.layer.border.map(() => "0px none"),
+					};
+				parts.push(part);
+			}
 			await run(page, "prototype", steps);
+			if (options.bare)
+				await isolateBare(page, [
+					...mount.map((component) => selector("prototype", component)),
+					"#fh-menu",
+					"#fh-tooltip",
+				]);
 			await isolate(page, [
 				...mount.map((component) => selector("prototype", component)),
 				"#fh-menu",
@@ -180,7 +259,8 @@ function pageScene(options: {
 					rectOf(page, selector("prototype", target)),
 				),
 			);
-			return { clip: union(rects, padding), background, parts, state };
+			const scroll = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
+			return { clip: union(rects, padding), scroll, background, parts, state };
 		},
 		async extension(page, { origin, theme, recorded }) {
 			await openHarness(page, origin, theme, recorded);
@@ -341,6 +421,8 @@ const allHiddenKept = (): PrototypeState => ({
 });
 
 const MENU: Target[] = ["control", "menu"];
+
+const linked = () => active(demo());
 
 const SHOW_ALL: Step[] = [{ click: "caret" }, { click: "item:show-all" }];
 
@@ -533,6 +615,85 @@ export const SCENES: Scene[] = [
 	pageScene({
 		name: "control-all-hidden",
 		state: allHidden,
+		capture: ["control"],
+	}),
+	pageScene({
+		name: "notice-file",
+		state: linked,
+		scenario: "link-file",
+		mount: ["notice"],
+		capture: ["notice"],
+	}),
+	pageScene({
+		name: "notice-comment",
+		state: linked,
+		scenario: "link-comment",
+		mount: ["notice"],
+		capture: ["notice"],
+	}),
+	pageScene({
+		name: "notice-hover",
+		state: linked,
+		scenario: "link-file",
+		mount: ["notice"],
+		steps: [{ hover: "noticeHide" }],
+		capture: ["notice"],
+	}),
+	pageScene({
+		name: "notice-focus",
+		state: linked,
+		scenario: "link-file",
+		mount: ["notice"],
+		steps: [{ focus: "noticeHide" }],
+		capture: ["notice"],
+	}),
+	pageScene({
+		name: "label-revealed",
+		state: linked,
+		bare: true,
+		scenario: "link-file",
+		mount: ["revealedLabel"],
+		capture: ["revealedLabel"],
+	}),
+	pageScene({
+		name: "label-revealed-hover",
+		state: linked,
+		bare: true,
+		scenario: "link-file",
+		mount: ["revealedLabel"],
+		steps: [{ hover: "revealedLabel" }],
+		capture: ["revealedLabel", "tooltip"],
+	}),
+	pageScene({
+		name: "label-revealed-focus",
+		state: linked,
+		bare: true,
+		scenario: "link-file",
+		mount: ["revealedLabel"],
+		steps: [{ focus: "revealedLabel" }],
+		capture: ["revealedLabel", "tooltip"],
+	}),
+	pageScene({
+		name: "label-kept",
+		state: linked,
+		bare: true,
+		reveal: "keptLabel",
+		mount: ["keptLabel"],
+		capture: ["keptLabel"],
+	}),
+	pageScene({
+		name: "label-kept-hover",
+		state: linked,
+		bare: true,
+		reveal: "keptLabel",
+		mount: ["keptLabel"],
+		steps: [{ hover: "keptLabel" }],
+		capture: ["keptLabel", "tooltip"],
+	}),
+	pageScene({
+		name: "control-revealed",
+		state: linked,
+		scenario: "link-file",
 		capture: ["control"],
 	}),
 	pageScene({

@@ -125,6 +125,7 @@ export async function launchExtension(options: {
 	allow?: (url: string) => boolean;
 	viewport?: { width: number; height: number };
 	deviceScaleFactor?: number;
+	reducedMotion?: boolean;
 }) {
 	const directory = await mkdtemp(join(tmpdir(), "github-file-hider-"));
 	const extension = resolve("dist");
@@ -132,6 +133,7 @@ export async function launchExtension(options: {
 		channel: "chromium",
 		headless: true,
 		colorScheme: options.colorScheme ?? "light",
+		reducedMotion: options.reducedMotion ? "reduce" : "no-preference",
 		viewport: options.viewport ?? { width: 1440, height: 900 },
 		deviceScaleFactor: options.deviceScaleFactor ?? 1,
 		args: [
@@ -166,7 +168,7 @@ export const test = base.extend<{
 		await use([]);
 	},
 	extension: async ({ pageErrors }, use) => {
-		const { context, close } = await launchExtension({});
+		const { context, close } = await launchExtension({ reducedMotion: true });
 		context.on("page", (page) =>
 			page.on("pageerror", (error) => pageErrors.push(error.message)),
 		);

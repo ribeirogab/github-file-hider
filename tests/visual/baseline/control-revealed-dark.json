@@ -1,0 +1,111 @@
+{
+	"clip": {
+		"x": 533,
+		"y": 43,
+		"width": 165,
+		"height": 45
+	},
+	"scroll": {
+		"x": 0,
+		"y": 1131
+	},
+	"background": "rgb(13, 17, 23)",
+	"parts": [
+		{
+			"component": "control",
+			"rect": {
+				"x": 541.515625,
+				"y": 51.5,
+				"width": 147.796875,
+				"height": 28
+			},
+			"layer": {
+				"rect": {
+					"x": 0,
+					"y": 40,
+					"width": 1440,
+					"height": 52
+				},
+				"background": "rgb(13, 17, 23)",
+				"position": "sticky",
+				"top": "40px",
+				"zIndex": "20",
+				"border": [
+					"0px none rgb(240, 246, 252)",
+					"0px none rgb(240, 246, 252)",
+					"1px solid rgba(61, 68, 77, 0.7)",
+					"0px none rgb(240, 246, 252)"
+				]
+			},
+			"meta": {
+				"view": "filtering",
+				"path": "",
+				"parentDisplay": "flex",
+				"parentDirection": "row",
+				"parentAlign": "center"
+			}
+		}
+	],
+	"state": {
+		"settings": {
+			"mode": "manual",
+			"treeFiltering": true,
+			"presets": {
+				"tests": {
+					"enabled": true
+				},
+				"lockfiles": {
+					"enabled": true
+				}
+			},
+			"customRules": [
+				{
+					"id": "generated",
+					"pattern": "**/generated/**",
+					"enabled": true
+				},
+				{
+					"id": "docs",
+					"pattern": "docs/**",
+					"enabled": false
+				}
+			],
+			"alwaysShow": [
+				{
+					"id": "checkout",
+					"pattern": "src/payments/checkout.spec.ts"
+				}
+			],
+			"activations": {
+				"acme/storefront#482": true
+			}
+		},
+		"paths": [
+			"docs/payments.md",
+			"e2e/checkout.spec.ts",
+			"examples/node/package-lock.json",
+			"src/__tests__/checkout.ts",
+			"src/components/Button.spec.tsx",
+			"src/components/Button.tsx",
+			"src/components/CheckoutForm.test.tsx",
+			"src/components/CheckoutForm.tsx",
+			"src/generated/client.ts",
+			"src/payments/__tests__/gateway.ts",
+			"src/payments/checkout.spec.ts",
+			"src/payments/checkout.ts",
+			"src/payments/gateway.ts",
+			"src/payments/retry-policy.spec.ts",
+			"src/payments/retry-policy.ts",
+			"src/utils/format.test.ts",
+			"src/utils/format.ts",
+			"src/config.ts",
+			"src/test-utils.ts",
+			"package.json",
+			"pnpm-lock.yaml",
+			"README.md"
+		],
+		"pullRequestKey": "acme/storefront#482",
+		"showingAll": false,
+		"revealed": ["src/components/CheckoutForm.test.tsx"]
+	}
+}

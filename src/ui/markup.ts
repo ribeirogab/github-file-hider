@@ -1,4 +1,5 @@
 import type { ControlViewName, PageModel } from "../filtering-session";
+import { type Evaluation, reasonPhrase } from "../rules";
 import { copy, plural } from "./copy";
 import { escapeHtml, icon, logo } from "./icons";
 
@@ -217,3 +218,23 @@ export const treeHintHtml = (kind: TreeHintKind, tip: string) =>
 
 export const treeEmptyHtml = () =>
 	`<div class="fh-tree-empty">${icon("eyeOff")}<div><strong>${copy.treeEmptyTitle}</strong>${copy.treeEmptyBody} <button type="button" class="fh-link" data-fh-act="show-all">${copy.showAll}</button></div></div>`;
+
+export const noticeReason = (evaluation: Evaluation) =>
+	evaluation.reason
+		? `${reasonPhrase(evaluation.reason)} <code>${escapeHtml(evaluation.reason.pattern)}</code>`
+		: "a rule";
+
+export function fileLabelTip(kind: FileLabelKind, evaluation: Evaluation) {
+	if (kind === "revealed" || !evaluation.reason) return copy.tipRevealed;
+	return copy.tipKept(
+		evaluation.reason.pattern,
+		`${reasonPhrase(evaluation.overridden)} (${evaluation.overridden?.pattern})`,
+	);
+}
+
+export function treeHintTip(kind: TreeHintKind, evaluation: Evaluation) {
+	if (kind === "revealed") return copy.tipTreeRevealed;
+	return copy.tipTreeHidden(
+		`${reasonPhrase(evaluation.reason)} (${evaluation.reason?.pattern})`,
+	);
+}

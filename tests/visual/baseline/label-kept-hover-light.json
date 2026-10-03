@@ -1,0 +1,95 @@
+{
+	"clip": {
+		"x": 1046,
+		"y": 386,
+		"width": 296,
+		"height": 102
+	},
+	"scroll": {
+		"x": 0,
+		"y": 1430
+	},
+	"background": "rgb(255, 255, 255)",
+	"parts": [
+		{
+			"component": "keptLabel",
+			"rect": {
+				"x": 1146.046875,
+				"y": 459.5,
+				"width": 96.15625,
+				"height": 20
+			},
+			"layer": null,
+			"meta": {
+				"kind": "kept",
+				"fhTip": "Kept visible by the Always show rule src/payments/checkout.spec.ts. Otherwise the Tests preset (**/*.spec.*) would hide it.",
+				"path": "src/payments/checkout.spec.ts",
+				"parentDisplay": "flex",
+				"parentDirection": "row",
+				"parentAlign": "center"
+			}
+		}
+	],
+	"state": {
+		"settings": {
+			"mode": "manual",
+			"treeFiltering": true,
+			"presets": {
+				"tests": {
+					"enabled": true
+				},
+				"lockfiles": {
+					"enabled": true
+				}
+			},
+			"customRules": [
+				{
+					"id": "generated",
+					"pattern": "**/generated/**",
+					"enabled": true
+				},
+				{
+					"id": "docs",
+					"pattern": "docs/**",
+					"enabled": false
+				}
+			],
+			"alwaysShow": [
+				{
+					"id": "checkout",
+					"pattern": "src/payments/checkout.spec.ts"
+				}
+			],
+			"activations": {
+				"acme/storefront#482": true
+			}
+		},
+		"paths": [
+			"docs/payments.md",
+			"e2e/checkout.spec.ts",
+			"examples/node/package-lock.json",
+			"src/__tests__/checkout.ts",
+			"src/components/Button.spec.tsx",
+			"src/components/Button.tsx",
+			"src/components/CheckoutForm.test.tsx",
+			"src/components/CheckoutForm.tsx",
+			"src/generated/client.ts",
+			"src/payments/__tests__/gateway.ts",
+			"src/payments/checkout.spec.ts",
+			"src/payments/checkout.ts",
+			"src/payments/gateway.ts",
+			"src/payments/retry-policy.spec.ts",
+			"src/payments/retry-policy.ts",
+			"src/utils/format.test.ts",
+			"src/utils/format.ts",
+			"src/config.ts",
+			"src/test-utils.ts",
+			"package.json",
+			"pnpm-lock.yaml",
+			"README.md"
+		],
+		"pullRequestKey": "acme/storefront#482",
+		"showingAll": false,
+		"revealed": []
+	}
+}
