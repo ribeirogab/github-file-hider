@@ -5,6 +5,10 @@
 		"width": 385,
 		"height": 525
 	},
+	"scroll": {
+		"x": 0,
+		"y": 0
+	},
 	"background": "rgb(255, 255, 255)",
 	"parts": [
 		{
@@ -34,7 +38,11 @@
 				]
 			},
 			"meta": {
-				"view": "empty"
+				"view": "empty",
+				"path": "",
+				"parentDisplay": "flex",
+				"parentDirection": "row",
+				"parentAlign": "center"
 			}
 		}
 	],

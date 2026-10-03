@@ -296,6 +296,8 @@ addEventListener("hashchange", schedule);
 );
 
 watchSettings((next) => {
+	if (mounted && next.mode !== settings.mode)
+		mounted.session = reduceSession(mounted.session, { type: "change-mode" });
 	settings = next;
 	schedule();
 });

@@ -1,9 +1,9 @@
 {
 	"clip": {
-		"x": 509,
-		"y": 290,
-		"width": 385,
-		"height": 525
+		"x": 533,
+		"y": 314,
+		"width": 254,
+		"height": 45
 	},
 	"scroll": {
 		"x": 0,
@@ -16,7 +16,7 @@
 			"rect": {
 				"x": 541.515625,
 				"y": 322.5,
-				"width": 107.765625,
+				"width": 237.046875,
 				"height": 28
 			},
 			"layer": {
@@ -38,7 +38,7 @@
 				]
 			},
 			"meta": {
-				"view": "empty",
+				"view": "filtering",
 				"path": "",
 				"parentDisplay": "flex",
 				"parentDirection": "row",
@@ -52,14 +52,30 @@
 			"treeFiltering": true,
 			"presets": {
 				"tests": {
-					"enabled": false
+					"enabled": true
 				},
 				"lockfiles": {
-					"enabled": false
+					"enabled": true
 				}
 			},
-			"customRules": [],
-			"alwaysShow": [],
+			"customRules": [
+				{
+					"id": "generated",
+					"pattern": "**/generated/**",
+					"enabled": true
+				},
+				{
+					"id": "docs",
+					"pattern": "docs/**",
+					"enabled": false
+				}
+			],
+			"alwaysShow": [
+				{
+					"id": "checkout",
+					"pattern": "src/payments/checkout.spec.ts"
+				}
+			],
 			"activations": {}
 		},
 		"paths": [

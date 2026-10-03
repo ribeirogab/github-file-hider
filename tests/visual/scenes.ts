@@ -697,6 +697,37 @@ export const SCENES: Scene[] = [
 		capture: ["control"],
 	}),
 	pageScene({
+		name: "control-automatic",
+		state: () => automatic(demo()),
+		capture: ["control"],
+	}),
+	pageScene({
+		name: "control-automatic-focus",
+		state: () => automatic(demo()),
+		steps: [{ focus: "caret" }],
+		capture: ["control"],
+	}),
+	pageScene({
+		name: "menu-automatic",
+		state: () => automatic(demo()),
+		steps: [{ click: "caret" }],
+		capture: MENU,
+		padding: 32,
+	}),
+	pageScene({
+		name: "control-automatic-showing",
+		state: () => automatic(demo()),
+		steps: SHOW_ALL,
+		capture: ["control"],
+	}),
+	pageScene({
+		name: "menu-automatic-showing",
+		state: () => automatic(demo()),
+		steps: [...SHOW_ALL, { click: "caret" }],
+		capture: MENU,
+		padding: 32,
+	}),
+	pageScene({
 		name: "menu-empty-automatic",
 		state: () => automatic(firstInstall()),
 		steps: [{ click: "caret" }],
