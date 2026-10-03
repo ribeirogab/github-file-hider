@@ -12,6 +12,7 @@ const STYLES = {
 		"components",
 		"in-page",
 	],
+	"settings.css": ["fonts-page", "theme-page", "components", "settings-page"],
 };
 
 function tags() {
@@ -51,6 +52,7 @@ export async function manifestFor({ version, versionName }) {
 		permissions: ["storage"],
 		host_permissions: ["https://github.com/*"],
 		background: { service_worker: "background.js" },
+		options_ui: { page: "settings.html", open_in_tab: true },
 		action: {
 			default_title: "GitHub File Hider settings",
 			default_icon: { 16: "icons/16.png", 32: "icons/32.png" },
@@ -82,7 +84,11 @@ export async function buildExtension() {
 	await rm(OUT, { recursive: true, force: true });
 	await mkdir(OUT, { recursive: true });
 	await build({
-		entryPoints: ["src/content.ts", "src/background.ts"],
+		entryPoints: [
+			"src/content.ts",
+			"src/background.ts",
+			"src/settings-page.ts",
+		],
 		outdir: OUT,
 		bundle: true,
 		format: "iife",
@@ -93,6 +99,7 @@ export async function buildExtension() {
 	await styles();
 	await cp("src/fonts", `${OUT}/fonts`, { recursive: true });
 	await cp("src/icons", `${OUT}/icons`, { recursive: true });
+	await cp("src/settings.html", `${OUT}/settings.html`);
 	const manifest = await manifestFor(await version());
 	await writeFile(
 		`${OUT}/manifest.json`,
