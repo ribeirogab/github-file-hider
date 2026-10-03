@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face { font-family: "Mona"; src: url("../../src/fonts/mona-sans-latin.woff2") format("woff2"); font-weight: 200 900; font-stretch: 75% 125%; }
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 440px; height: 280px; overflow: hidden; }
+body {
+	font-family: "Mona", -apple-system, sans-serif;
+	background: #f6f8fa;
+	color: #1f2328;
+	display: grid;
+	grid-template-columns: 1fr 176px;
+	gap: 20px;
+	padding: 28px 24px 28px 28px;
+	position: relative;
+}
+body::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(circle at 100% 100%, #ddf4ff 0, transparent 60%);
+}
+.brand, .tree { position: relative; }
+.brand { display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.brand svg { width: 52px; height: 52px; }
+h1 { font-size: 27px; line-height: 1.08; font-weight: 700; letter-spacing: -0.01em; }
+p { font-size: 14px; line-height: 1.35; color: #59636e; font-weight: 500; }
+.tree {
+	align-self: center;
+	background: #fff;
+	border: 1px solid #d1d9e0;
+	border-radius: 10px;
+	box-shadow: 0 8px 24px #1f23281a;
+	padding: 10px 0;
+	font-size: 12.5px;
+	font-weight: 500;
+}
+.badge {
+	display: flex; align-items: center; gap: 6px;
+	margin: 0 10px 8px; padding: 4px 8px;
+	border-radius: 6px; background: #ddf4ff; color: #0969da;
+	font-weight: 600; font-size: 12px;
+}
+.row { display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 12px; white-space: nowrap; }
+.row.d1 { padding-left: 26px; }
+.row svg { width: 14px; height: 14px; flex: none; }
+.row .name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.row.hidden { color: #818b98; }
+.row.hidden .name { text-decoration: line-through; text-decoration-color: #818b9880; }
+.row .off { width: 13px; height: 13px; color: #818b98; }
+.folder { color: #54aeff; }
+.file { color: #59636e; }
+</style>
+</head>
+<body>
+<div class="brand">
+	<svg viewBox="0 0 24 24" aria-hidden="true"><mask id="a"><rect width="24" height="10" fill="#fff"/></mask><mask id="b"><rect y="15.5" width="24" height="8.5" fill="#fff"/></mask><g fill="none" stroke="#1f2328" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g mask="url(#a)"><path d="M13.75 2.75H6.5A1.75 1.75 0 0 0 4.75 4.5v15a1.75 1.75 0 0 0 1.75 1.75h11a1.75 1.75 0 0 0 1.75-1.75V8.25Z"/><path d="M13.75 2.75v5.5h5.5"/></g><path mask="url(#b)" stroke-dasharray="2 2.25" d="M13.75 2.75H6.5A1.75 1.75 0 0 0 4.75 4.5v15a1.75 1.75 0 0 0 1.75 1.75h11a1.75 1.75 0 0 0 1.75-1.75V8.25Z"/></g><rect x="3" y="11" width="18" height="3.5" rx="1.25" fill="#0969da"/></svg>
+	<h1>GitHub<br>File Hider</h1>
+	<p>Review the code that matters first.</p>
+</div>
+<div class="tree" id="tree"></div>
+<script>
+const folder = '<svg class="folder" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75Z"/></svg>';
+const file = '<svg class="file" viewBox="0 0 16 16" fill="currentColor"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/></svg>';
+const off = '<svg class="off" viewBox="0 0 16 16" fill="currentColor"><path d="M.143 2.31a.75.75 0 0 1 1.047-.167l14.5 10.5a.75.75 0 1 1-.88 1.214l-2.248-1.628C11.346 13.19 9.792 14 8 14c-1.981 0-3.67-.992-4.933-2.078C1.797 10.832.88 9.577.43 8.9a1.619 1.619 0 0 1 0-1.797c.353-.533.995-1.42 1.868-2.305L.31 3.357A.75.75 0 0 1 .143 2.31Zm1.536 5.622A.12.12 0 0 0 1.657 8c0 .021.006.045.022.068.412.621 1.242 1.75 2.366 2.717C5.175 11.758 6.527 12.5 8 12.5c1.195 0 2.31-.488 3.29-1.191L9.063 9.695A2 2 0 0 1 6.058 7.52L3.529 5.688a14.207 14.207 0 0 0-1.85 2.244ZM8 3.5c-.516 0-1.017.09-1.499.251a.75.75 0 1 1-.473-1.423A6.207 6.207 0 0 1 8 2c1.981 0 3.67.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.11.166-.248.365-.41.587a.75.75 0 1 1-1.21-.887c.148-.201.272-.382.371-.53a.119.119 0 0 0 0-.137c-.412-.621-1.242-1.75-2.366-2.717C10.825 4.242 9.473 3.5 8 3.5Z"/></svg>';
+const rows = [
+	["src", 0, folder],
+	["checkout.ts", 1, file],
+	["gateway.ts", 1, file],
+	["api.spec.ts", 1, file, true],
+	["generated", 1, folder, true],
+	["pnpm-lock.yaml", 0, file, true],
+];
+document.getElementById("tree").innerHTML =
+	`<div class="badge">${off.replace('class="off"', 'style="width:13px;height:13px"')}3 files hidden</div>` +
+	rows.map(([name, depth, icon, hidden]) =>
+		`<div class="row d${depth}${hidden ? " hidden" : ""}">${icon}<span class="name">${name}</span>${hidden ? off : ""}</div>`
+	).join("");
+</script>
+</body>
+</html>

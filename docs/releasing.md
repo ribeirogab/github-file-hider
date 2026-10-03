@@ -82,4 +82,4 @@ A release starts manually. A maintainer runs the **Release** workflow from the A
 2. Builds the extension and packages `github-file-hider-YYYY.MM.DD.N.zip` with the next version for the current UTC date.
 3. Creates the Git tag `vYYYY.MM.DD.N` and the GitHub Release `YYYY.MM.DD.N` with the ZIP and generated release notes.
 
-The maintainer then uploads the same ZIP to the Chrome Web Store developer dashboard and submits it for review. The store submission stays manual.
+The maintainer then uploads the same ZIP to the Chrome Web Store developer dashboard and submits it for review. The store submission stays manual. When the UI changed since the last submission, the maintainer also runs `pnpm store:images` and uploads the new images from `store/` in the store listing.

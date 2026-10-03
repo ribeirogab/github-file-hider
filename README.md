@@ -86,6 +86,16 @@ The images are written to `tests/visual/results/report/`.
 
 Captures run Chromium with software rasterization at a device scale factor of 2, so both sides render deterministically. Each in-page surface is rendered through the same UI code that the content script uses, at the position, layer, and scroll offset that the prototype recorded.
 
+## Store images
+
+The Chrome Web Store screenshots and the small promo tile are in `store/`. To capture them again after the UI changes:
+
+```sh
+pnpm store:images
+```
+
+The command builds the extension and opens demo pull request 1 from the fixtures, with GitHub's real stylesheets and the demo settings. It writes five 1280 × 800 screenshots and the 440 × 280 promo tile (`tests/store/promo.html`) to `store/`. The store icon is `src/icons/128.png`. The command needs network access to `github.githubassets.com` and `avatars.githubusercontent.com`.
+
 ## Manual test on the demo repository
 
 Use a Chrome profile signed in to GitHub, so that GitHub shows the current Files changed page. The demo repository is [ribeirogab/github-file-hider-demo](https://github.com/ribeirogab/github-file-hider-demo).

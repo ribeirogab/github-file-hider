@@ -14,5 +14,6 @@ export default defineConfig({
 			testDir: "tests/visual",
 			testMatch: "baseline.spec.ts",
 		},
+		{ name: "store", testDir: "tests/store" },
 	],
 });
