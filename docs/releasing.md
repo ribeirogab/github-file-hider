@@ -78,7 +78,7 @@ These constraints follow the [Chrome manifest version reference](https://develop
 
 A release starts manually. A maintainer runs the **Release** workflow from the Actions tab of the repository (`.github/workflows/release.yml`). The workflow:
 
-1. Runs the Biome check, the type check, and the unit and end-to-end tests on Linux, and the visual tests on macOS.
+1. Runs the Biome check, the type check, and the unit, end-to-end, and visual tests on Linux.
 2. Builds the extension and packages `github-file-hider-YYYY.MM.DD.N.zip` with the next version for the current UTC date.
 3. Creates the Git tag `vYYYY.MM.DD.N` and the GitHub Release `YYYY.MM.DD.N` with the ZIP and generated release notes.
 

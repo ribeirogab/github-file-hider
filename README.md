@@ -41,7 +41,7 @@ pnpm test
 
 - `pnpm test:unit` runs the Vitest tables for the Rules module, the Settings model, the filtering session, and the release version.
 - `pnpm test:e2e` builds the extension, loads it in Chromium, and routes `https://github.com/**` to the sanitized fixtures in `tests/fixtures/github`. Every other network request is blocked, so no GitHub account is needed.
-- `pnpm test:visual` compares every surface of the extension with screenshots of the design prototype (`design/prototype/index.html`), in GitHub light and dark, and fails on any different pixel.
+- `pnpm test:visual` compares every surface of the extension with screenshots of the design prototype (`design/prototype/index.html`), in GitHub light and dark, and fails on any different pixel. On Linux, one difference in monospace text is accepted, as [Visual baselines](#visual-baselines) explains.
 - `pnpm test` runs all three suites.
 
 ## Package
@@ -74,7 +74,7 @@ pnpm visual:baseline
 
 The command serves `design/prototype` locally, opens each state in Chromium with the bundled Mona Sans font, and captures it. Baselines always come from the prototype, never from the extension. Review the changed PNG files before you commit them.
 
-Font rendering differs between operating systems, so the committed baselines are for macOS, and the visual suite runs on a macOS runner in CI. On Linux the system monospace font renders half a pixel apart between the prototype page and the extension page, so the comparison is only exact on macOS. The CI job captures the baselines from the prototype on the runner and compares the extension with them in the same job. Checks, unit tests, and end-to-end tests run on Linux. While the repository is private, the macOS job runs only when the workflow is started by hand and in the Release workflow.
+Font rendering differs between operating systems, so the committed baselines are for macOS. In CI, every job runs on Linux: the visual job captures the baselines from the prototype on the runner and compares the extension with them in the same job. On Linux, the system monospace font renders half a pixel apart between the prototype's Settings page and the extension's Settings page. So on Linux, and in Settings scenes only, the suite accepts different pixels inside monospace text boxes and 1 pixel around them. Every other pixel must match. In the diff image, accepted pixels are yellow and other different pixels are magenta. On macOS, every pixel must match.
 
 When a comparison fails, `tests/visual/results/<surface>/` contains the expected image, the actual image, a diff, and a side-by-side image. To write a side-by-side image of every surface, prototype on the left and extension on the right, run:
 

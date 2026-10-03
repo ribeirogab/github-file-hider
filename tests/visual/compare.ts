@@ -1,13 +1,28 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { PNG } from "pngjs";
+import type { Rect } from "./harness.ts";
 
 export type Comparison = {
 	different: number;
+	ignored: number;
 	total: number;
 	sizeMatches: boolean;
 };
 
-export function comparePng(actual: Buffer, expected: Buffer) {
+const within = (areas: Rect[], x: number, y: number) =>
+	areas.some(
+		(area) =>
+			x >= area.x &&
+			x < area.x + area.width &&
+			y >= area.y &&
+			y < area.y + area.height,
+	);
+
+export function comparePng(
+	actual: Buffer,
+	expected: Buffer,
+	ignoredAreas: Rect[] = [],
+) {
 	const a = PNG.sync.read(actual);
 	const b = PNG.sync.read(expected);
 	const sizeMatches = a.width === b.width && a.height === b.height;
@@ -15,6 +30,7 @@ export function comparePng(actual: Buffer, expected: Buffer) {
 	const height = Math.max(a.height, b.height);
 	const diff = new PNG({ width, height });
 	let different = 0;
+	let ignored = 0;
 	for (let y = 0; y < height; y++)
 		for (let x = 0; x < width; x++) {
 			const index = (y * width + x) * 4;
@@ -29,7 +45,9 @@ export function comparePng(actual: Buffer, expected: Buffer) {
 				a.data[ia + 1] === b.data[ib + 1] &&
 				a.data[ia + 2] === b.data[ib + 2] &&
 				a.data[ia + 3] === b.data[ib + 3];
-			if (!same) different++;
+			const accepted = !same && within(ignoredAreas, x, y);
+			if (accepted) ignored++;
+			else if (!same) different++;
 			const gray = inB
 				? Math.round(
 						((b.data[ib] ?? 0) +
@@ -39,12 +57,17 @@ export function comparePng(actual: Buffer, expected: Buffer) {
 					)
 				: 0;
 			diff.data[index] = same ? gray : 255;
-			diff.data[index + 1] = same ? gray : 0;
-			diff.data[index + 2] = same ? gray : 255;
+			diff.data[index + 1] = same ? gray : accepted ? 200 : 0;
+			diff.data[index + 2] = same ? gray : accepted ? 0 : 255;
 			diff.data[index + 3] = same ? 64 : 255;
 		}
 	return {
-		result: { different, total: width * height, sizeMatches } as Comparison,
+		result: {
+			different,
+			ignored,
+			total: width * height,
+			sizeMatches,
+		} as Comparison,
 		diff: PNG.sync.write(diff),
 	};
 }

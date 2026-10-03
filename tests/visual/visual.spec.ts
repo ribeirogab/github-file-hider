@@ -1,13 +1,16 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import { launchExtension } from "../support/extension.ts";
-import { capture } from "./capture.ts";
+import { capture, monospaceAreas } from "./capture.ts";
 import { comparePng, sideBySide, writeResult } from "./compare.ts";
 import { SCALE, SETTINGS_VIEWPORT, THEMES, VIEWPORT } from "./prototype.ts";
 import { type Recorded, SCENES } from "./scenes.ts";
 import { startServer } from "./server.ts";
 
 const DIRECTORY = "tests/visual/baseline";
+
+const acceptsMonospaceDifferences = (surface: string) =>
+	process.platform === "linux" && surface === "settings";
 
 for (const scene of SCENES)
 	for (const theme of THEMES)
@@ -34,8 +37,11 @@ for (const scene of SCENES)
 						recorded,
 						browser: context,
 					})) ?? recorded.clip;
+				const ignored = acceptsMonospaceDifferences(scene.surface)
+					? await monospaceAreas(page, clip)
+					: [];
 				const actual = await capture(page, clip);
-				const { result, diff } = comparePng(actual, expected);
+				const { result, diff } = comparePng(actual, expected, ignored);
 				if (process.env.FH_VISUAL_REPORT)
 					await writeResult(`report/${scene.name}-${theme}`, {
 						"side-by-side.png": sideBySide(expected, actual),
