@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import type { Rect } from "./harness.ts";
 
-async function settle(page: Page) {
+export async function settle(page: Page) {
 	await page.evaluate(
 		() =>
 			new Promise((done) =>

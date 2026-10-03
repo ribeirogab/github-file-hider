@@ -1,5 +1,6 @@
 import type { BrowserContext, Page } from "@playwright/test";
 import { extensionId, seedSettings } from "../support/extension.ts";
+import { settle } from "./capture.ts";
 import type { HarnessState, Part, Rect } from "./harness.ts";
 import {
 	backgroundOf,
@@ -151,6 +152,7 @@ async function openHarness(
 		},
 		{ theme, recorded },
 	);
+	await settle(page);
 }
 
 async function partOf(page: Page, component: Component): Promise<Part> {
