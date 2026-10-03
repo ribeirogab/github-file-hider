@@ -52,6 +52,8 @@ pnpm release
 
 The command fetches the existing Git tags, builds the extension, and writes `github-file-hider-YYYY.MM.DD.N.zip` to the repository root with `manifest.json` at the root of the archive. The version uses the current UTC date and the next daily counter that no `v*` tag uses yet, as [the release standards](docs/releasing.md) define. Publishing the tag, the GitHub Release, and the store submission are not part of this command.
 
+To publish a release, run the **Release** workflow from the Actions tab. It runs every check and test suite, packages the ZIP, and creates the tag and the GitHub Release. See [the release standards](docs/releasing.md#publication-workflow).
+
 ## Install from a ZIP
 
 1. Download `github-file-hider-YYYY.MM.DD.N.zip` from GitHub Releases.
@@ -71,6 +73,8 @@ pnpm visual:baseline
 ```
 
 The command serves `design/prototype` locally, opens each state in Chromium with the bundled Mona Sans font, and captures it. Baselines always come from the prototype, never from the extension. Review the changed PNG files before you commit them.
+
+Font rendering differs between operating systems, so the committed baselines are for macOS, and the visual suite runs on a macOS runner in CI. On Linux the system monospace font renders half a pixel apart between the prototype page and the extension page, so the comparison is only exact on macOS. The CI job captures the baselines from the prototype on the runner and compares the extension with them in the same job. Checks, unit tests, and end-to-end tests run on Linux. While the repository is private, the macOS job runs only when the workflow is started by hand and in the Release workflow.
 
 When a comparison fails, `tests/visual/results/<surface>/` contains the expected image, the actual image, a diff, and a side-by-side image. To write a side-by-side image of every surface, prototype on the left and extension on the right, run:
 

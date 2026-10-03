@@ -74,6 +74,12 @@ These constraints follow the [Chrome manifest version reference](https://develop
 | GitHub Release title | `YYYY.MM.DD.N` | `2026.10.02.1` |
 | ZIP filename | `github-file-hider-YYYY.MM.DD.N.zip` | `github-file-hider-2026.10.02.1.zip` |
 
-## Publication Workflow: Deferred Decision
+## Publication Workflow
 
-The publication process will be defined when the extension is ready to publish. This document does not choose a release trigger or an automation workflow. Whether a release starts from a manual command, a Git tag, or a workflow action remains to be decided.
+A release starts manually. A maintainer runs the **Release** workflow from the Actions tab of the repository (`.github/workflows/release.yml`). The workflow:
+
+1. Runs the Biome check, the type check, and the unit and end-to-end tests on Linux, and the visual tests on macOS.
+2. Builds the extension and packages `github-file-hider-YYYY.MM.DD.N.zip` with the next version for the current UTC date.
+3. Creates the Git tag `vYYYY.MM.DD.N` and the GitHub Release `YYYY.MM.DD.N` with the ZIP and generated release notes.
+
+The maintainer then uploads the same ZIP to the Chrome Web Store developer dashboard and submits it for review. The store submission stays manual.
