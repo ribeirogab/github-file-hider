@@ -72,7 +72,33 @@ pnpm visual:baseline
 
 The command serves `design/prototype` locally, opens each state in Chromium with the bundled Mona Sans font, and captures it. Baselines always come from the prototype, never from the extension. Review the changed PNG files before you commit them.
 
-When a comparison fails, `tests/visual/results/<surface>/` contains the expected image, the actual image, a diff, and a side-by-side image.
+When a comparison fails, `tests/visual/results/<surface>/` contains the expected image, the actual image, a diff, and a side-by-side image. To write a side-by-side image of every surface, prototype on the left and extension on the right, run:
+
+```sh
+FH_VISUAL_REPORT=1 pnpm test:visual
+```
+
+The images are written to `tests/visual/results/report/`.
+
+Captures run Chromium with software rasterization at a device scale factor of 2, so both sides render deterministically. Each in-page surface is rendered through the same UI code that the content script uses, at the position, layer, and scroll offset that the prototype recorded.
+
+## Manual test on the demo repository
+
+Use a Chrome profile signed in to GitHub, so that GitHub shows the current Files changed page. The demo repository is [ribeirogab/github-file-hider-demo](https://github.com/ribeirogab/github-file-hider-demo).
+
+1. Build the extension and load `dist` unpacked, as described in [Build and load](#build-and-load).
+2. Open [demo pull request 1](https://github.com/ribeirogab/github-file-hider-demo/pull/1/changes). The toolbar shows **Hide files** with a caret. Select it: the menu says **Choose what to hide**.
+3. In the menu, turn on **Tests** and **Lockfiles**. The menu shows the number of files each preset matches. Close the menu with Esc. The control now reads **Hide files 11**.
+4. Select the extension icon in the Chrome toolbar. The Settings page opens in a new tab. In **Custom rules**, add `**/generated/**`. In **Always show**, add `src/payments/checkout.spec.ts`.
+5. Return to the pull request. Without a reload, the control reads **Hide files 11**. Select **Hide files**: the control reads **11 files hidden**, matching diffs and tree entries disappear, and `src/payments/checkout.spec.ts` shows **Always shown**. GitHub still says 25 files changed.
+6. Reload the page. Filtering stays on for this pull request.
+7. Open the menu and select **Show all files**. Every file returns, and the control reads **Hide files again**. Select it to hide the files again.
+8. Open [a direct link to Button.spec.tsx](https://github.com/ribeirogab/github-file-hider-demo/pull/1/changes#diff-32fecba91ca3e0638460c5e5c36a6acd2c9e10af2486a8424fa6df4cdc489b06). The file appears with a notice that names the Tests preset and the **Temporarily visible** label, and the count drops to 10. Select **Hide again**.
+9. In the menu, turn off **Hide in sidebar tree**. Matching files return to the tree, muted, with an eye-off icon. Hover one to see the rule, and select it to reveal the file.
+10. In Settings, edit a Tests rule: the preset shows **Modified**. Select **Restore defaults**.
+11. In Settings, choose **Automatic**. Open [demo pull request 2](https://github.com/ribeirogab/github-file-hider-demo/pull/2/changes): its 400 test files are hidden at once, and the control shows the **Automatic** label. Scroll to the end; files that load later stay hidden.
+12. Open [demo pull request 3](https://github.com/ribeirogab/github-file-hider-demo/pull/3/changes), add the custom rule `**/*.sql`, and switch to single file mode. The open file stays visible with **Temporarily visible**, and `J` and `K` move between files.
+13. Switch GitHub between light and dark (Settings → Appearance on github.com). The extension follows the theme. The Settings page follows the system theme.
 
 ## Documents
 

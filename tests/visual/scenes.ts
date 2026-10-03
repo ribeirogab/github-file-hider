@@ -763,6 +763,20 @@ export const SCENES: Scene[] = [
 		padding: 32,
 	}),
 	pageScene({
+		name: "menu-empty-hover",
+		state: firstInstall,
+		steps: [{ click: "caret" }, { hover: "item:preset:tests" }],
+		capture: MENU,
+		padding: 32,
+	}),
+	pageScene({
+		name: "menu-automatic-showing-tree-off",
+		state: () => ({ ...automatic(demo()), treeFiltering: false }),
+		steps: [...SHOW_ALL, { click: "caret" }],
+		capture: MENU,
+		padding: 32,
+	}),
+	pageScene({
 		name: "menu-empty-automatic",
 		state: () => automatic(firstInstall()),
 		steps: [{ click: "caret" }],

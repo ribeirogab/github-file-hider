@@ -36,6 +36,10 @@ for (const scene of SCENES)
 					})) ?? recorded.clip;
 				const actual = await capture(page, clip);
 				const { result, diff } = comparePng(actual, expected);
+				if (process.env.FH_VISUAL_REPORT)
+					await writeResult(`report/${scene.name}-${theme}`, {
+						"side-by-side.png": sideBySide(expected, actual),
+					});
 				if (result.different > 0)
 					await writeResult(`${scene.name}-${theme}`, {
 						"expected.png": expected,
