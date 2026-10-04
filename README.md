@@ -1,134 +1,67 @@
-# GitHub File Hider
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="store/readme-logo-dark.png">
+    <img src="store/readme-logo-light.png" width="72" height="72" alt="">
+  </picture>
+  <h1>GitHub File Hider</h1>
+  <p>
+    <strong>Review the code that matters first.</strong><br>
+    A Chrome extension that hides tests, lockfiles, and other noise from the Files changed tab of GitHub pull requests.
+  </p>
+  <p>
+    <a href="https://chromewebstore.google.com/detail/github-file-hider/nocgonekcilofckcilmhpjldgkclkcbf"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-Install-1a73e8?logo=googlechrome&logoColor=white" alt="Install from the Chrome Web Store"></a>
+    <a href="https://github.com/ribeirogab/github-file-hider/actions/workflows/ci.yml"><img src="https://github.com/ribeirogab/github-file-hider/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
+  </p>
+</div>
 
-Hide files in GitHub's Files changed tab.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="store/readme-dark.png">
+  <img src="store/readme-light.png" alt="The GitHub File Hider menu on the Files changed tab of a pull request, with 11 files hidden by the Tests and Lockfiles presets and a custom rule">
+</picture>
 
-GitHub File Hider is an open-source Chrome extension that hides selected files on the Files changed page of GitHub pull requests. It changes only the browser display. It does not remove files, change repository content, submit reviews, or mark files as viewed.
+## Features
 
-GitHub File Hider is not affiliated with GitHub.
+- **Presets** for tests and lockfiles, and **custom rules** such as `docs/**` or `**/generated/**`.
+- **Always show** rules keep important files visible.
+- **One pull request or all of them.** Hide files with one click, remembered per pull request, or turn on automatic mode.
+- **Show all files** at any time. A direct link to a hidden file still opens it.
+- **Sidebar tree** follows your rules, or stays complete.
+- **Feels built in.** Matches GitHub's components in light and dark themes.
+
+## Usage
+
+1. Sign in to github.com and open the **Files changed** tab of a pull request.
+2. Open the **Hide files** menu in the toolbar and turn on **Tests** or **Lockfiles**.
+3. Select **Hide files**. Matching files leave the diff and the sidebar tree.
+
+To add your own rules, select the extension icon in the Chrome toolbar to open the Settings page.
 
 ## Install
 
-Install GitHub File Hider from the [Chrome Web Store](https://chromewebstore.google.com/detail/github-file-hider/nocgonekcilofckcilmhpjldgkclkcbf). Then open a pull request on github.com while signed in and select its **Files changed** tab.
+[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/github-file-hider/nocgonekcilofckcilmhpjldgkclkcbf).
 
-To install a release ZIP instead, see [Install from a ZIP](#install-from-a-zip).
+<details>
+<summary>Install from a ZIP</summary>
 
-## Build and load
-
-Use Node 24 and pnpm 11.24.0.
-
-```sh
-pnpm install
-pnpm build
-```
-
-The build writes the unpacked extension to `dist/`, with `manifest.json` at its root. To load it:
-
-1. Open `chrome://extensions` in Chrome.
-2. Turn on **Developer mode**.
-3. Select **Load unpacked** and choose the `dist` folder.
-
-Then open a pull request on github.com while signed in and select its **Files changed** tab (`/pull/<number>/changes`). The classic Files changed page (`/pull/<number>/files`) is not supported.
-
-## Test
-
-Install the Chromium build that Playwright uses once:
-
-```sh
-pnpm exec playwright install chromium
-```
-
-Then run the checks and the test suites:
-
-```sh
-pnpm check
-pnpm typecheck
-pnpm test
-```
-
-- `pnpm test:unit` runs the Vitest tables for the Rules module, the Settings model, the filtering session, and the release version.
-- `pnpm test:e2e` builds the extension, loads it in Chromium, and routes `https://github.com/**` to the sanitized fixtures in `tests/fixtures/github`. Every other network request is blocked, so no GitHub account is needed.
-- `pnpm test:visual` compares every surface of the extension with screenshots of the design prototype (`design/prototype/index.html`), in GitHub light and dark, and fails on any different pixel. On Linux, one difference in monospace text is accepted, as [Visual baselines](#visual-baselines) explains.
-- `pnpm test` runs all three suites.
-
-## Package
-
-```sh
-pnpm release
-```
-
-The command fetches the existing Git tags, builds the extension, and writes `github-file-hider-YYYY.MM.DD.N.zip` to the repository root with `manifest.json` at the root of the archive. The version uses the current UTC date and the next daily counter that no `v*` tag uses yet, as [the release standards](docs/releasing.md) define. Publishing the tag, the GitHub Release, and the store submission are not part of this command.
-
-To publish a release, run the **Release** workflow from the Actions tab. It runs every check and test suite, packages the ZIP, and creates the tag and the GitHub Release. See [the release standards](docs/releasing.md#publication-workflow).
-
-## Install from a ZIP
-
-1. Download `github-file-hider-YYYY.MM.DD.N.zip` from GitHub Releases.
+1. Download `github-file-hider-YYYY.MM.DD.N.zip` from [GitHub Releases](https://github.com/ribeirogab/github-file-hider/releases).
 2. Extract the ZIP into a folder that you keep, for example `~/Extensions/github-file-hider`.
 3. Open `chrome://extensions`, turn on **Developer mode**, select **Load unpacked**, and choose that folder.
 
-To install a newer version, extract the new ZIP into the same folder and replace the old files. Then select **Reload** on the GitHub File Hider card in `chrome://extensions` and reload open GitHub tabs. Keep the same folder, so Chrome keeps the same extension and your settings.
+To update, extract the new ZIP into the same folder, select **Reload** on the extension card in `chrome://extensions`, and reload open GitHub tabs. Keep the same folder, so Chrome keeps your settings.
 
-## Visual baselines
+</details>
 
-The visual suite compares the extension with baselines captured from the design prototype. The baselines are in `tests/visual/baseline`: one PNG and one JSON file with the clip and state of each surface, in light and dark.
+## Privacy
 
-To refresh them after the prototype changes:
+No account, no server, no tracking. Settings stay in your browser. The extension runs only on github.com and changes only what you see. It never changes files, comments, reviews, or viewed state.
 
-```sh
-pnpm visual:baseline
-```
+## Development
 
-The command serves `design/prototype` locally, opens each state in Chromium with the bundled Mona Sans font, and captures it. Baselines always come from the prototype, never from the extension. Review the changed PNG files before you commit them.
-
-Font rendering differs between operating systems, so the committed baselines are for macOS. In CI, every job runs on Linux: the visual job captures the baselines from the prototype on the runner and compares the extension with them in the same job. On Linux, the system monospace font renders half a pixel apart between the prototype's Settings page and the extension's Settings page. So on Linux, and in Settings scenes only, the suite accepts different pixels inside monospace text boxes and 1 pixel around them. Every other pixel must match. In the diff image, accepted pixels are yellow and other different pixels are magenta. On macOS, every pixel must match.
-
-When a comparison fails, `tests/visual/results/<surface>/` contains the expected image, the actual image, a diff, and a side-by-side image. To write a side-by-side image of every surface, prototype on the left and extension on the right, run:
-
-```sh
-FH_VISUAL_REPORT=1 pnpm test:visual
-```
-
-The images are written to `tests/visual/results/report/`.
-
-Captures run Chromium with software rasterization at a device scale factor of 2, so both sides render deterministically. Each in-page surface is rendered through the same UI code that the content script uses, at the position, layer, and scroll offset that the prototype recorded.
-
-## Store images
-
-The Chrome Web Store screenshots and the small promo tile are in `store/`. To capture them again after the UI changes:
-
-```sh
-pnpm store:images
-```
-
-The command builds the extension and opens demo pull request 1 from the fixtures, with GitHub's real stylesheets and the demo settings. It writes five 1280 × 800 screenshots and the 440 × 280 promo tile (`tests/store/promo.html`) to `store/`. The store icon is `src/icons/128.png`. The command needs network access to `github.githubassets.com` and `avatars.githubusercontent.com`.
-
-## Manual test on the demo repository
-
-Use a Chrome profile signed in to GitHub, so that GitHub shows the current Files changed page. The demo repository is [ribeirogab/github-file-hider-demo](https://github.com/ribeirogab/github-file-hider-demo).
-
-1. Build the extension and load `dist` unpacked, as described in [Build and load](#build-and-load).
-2. Open [demo pull request 1](https://github.com/ribeirogab/github-file-hider-demo/pull/1/changes). The toolbar shows **Hide files** with a caret. Select it: the menu says **Choose what to hide**.
-3. In the menu, turn on **Tests** and **Lockfiles**. The menu shows the number of files each preset matches. Close the menu with Esc. The control now reads **Hide files 11**.
-4. Select the extension icon in the Chrome toolbar. The Settings page opens in a new tab. In **Custom rules**, add `**/generated/**`. In **Always show**, add `src/payments/checkout.spec.ts`.
-5. Return to the pull request. Without a reload, the control reads **Hide files 11**. Select **Hide files**: the control reads **11 files hidden**, matching diffs and tree entries disappear, and `src/payments/checkout.spec.ts` shows **Always shown**. GitHub still says 25 files changed.
-6. Reload the page. Filtering stays on for this pull request.
-7. Open the menu and select **Show all files**. Every file returns, and the control reads **Hide files again**. Select it to hide the files again.
-8. Open [a direct link to Button.spec.tsx](https://github.com/ribeirogab/github-file-hider-demo/pull/1/changes#diff-32fecba91ca3e0638460c5e5c36a6acd2c9e10af2486a8424fa6df4cdc489b06). The file appears with a notice that names the Tests preset and the **Temporarily visible** label, and the count drops to 10. Select **Hide again**.
-9. In the menu, turn off **Hide in sidebar tree**. Matching files return to the tree, muted, with an eye-off icon. Hover one to see the rule, and select it to reveal the file.
-10. In Settings, edit a Tests rule: the preset shows **Modified**. Select **Restore defaults**.
-11. In Settings, choose **Automatic**. Open [demo pull request 2](https://github.com/ribeirogab/github-file-hider-demo/pull/2/changes): its 400 test files are hidden at once, and the control shows the **Automatic** label. Scroll to the end; files that load later stay hidden.
-12. Open [demo pull request 3](https://github.com/ribeirogab/github-file-hider-demo/pull/3/changes), add the custom rule `**/*.sql`, and switch to single file mode. The open file stays visible with **Temporarily visible**, and `J` and `K` move between files.
-13. Switch GitHub between light and dark (Settings → Appearance on github.com). The extension follows the theme. The Settings page follows the system theme.
-
-## Documents
-
-- [Product overview](docs/product.md)
-- [Glossary](CONTEXT.md)
-- [Release standards](docs/releasing.md)
-- [Decisions](docs/adr)
-- [Design prototype](design/README.md)
-- [Fixture refresh instructions](tests/fixtures/github/README.md)
+See [docs/development.md](docs/development.md) to build, test, and release the extension, and the [product overview](docs/product.md) for how it works.
 
 ## License
 
 [MIT](LICENSE). Mona Sans is licensed under the [SIL Open Font License 1.1](src/fonts/OFL.txt).
+
+GitHub File Hider is not affiliated with GitHub.

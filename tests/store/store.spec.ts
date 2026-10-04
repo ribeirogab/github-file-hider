@@ -1,3 +1,4 @@
+import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
 	type BrowserContext,
@@ -5,6 +6,7 @@ import {
 	type Page,
 	test,
 } from "@playwright/test";
+import { logo } from "../../src/ui/icons.ts";
 import {
 	FIXTURE_URLS,
 	fixtureHtml,
@@ -129,6 +131,78 @@ test("captures the small promo tile for the store", async () => {
 		await page.goto(`file://${resolve("tests/store/promo.html")}`);
 		await page.evaluate(() => document.fonts.ready);
 		await page.screenshot({ path: `${DIRECTORY}/promo-small.png` });
+	} finally {
+		await browser.close();
+	}
+});
+
+const DEMO_CLIP = { x: 0, y: 222, width: 960, height: 540 };
+const DEMO_BORDER = { light: "#d1d9e0", dark: "#3d444d" };
+
+async function framed(page: Page, image: Buffer, theme: Theme) {
+	await page.setViewportSize({
+		width: DEMO_CLIP.width,
+		height: DEMO_CLIP.height,
+	});
+	await page.setContent(
+		`<style>html,body{margin:0;background:transparent}img{display:block;box-sizing:border-box;width:${DEMO_CLIP.width}px;height:${DEMO_CLIP.height}px;border:1px solid ${DEMO_BORDER[theme]};border-radius:12px}</style><img src="data:image/png;base64,${image.toString("base64")}">`,
+	);
+	return page.locator("img").screenshot({ omitBackground: true });
+}
+
+for (const theme of ["light", "dark"] as const)
+	test(`captures the ${theme} demo image for the README`, async () => {
+		const { context, close } = await launchExtension({
+			allow: (url) => url.includes("githubassets.com") || url.includes(AVATARS),
+			viewport: VIEWPORT,
+			deviceScaleFactor: 2,
+			colorScheme: theme,
+		});
+		try {
+			const page = context.pages()[0] ?? (await context.newPage());
+			await seedSettings(
+				context,
+				demoSettings({ activations: { [DEMO_KEY]: true } }),
+			);
+			await openPullRequest(page, theme);
+			await menuButton(page).click();
+			await page.waitForTimeout(600);
+			const image = await page.screenshot({ clip: DEMO_CLIP });
+			await writeFile(
+				`${DIRECTORY}/readme-${theme}.png`,
+				await framed(await context.newPage(), image, theme),
+			);
+		} finally {
+			await close();
+		}
+	});
+
+const LOGO_SIZE = 72;
+const LOGO_COLORS = {
+	light: { ink: "#1f2328", band: "#0969da" },
+	dark: { ink: "#f0f6fc", band: "#4493f8" },
+};
+
+test("captures the logo for the README in both themes", async () => {
+	const browser = await chromium.launch({
+		channel: "chromium",
+		args: RENDERING_ARGS,
+	});
+	try {
+		const page = await browser.newPage({
+			viewport: { width: LOGO_SIZE, height: LOGO_SIZE },
+			deviceScaleFactor: 2,
+		});
+		for (const theme of ["light", "dark"] as const) {
+			const { ink, band } = LOGO_COLORS[theme];
+			await page.setContent(
+				`<style>html,body{margin:0;background:transparent}.fh-logo{display:block;color:${ink}}.fh-logo-band{fill:${band}}</style>${logo(LOGO_SIZE)}`,
+			);
+			await page.locator("svg").screenshot({
+				path: `${DIRECTORY}/readme-logo-${theme}.png`,
+				omitBackground: true,
+			});
+		}
 	} finally {
 		await browser.close();
 	}
