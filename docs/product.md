@@ -49,7 +49,7 @@ It does not support other browsers, GitHub Enterprise, the classic Files changed
 
 ## Installation
 
-The extension will be published in the Chrome Web Store. Each stable release is also available as a ZIP in GitHub Releases for local installation. See [releasing.md](releasing.md).
+The extension is published in the [Chrome Web Store](https://chromewebstore.google.com/detail/github-file-hider/nocgonekcilofckcilmhpjldgkclkcbf). Each stable release is also available as a ZIP in GitHub Releases for local installation. See [releasing.md](releasing.md).
 
 ## Known Limitations
 

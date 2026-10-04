@@ -6,6 +6,12 @@ GitHub File Hider is an open-source Chrome extension that hides selected files o
 
 GitHub File Hider is not affiliated with GitHub.
 
+## Install
+
+Install GitHub File Hider from the [Chrome Web Store](https://chromewebstore.google.com/detail/github-file-hider/nocgonekcilofckcilmhpjldgkclkcbf). Then open a pull request on github.com while signed in and select its **Files changed** tab.
+
+To install a release ZIP instead, see [Install from a ZIP](#install-from-a-zip).
+
 ## Build and load
 
 Use Node 24 and pnpm 11.24.0.
