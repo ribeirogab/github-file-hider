@@ -30,6 +30,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:unit
       - run: pnpm test:e2e
+      - run: pnpm test:site
 
   visual:
     runs-on: ubuntu-latest

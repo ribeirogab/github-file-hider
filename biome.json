@@ -30,7 +30,7 @@
 	},
 	"overrides": [
 		{
-			"includes": ["src/styles/**"],
+			"includes": ["src/styles/**", "site/src/**/*.css"],
 			"linter": {
 				"rules": {
 					"complexity": {

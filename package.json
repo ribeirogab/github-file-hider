@@ -23,10 +23,19 @@
 		"test": "pnpm test:unit && pnpm build:test && playwright test --project e2e --project visual",
 		"icons": "node scripts/icons.mjs",
 		"store:images": "pnpm build:test && playwright test --project store",
+		"site:dev": "vite site",
+		"site:build": "vite build site",
+		"site:preview": "vite preview site",
+		"test:site": "pnpm site:build && playwright test --project site",
+		"site:deploy": "pnpm site:build && wrangler deploy",
 		"release": "node scripts/release.mjs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.15",
+		"@fontsource-variable/atkinson-hyperlegible-next": "5.3.0",
+		"@fontsource-variable/familjen-grotesk": "5.3.0",
+		"@fontsource-variable/mona-sans": "5.3.0",
+		"@fontsource/fragment-mono": "5.3.0",
 		"@playwright/test": "^1.63.0",
 		"@types/chrome": "^0.3.4",
 		"@types/node": "^26.6.3",
@@ -34,6 +43,8 @@
 		"esbuild": "^0.28.2",
 		"pngjs": "^7.0.0",
 		"typescript": "^7.0.2",
-		"vitest": "^5.0.3"
+		"vite": "8.3.2",
+		"vitest": "^5.0.3",
+		"wrangler": "^4.147.0"
 	}
 }

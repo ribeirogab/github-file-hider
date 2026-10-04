@@ -4,7 +4,7 @@
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"module": "ESNext",
 		"moduleResolution": "bundler",
-		"types": ["chrome", "node"],
+		"types": ["chrome", "node", "vite/client"],
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"noEmit": true,
@@ -13,5 +13,5 @@
 		"allowImportingTsExtensions": true,
 		"skipLibCheck": true
 	},
-	"include": ["src", "tests", "*.config.ts"]
+	"include": ["src", "site", "tests", "*.config.ts"]
 }

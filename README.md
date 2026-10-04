@@ -39,7 +39,7 @@ To add your own rules, select the extension icon in the Chrome toolbar to open t
 
 ## Install
 
-[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/github-file-hider/nocgonekcilofckcilmhpjldgkclkcbf).
+[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/github-file-hider/nocgonekcilofckcilmhpjldgkclkcbf), or try the rules first in the sandbox on the [website](https://github-file-hider.ribeiro.engineer).
 
 <details>
 <summary>Install from a ZIP</summary>

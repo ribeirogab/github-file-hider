@@ -11,3 +11,4 @@ tmp/
 tests/visual/results/
 test-results/
 playwright-report/
+.wrangler/

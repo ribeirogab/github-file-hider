@@ -1,0 +1,15 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "github-file-hider-site",
+	"compatibility_date": "2026-10-01",
+	"assets": {
+		"directory": "./site/dist",
+		"not_found_handling": "404-page",
+		"html_handling": "auto-trailing-slash"
+	},
+	"routes": [
+		{ "pattern": "github-file-hider.ribeiro.engineer", "custom_domain": true }
+	],
+	"workers_dev": false,
+	"preview_urls": false
+}

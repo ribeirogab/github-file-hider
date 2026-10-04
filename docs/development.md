@@ -82,7 +82,29 @@ The Chrome Web Store screenshots, the small promo tile, and the README demo imag
 pnpm store:images
 ```
 
-The command builds the extension and opens demo pull request 1 from the fixtures, with GitHub's real stylesheets and the demo settings. It writes five 1280 × 800 screenshots, the 440 × 280 promo tile (`tests/store/promo.html`), and the light and dark README demo images and logos to `store/`. The store icon is `src/icons/128.png`. The command needs network access to `github.githubassets.com` and `avatars.githubusercontent.com`.
+The command builds the extension and opens demo pull request 1 from the fixtures, with GitHub's real stylesheets and the demo settings. It writes five 1280 × 800 screenshots, the 440 × 280 promo tile (`tests/store/promo.html`), and the light and dark README demo images and logos to `store/`. It also writes the landing page's 1200 × 630 link preview (`tests/store/og.html`) and touch icon to `site/public/`. The store icon is `src/icons/128.png`. The command needs network access to `github.githubassets.com` and `avatars.githubusercontent.com`.
+
+## Landing page
+
+The landing page at https://github-file-hider.ribeiro.engineer is a static site built with Vite in `site/`. Its sandbox replays the demo pull request with the extension's own rule engine (`src/rules.ts`) and interface text (`src/ui/copy.ts`), so it always matches the extension.
+
+```sh
+pnpm site:dev
+pnpm site:build
+pnpm test:site
+```
+
+- `pnpm site:dev` serves the page with live reload at http://localhost:5173.
+- `pnpm site:build` writes the static site to `site/dist`. The build adds a Content Security Policy that allows only the site's own files, so the page makes no third-party requests. Fonts are self-hosted from the Fontsource packages.
+- `pnpm test:site` builds the site and checks it in Chromium: the sandbox, the phone layout, the metadata for search engines and link previews, and the absence of errors, policy violations, and third-party requests. The sandbox model also has unit tests in `tests/unit/site-model.test.ts`.
+
+To publish the page, sign in once with `pnpm exec wrangler login`, using the Cloudflare account that has the `ribeiro.engineer` zone, then run:
+
+```sh
+pnpm site:deploy
+```
+
+The command builds the site and deploys it as a Cloudflare Worker with static assets (`wrangler.jsonc`). The Worker serves `github-file-hider.ribeiro.engineer` as a custom domain, so Cloudflare manages its DNS record and certificate. `site/public/_headers` sets the security and cache headers.
 
 ## Manual test on the demo repository
 
