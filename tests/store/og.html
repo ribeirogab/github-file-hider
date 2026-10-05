@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GitHub File Hider link preview</title>
+<style>
+@font-face { font-family: "Familjen"; src: url("../../node_modules/@fontsource-variable/familjen-grotesk/files/familjen-grotesk-latin-wght-normal.woff2") format("woff2"); font-weight: 400 700; }
+@font-face { font-family: "Atkinson"; src: url("../../node_modules/@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-wght-normal.woff2") format("woff2"); font-weight: 200 800; }
+@font-face { font-family: "Fragment"; src: url("../../node_modules/@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Mona"; src: url("../../node_modules/@fontsource-variable/mona-sans/files/mona-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 200 900; }
+:root {
+	--bg: #e6e9e5;
+	--dot: #c3c9c4;
+	--ink: #131715;
+	--muted: #4a5350;
+	--line: #c7cdc8;
+	--accent: #0969da;
+	--card: #ffffff;
+	--gh-fg: #1f2328;
+	--gh-muted: #59636e;
+	--gh-border: #d1d9e0;
+	--gh-accent-muted: #ddf4ff;
+	--folder: #54aeff;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1200px; height: 630px; overflow: hidden; }
+body {
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr 380px;
+	grid-template-rows: auto 1fr auto;
+	column-gap: 56px;
+	padding: 56px 64px;
+	background: var(--bg);
+	color: var(--ink);
+	font-family: "Atkinson", sans-serif;
+}
+body::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image: radial-gradient(circle, var(--dot) 1.2px, transparent 1.6px);
+	background-size: 26px 26px;
+	mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+}
+.brand, .copy, .foot, .card { position: relative; }
+.brand { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; font: 600 30px/1 "Familjen", sans-serif; letter-spacing: -0.01em; }
+li svg { width: 20px; height: 20px; flex: none; }
+.brand svg { width: 44px; height: 44px; color: var(--ink); }
+.copy { align-self: center; display: grid; gap: 26px; }
+h1 { font: 600 82px/0.96 "Familjen", sans-serif; letter-spacing: -0.035em; }
+h1 .ghost { color: transparent; -webkit-text-stroke: 2px var(--ink); }
+p { font-size: 29px; line-height: 1.35; color: var(--muted); max-width: 30ch; }
+.foot { align-self: end; font: 400 21px/1 "Fragment", monospace; color: var(--muted); display: flex; align-items: center; gap: 12px; }
+.foot::before { content: ""; width: 26px; height: 6px; border-radius: 3px; background: var(--accent); }
+.card {
+	grid-column: 2;
+	grid-row: 2 / span 2;
+	align-self: center;
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	box-shadow: 0 18px 40px #13171522;
+	overflow: hidden;
+	font: 400 20px/1 "Mona", sans-serif;
+	color: var(--gh-fg);
+}
+.bar { display: flex; align-items: center; gap: 10px; padding: 18px 20px; border-bottom: 1px solid var(--gh-border); font-weight: 500; color: var(--gh-muted); }
+.bar svg { width: 22px; height: 22px; color: var(--accent); }
+.count { display: inline-grid; place-items: center; min-width: 30px; height: 28px; padding: 0 9px; border-radius: 14px; background: var(--gh-accent-muted); color: var(--accent); font-weight: 600; }
+.bar b { color: var(--gh-fg); font-weight: 600; }
+ul { list-style: none; padding: 14px 12px 18px; display: grid; gap: 4px; }
+li { display: flex; align-items: center; gap: 12px; height: 38px; padding: 0 10px; border-radius: 8px; }
+li.d1 { padding-left: 42px; }
+li .folder { color: var(--folder); }
+li .file { color: var(--gh-muted); }
+li.off { color: var(--gh-muted); }
+li.off .name { text-decoration: line-through; text-decoration-color: #59636e80; }
+li .eye { margin-left: auto; color: var(--gh-muted); }
+</style>
+</head>
+<body>
+<div class="brand">
+	<svg viewBox="0 0 24 24" aria-hidden="true"><mask id="a"><rect width="24" height="10" fill="#fff"/></mask><mask id="b"><rect y="15.5" width="24" height="8.5" fill="#fff"/></mask><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g mask="url(#a)"><path d="M13.75 2.75H6.5A1.75 1.75 0 0 0 4.75 4.5v15a1.75 1.75 0 0 0 1.75 1.75h11a1.75 1.75 0 0 0 1.75-1.75V8.25Z"/><path d="M13.75 2.75v5.5h5.5"/></g><path mask="url(#b)" stroke-dasharray="2 2.25" d="M13.75 2.75H6.5A1.75 1.75 0 0 0 4.75 4.5v15a1.75 1.75 0 0 0 1.75 1.75h11a1.75 1.75 0 0 0 1.75-1.75V8.25Z"/></g><rect x="3" y="11" width="18" height="3.5" rx="1.25" fill="#0969da"/></svg>
+	GitHub File Hider
+</div>
+<div class="copy">
+	<h1>Review the code that matters <span class="ghost">first.</span></h1>
+	<p>Hide tests, lockfiles, and generated code in GitHub pull requests.</p>
+</div>
+<div class="foot">Free Chrome extension · Open source</div>
+<div class="card">
+	<div class="bar"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 2l12 12M6.4 6.45A2.25 2.25 0 0 0 9.55 9.6M4.1 4.6C2.3 5.85 1.25 8 1.25 8S3.75 12.75 8 12.75c1.35 0 2.5-.45 3.5-1.1M6.6 3.4c.45-.1.9-.15 1.4-.15 4.25 0 6.75 4.75 6.75 4.75s-.6 1.15-1.7 2.35"/></svg><span class="count">11</span><b>files hidden</b></div>
+	<ul id="tree"></ul>
+</div>
+<script>
+const folder = '<svg class="folder" viewBox="0 0 16 16" fill="currentColor"><path d="M1.25 3.5c0-.69.56-1.25 1.25-1.25h3.3c.4 0 .77.19 1 .51l.8 1.09h5.9c.69 0 1.25.56 1.25 1.25v7.4c0 .69-.56 1.25-1.25 1.25H2.5c-.69 0-1.25-.56-1.25-1.25z"/></svg>';
+const file = '<svg class="file" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M3.25 2.25a1 1 0 0 1 1-1h5l3.5 3.5v9a1 1 0 0 1-1 1h-7.5a1 1 0 0 1-1-1z"/><path d="M8 5.25v4M6 7.25h4M6 11.5h4"/></svg>';
+const eye = '<svg class="eye" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 2l12 12M6.4 6.45A2.25 2.25 0 0 0 9.55 9.6M4.1 4.6C2.3 5.85 1.25 8 1.25 8S3.75 12.75 8 12.75c1.35 0 2.5-.45 3.5-1.1M6.6 3.4c.45-.1.9-.15 1.4-.15 4.25 0 6.75 4.75 6.75 4.75s-.6 1.15-1.7 2.35"/></svg>';
+const rows = [
+	["payments", 0, folder],
+	["checkout.spec.ts", 1, file],
+	["checkout.ts", 1, file],
+	["gateway.ts", 1, file],
+	["retry-policy.ts", 1, file],
+	["retry-policy.spec.ts", 1, file, true],
+	["pnpm-lock.yaml", 0, file, true],
+];
+document.getElementById("tree").innerHTML = rows
+	.map(([name, depth, icon, hidden]) => `<li class="d${depth}${hidden ? " off" : ""}">${icon}<span class="name">${name}</span>${hidden ? eye : ""}</li>`)
+	.join("");
+</script>
+</body>
+</html>

@@ -28,6 +28,11 @@ type Screenshot = {
 };
 
 const DIRECTORY = "store";
+const LOGO_SIZE = 72;
+const LOGO_COLORS = {
+	light: { ink: "#1f2328", band: "#0969da" },
+	dark: { ink: "#f0f6fc", band: "#4493f8" },
+};
 const VIEWPORT = { width: 1280, height: 800 };
 const PROMO_TILE = { width: 440, height: 280 };
 const CHANGES = FIXTURE_URLS["pr1-changes"];
@@ -121,16 +126,57 @@ for (const screenshot of SCREENSHOTS)
 		}
 	});
 
-test("captures the small promo tile for the store", async () => {
+async function captureComposition(
+	source: string,
+	viewport: { width: number; height: number },
+	path: string,
+) {
 	const browser = await chromium.launch({
 		channel: "chromium",
 		args: RENDERING_ARGS,
 	});
 	try {
-		const page = await browser.newPage({ viewport: PROMO_TILE });
-		await page.goto(`file://${resolve("tests/store/promo.html")}`);
+		const page = await browser.newPage({ viewport });
+		await page.goto(`file://${resolve(source)}`);
 		await page.evaluate(() => document.fonts.ready);
-		await page.screenshot({ path: `${DIRECTORY}/promo-small.png` });
+		await page.screenshot({ path });
+	} finally {
+		await browser.close();
+	}
+}
+
+test("captures the small promo tile for the store", () =>
+	captureComposition(
+		"tests/store/promo.html",
+		PROMO_TILE,
+		`${DIRECTORY}/promo-small.png`,
+	));
+
+const SITE_PUBLIC = "site/public";
+const LINK_PREVIEW = { width: 1200, height: 630 };
+const TOUCH_ICON = 180;
+
+test("captures the link preview image for the landing page", () =>
+	captureComposition(
+		"tests/store/og.html",
+		LINK_PREVIEW,
+		`${SITE_PUBLIC}/og.png`,
+	));
+
+test("captures the touch icon for the landing page", async () => {
+	const browser = await chromium.launch({
+		channel: "chromium",
+		args: RENDERING_ARGS,
+	});
+	try {
+		const page = await browser.newPage({
+			viewport: { width: TOUCH_ICON, height: TOUCH_ICON },
+		});
+		const { ink, band } = LOGO_COLORS.light;
+		await page.setContent(
+			`<style>html,body{margin:0;width:${TOUCH_ICON}px;height:${TOUCH_ICON}px;display:grid;place-items:center;background:#ffffff}.fh-logo{display:block;color:${ink}}.fh-logo-band{fill:${band}}</style>${logo(120)}`,
+		);
+		await page.screenshot({ path: `${SITE_PUBLIC}/apple-touch-icon.png` });
 	} finally {
 		await browser.close();
 	}
@@ -176,12 +222,6 @@ for (const theme of ["light", "dark"] as const)
 			await close();
 		}
 	});
-
-const LOGO_SIZE = 72;
-const LOGO_COLORS = {
-	light: { ink: "#1f2328", band: "#0969da" },
-	dark: { ink: "#f0f6fc", band: "#4493f8" },
-};
 
 test("captures the logo for the README in both themes", async () => {
 	const browser = await chromium.launch({
