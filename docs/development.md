@@ -104,7 +104,7 @@ To publish the page, sign in once with `pnpm exec wrangler login`, using the Clo
 pnpm site:deploy
 ```
 
-The command builds the site and deploys it as a Cloudflare Worker with static assets (`wrangler.jsonc`). The Worker serves `github-file-hider.ribeiro.engineer` as a custom domain, so Cloudflare manages its DNS record and certificate. `site/public/_headers` sets the security and cache headers.
+The command builds the site and deploys it as a Cloudflare Worker with static assets (`wrangler.jsonc`). The Worker serves `github-file-hider.ribeiro.engineer` as a custom domain, so Cloudflare manages its DNS record and certificate. `site/public/_headers` sets the security and cache headers. `Cache-Control: no-transform` on every response stops Cloudflare from changing the HTML, for example to inject its Web Analytics script, which the Content Security Policy would block.
 
 ## Manual test on the demo repository
 
